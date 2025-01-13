@@ -2,9 +2,10 @@
 
 public sealed class Person
 {
-    private readonly Guid _id;
-    private readonly Location _location;
     private readonly TimeSpan _time;
+
+    public Guid Id { get; init; }
+    public Location Location { get; private set; }
 
     public static Person Create(Guid id, Location location, TimeSpan timeout)
     {
@@ -13,10 +14,17 @@ public sealed class Person
         return person;
     }
 
-    private Person(Guid id, Location location, TimeSpan timeout)
+    public void UpdateLocation(Location newLocation)
     {
-        _id = id;
-        _location = location;
+        var previousLocation = Location;
+        Location = newLocation;
+        DomainEvents.Raise(new PersonLocationChangedEvent(this, previousLocation, newLocation));
+    }
+
+    private Person(Guid id, Location initialLocation, TimeSpan timeout)
+    {
+        Id = id;
+        Location = initialLocation;
         _time = timeout;
     }
 }
