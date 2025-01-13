@@ -2,8 +2,10 @@
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Core;
 
-public class PersonTests
+public sealed class PersonTests : IDisposable
 {
+    private Person? _person;
+
     [Fact]
     public void Create_WhenCreatingPerson_ShouldRaisePersonCreatedEvent()
     {
@@ -16,7 +18,7 @@ public class PersonTests
         DomainEvents.Register<PersonCreatedEvent>(e => personCreatedEvent = e);
 
         // Act
-        Person.Create(personId, location, timeout);
+        _person = Person.Create(personId, location, timeout);
 
         // Assert
         Assert.NotNull(personCreatedEvent);
@@ -35,10 +37,10 @@ public class PersonTests
         PersonLocationChangedEvent? personLocationChangedEvent = null;
 
         DomainEvents.Register<PersonLocationChangedEvent>(e => personLocationChangedEvent = e);
-        var person = Person.Create(personId, initialLocation, timeout);
+        _person = Person.Create(personId, initialLocation, timeout);
 
         // Act
-        person.UpdateLocation(newLocation);
+        _person.UpdateLocation(newLocation);
 
         // Assert
         Assert.NotNull(personLocationChangedEvent);
@@ -56,7 +58,7 @@ public class PersonTests
         PersonExpiredEvent? personExpiredEvent = null;
 
         DomainEvents.Register<PersonExpiredEvent>(e => personExpiredEvent = e);
-        Person.Create(personId, location, lifespanTimeout);
+        _person = Person.Create(personId, location, lifespanTimeout);
 
         // Act
         await Task.Delay(lifespanTimeout * 2);
@@ -64,5 +66,10 @@ public class PersonTests
         // Assert
         Assert.NotNull(personExpiredEvent);
         Assert.Equal(personId, personExpiredEvent.Person.Id);
+    }
+
+    public void Dispose()
+    {
+        _person?.Dispose();
     }
 }
