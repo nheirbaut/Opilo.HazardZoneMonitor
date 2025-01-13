@@ -1,4 +1,5 @@
 ﻿using Opilo.HazardZoneMonitor.Core;
+using Opilo.HazardZoneMonitor.Core.Services;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Core;
 

@@ -1,4 +1,5 @@
 ﻿using System.Timers;
+using Opilo.HazardZoneMonitor.Core.Services;
 using Timer = System.Timers.Timer;
 
 namespace Opilo.HazardZoneMonitor.Core;
@@ -8,7 +9,7 @@ public sealed class Person : IDisposable
     private DateTime _initialTime;
     private readonly Timer _expiryTimer;
 
-    public Guid Id { get; init; }
+    public Guid Id { get; }
     public Location Location { get; private set; }
 
     public static Person Create(Guid id, Location location, TimeSpan lifespanTimeout)
