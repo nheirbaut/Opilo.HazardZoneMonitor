@@ -13,14 +13,14 @@ public sealed class OutlineTests
     ]);
 
     [Fact]
-    public void Constructor_ShouldThrowException_WhenVerticesAreNull()
+    public void Constructor_WhenVerticesAreNull_ThrowsArgumentNullException()
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new Outline(null!));
     }
 
     [Fact]
-    public void Constructor_ShouldThrowException_WhenVerticesAreLessThanThree()
+    public void Constructor_WhenVerticesAreLessThanThree_ThrowsArgumentException()
     {
         // Arrange
         var vertices = new ReadOnlyCollection<Location>([
@@ -33,7 +33,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_ShouldThrowException_WhenLocationIsNull()
+    public void IsLocationInside_WhenLocationIsNull_ThrowsArgumentNullException()
     {
         // Arrange
         var outline = new Outline(_validVertices);
@@ -43,7 +43,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_ShouldReturnTrue_WhenPointIsInsidePolygon()
+    public void IsLocationInside_WhenPointIsInsidePolygon_ReturnsTrue()
     {
         // Arrange
         var outline = new Outline(_validVertices);
@@ -57,7 +57,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_ShouldReturnFalse_WhenPointIsOutsidePolygon()
+    public void IsLocationInside_WhenPointIsOutsidePolygon_ReturnsFalse()
     {
         // Arrange
         var outline = new Outline(_validVertices);
@@ -71,7 +71,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_ShouldReturnTrue_WhenPointIsOnPolygonEdge()
+    public void IsLocationInside_WhenPointIsOnPolygonEdge_ReturnsTrue()
     {
         // Arrange
         var outline = new Outline(_validVertices);
@@ -85,7 +85,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_ShouldWorkForConcavePolygons()
+    public void IsLocationInside_ForConcavePolygons_ReturnsTrueForPointsInsideAndFalseForPointsOutside()
     {
         // Arrange
         var vertices = new ReadOnlyCollection<Location>([

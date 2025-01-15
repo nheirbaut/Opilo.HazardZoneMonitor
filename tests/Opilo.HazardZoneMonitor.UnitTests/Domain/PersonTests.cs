@@ -10,7 +10,24 @@ public sealed class PersonTests : IDisposable
     private Person? _person;
 
     [Fact]
-    public void Create_WhenCreatingPerson_ShouldRaisePersonCreatedEvent()
+    public void Create_GivenValidParameters_CreatesValidPerson()
+    {
+        // Arrange
+        var personId = Guid.NewGuid();
+        var location = new Location(0, 0);
+        var timeout = TimeSpan.FromSeconds(1);
+
+        // Act
+        _person = Person.Create(personId, location, timeout);
+
+        // Assert
+        Assert.NotNull(_person);
+        Assert.Equal(personId, _person.Id);
+        Assert.Equal(location, _person.Location);
+    }
+
+    [Fact]
+    public void Create_GivenValidParameters_RaisesPersonCreatedEvent()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -30,7 +47,7 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public void UpdateLocation_WhenUpdatingLocation_ShouldRaisePersonLocationChangedEvent()
+    public void UpdateLocation_WithNewLocation_RaisesPersonLocationChangedEvent()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -52,7 +69,7 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task ExpirePerson_WhenTimeExpires_ShouldRaisePersonExpiredEvent()
+    public async Task ExpirePerson_WhenTimeExpires_RaisesPersonExpiredEvent()
     {
         // Arrange
         var lifespanTimeout = TimeSpan.FromMilliseconds(10);
