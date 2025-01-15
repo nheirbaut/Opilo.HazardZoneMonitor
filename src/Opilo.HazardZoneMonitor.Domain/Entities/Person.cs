@@ -1,8 +1,10 @@
 ﻿using System.Timers;
-using Opilo.HazardZoneMonitor.Core.Services;
+using Opilo.HazardZoneMonitor.Domain.Events;
+using Opilo.HazardZoneMonitor.Domain.Services;
+using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 using Timer = System.Timers.Timer;
 
-namespace Opilo.HazardZoneMonitor.Core;
+namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
 public sealed class Person : IDisposable
 {

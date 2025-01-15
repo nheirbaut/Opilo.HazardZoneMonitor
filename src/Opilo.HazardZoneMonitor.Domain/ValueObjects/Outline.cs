@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Ardalis.GuardClauses;
 
-namespace Opilo.HazardZoneMonitor.Core;
+namespace Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
 public sealed class Outline
 {

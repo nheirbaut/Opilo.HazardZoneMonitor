@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Opilo.HazardZoneMonitor.Core\Opilo.HazardZoneMonitor.Core.csproj" />
+    <ProjectReference Include="..\..\src\Opilo.HazardZoneMonitor.Domain\Opilo.HazardZoneMonitor.Domain.csproj" />
   </ItemGroup>
 
 </Project>

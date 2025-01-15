@@ -1,4 +1,6 @@
-﻿namespace Opilo.HazardZoneMonitor.Core.Services;
+﻿using Opilo.HazardZoneMonitor.Domain.Events;
+
+namespace Opilo.HazardZoneMonitor.Domain.Services;
 
 public static class DomainEvents
 {

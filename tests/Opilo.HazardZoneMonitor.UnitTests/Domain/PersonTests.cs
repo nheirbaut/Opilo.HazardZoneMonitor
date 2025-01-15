@@ -1,7 +1,9 @@
-﻿using Opilo.HazardZoneMonitor.Core;
-using Opilo.HazardZoneMonitor.Core.Services;
+﻿using Opilo.HazardZoneMonitor.Domain.Entities;
+using Opilo.HazardZoneMonitor.Domain.Events;
+using Opilo.HazardZoneMonitor.Domain.Services;
+using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
-namespace Opilo.HazardZoneMonitor.UnitTests.Core;
+namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
 public sealed class PersonTests : IDisposable
 {
