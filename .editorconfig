@@ -160,9 +160,16 @@ dotnet_diagnostic.CA1040.severity = none;
 # CA1030 : Consider making 'Raise' an event
 dotnet_diagnostic.CA1030.severity = none
 
-# Error CA1707 : Remove the underscores from member name
 [tests/**.cs]
+
+# Error CA1707 : Remove the underscores from member name
 dotnet_diagnostic.CA1707.severity = none
+
+# Error CA5394 : Random is an insecure random number generator.
+dotnet_diagnostic.CA5394.severity = none
+
+# Error CA2007 : Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = none
 
 # C++ Files
 [*.{cpp,h,in}]
