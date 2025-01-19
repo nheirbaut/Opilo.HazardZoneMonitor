@@ -10,11 +10,6 @@ public sealed class PersonTests : IDisposable
 {
     Person? _person;
 
-    public PersonTests()
-    {
-        DomainEvents.Reset();
-    }
-
     [Fact]
     public void Create_GivenValidParameters_CreatesValidPerson()
     {
@@ -38,14 +33,12 @@ public sealed class PersonTests : IDisposable
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
-        var timeout = TimeSpan.FromSeconds(5);
-
-        PersonCreatedEvent? personCreatedEvent = null;
-        DomainEvents.Register<PersonCreatedEvent>(e => personCreatedEvent = e);
+        var timeout = TimeSpan.FromSeconds(1);
+        var personCreatedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonCreatedEvent>();
 
         // Act
         _person = Person.Create(personId, location, timeout);
-        await Task.Delay(500);
+        var personCreatedEvent = await personCreatedEventTask;
 
         // Assert
         Assert.NotNull(personCreatedEvent);
@@ -61,15 +54,12 @@ public sealed class PersonTests : IDisposable
         var initialLocation = new Location(0, 0);
         var newLocation = new Location(1, 1);
         var timeout = TimeSpan.FromSeconds(1);
-
-        PersonLocationChangedEvent? personLocationChangedEvent = null;
-        DomainEvents.Register<PersonLocationChangedEvent>(e => personLocationChangedEvent = e);
-
+        var personLocationChangedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>();
         _person = Person.Create(personId, initialLocation, timeout);
 
         // Act
         _person.UpdateLocation(newLocation);
-        await Task.Delay(500);
+        var personLocationChangedEvent = await personLocationChangedEventTask;
 
         // Assert
         Assert.NotNull(personLocationChangedEvent);
@@ -84,8 +74,7 @@ public sealed class PersonTests : IDisposable
         var lifespanTimeout = TimeSpan.FromMilliseconds(10);
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
-
-        var personExpiredEventTask = DomainEventsExtensions.Register<PersonExpiredEvent>();
+        var personExpiredEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>();
         _person = Person.Create(personId, location, lifespanTimeout);
 
         // Act
@@ -100,5 +89,7 @@ public sealed class PersonTests : IDisposable
     {
         _person?.Dispose();
         _person = null;
+
+        DomainEvents.Dispose();
     }
 }

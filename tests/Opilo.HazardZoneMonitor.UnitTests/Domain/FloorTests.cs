@@ -91,7 +91,7 @@ public sealed class FloorTests : IDisposable
         var location = new Location(2, 2);
         var floor = new Floor(floorName, _validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
-        var personAddedToFloorEventTask = DomainEventsExtensions.Register<PersonAddedToFloorEvent>();
+        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEvent>();
 
         // Act
         floor.TryAddPersonLocationUpdate(personMovement);
@@ -127,6 +127,6 @@ public sealed class FloorTests : IDisposable
 
     public void Dispose()
     {
-        DomainEvents.Reset();
+        DomainEvents.Dispose();
     }
 }

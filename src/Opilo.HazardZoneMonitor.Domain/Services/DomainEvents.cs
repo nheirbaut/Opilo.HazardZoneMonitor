@@ -5,45 +5,31 @@ namespace Opilo.HazardZoneMonitor.Domain.Services;
 
 public static class DomainEvents
 {
-    private static Lazy<DomainEventsImplementation> s_implementation = new(
-        () => new DomainEventsImplementation(),
-        LazyThreadSafetyMode.ExecutionAndPublication);
+    private static DomainEventsImplementation? s_instance = new();
 
-    public static void Register<T>(Action<T> domainEventHandler) where T : IDomainEvent
+    public static void Register<T>(Action<T> handler) where T : IDomainEvent
     {
-        s_implementation.Value.Register(domainEventHandler);
+        s_instance?.Register(handler);
     }
 
     public static void Raise<T>(T domainEvent) where T : IDomainEvent
     {
-        s_implementation.Value.Raise(domainEvent);
+        s_instance?.Raise(domainEvent);
     }
 
     public static void Dispose()
     {
-        if (s_implementation is { IsValueCreated: true, Value.IsDisposed: false })
-            s_implementation.Value.Dispose();
-    }
-
-    public static void Reset()
-    {
-        Dispose();
-
-        s_implementation = new Lazy<DomainEventsImplementation>(
-            () => new DomainEventsImplementation(),
-            LazyThreadSafetyMode.ExecutionAndPublication);
+        s_instance?.Dispose();
+        s_instance = new DomainEventsImplementation();
     }
 }
 
 internal sealed class DomainEventsImplementation : IDisposable
 {
-    private readonly ConcurrentDictionary<Type, List<Delegate>> _handlers = [];
+    private readonly ConcurrentDictionary<Type, List<Delegate>> _handlers = new();
     private readonly BlockingCollection<IDomainEvent> _domainEvents = [];
-    private volatile bool _disposed;
-
     private readonly TaskCompletionSource<bool> _consumerStarted = new();
-
-    public bool IsDisposed => _disposed;
+    private volatile bool _disposed;
 
     public DomainEventsImplementation()
     {
@@ -60,9 +46,8 @@ internal sealed class DomainEventsImplementation : IDisposable
             return;
 
         var eventType = typeof(T);
-        var listForType = _handlers.GetOrAdd(eventType, _ => []);
-
-        listForType.Add(domainEventHandler);
+        var handlersForType = _handlers.GetOrAdd(eventType, _ => []);
+        handlersForType.Add(domainEventHandler);
     }
 
     public void Raise<T>(T domainEvent) where T : IDomainEvent
@@ -70,6 +55,7 @@ internal sealed class DomainEventsImplementation : IDisposable
         if (_disposed)
             return;
 
+        // Ensure background thread is actually ready
         _consumerStarted.Task.GetAwaiter().GetResult();
 
         _domainEvents.Add(domainEvent);
@@ -77,6 +63,7 @@ internal sealed class DomainEventsImplementation : IDisposable
 
     private void StartConsumingLoopAsync()
     {
+        // Let any waiting calls know we are ready
         _consumerStarted.SetResult(true);
 
         while (!_domainEvents.IsAddingCompleted)
@@ -97,12 +84,19 @@ internal sealed class DomainEventsImplementation : IDisposable
 
     public void Dispose()
     {
-        if (_disposed)
-            return;
-
+        if (_disposed) return;
         _disposed = true;
 
         _handlers.Clear();
+        ClearDomainEvents();
         _domainEvents.Dispose();
+    }
+
+    private void ClearDomainEvents()
+    {
+        while (_domainEvents.TryTake(out _))
+        {
+            // Discard
+        }
     }
 }

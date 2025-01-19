@@ -11,7 +11,7 @@ public sealed class DomainEventsTests : IDisposable
     {
         // Arrange
         var testDomainEvent = new TestDomainEvent();
-        var testDomainEventTask = DomainEventsExtensions.Register<TestDomainEvent>();
+        var testDomainEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<TestDomainEvent>();
 
         // Act
         DomainEvents.Raise(testDomainEvent);
@@ -40,6 +40,6 @@ public sealed class DomainEventsTests : IDisposable
 
     public void Dispose()
     {
-        DomainEvents.Reset();
+        DomainEvents.Dispose();
     }
 }
