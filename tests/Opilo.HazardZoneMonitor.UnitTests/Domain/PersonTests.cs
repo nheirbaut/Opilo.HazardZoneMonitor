@@ -40,11 +40,12 @@ public sealed class PersonTests : IDisposable
         var location = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(5);
 
-        var personCreatedEventTask = DomainEventsExtensions.Register<PersonCreatedEvent>();
+        PersonCreatedEvent? personCreatedEvent = null;
+        DomainEvents.Register<PersonCreatedEvent>(e => personCreatedEvent = e);
 
         // Act
         _person = Person.Create(personId, location, timeout);
-        var personCreatedEvent = await personCreatedEventTask;
+        await Task.Delay(500);
 
         // Assert
         Assert.NotNull(personCreatedEvent);
@@ -61,12 +62,14 @@ public sealed class PersonTests : IDisposable
         var newLocation = new Location(1, 1);
         var timeout = TimeSpan.FromSeconds(1);
 
-        var personLocationChangedEventTask = DomainEventsExtensions.Register<PersonLocationChangedEvent>();
+        PersonLocationChangedEvent? personLocationChangedEvent = null;
+        DomainEvents.Register<PersonLocationChangedEvent>(e => personLocationChangedEvent = e);
+
         _person = Person.Create(personId, initialLocation, timeout);
 
         // Act
         _person.UpdateLocation(newLocation);
-        var personLocationChangedEvent = await personLocationChangedEventTask;
+        await Task.Delay(500);
 
         // Assert
         Assert.NotNull(personLocationChangedEvent);
