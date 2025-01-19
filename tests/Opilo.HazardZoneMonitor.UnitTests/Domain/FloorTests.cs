@@ -1,13 +1,13 @@
 ﻿using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.Domain;
 using Opilo.HazardZoneMonitor.Domain.Entities;
 using Opilo.HazardZoneMonitor.Domain.Events;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
-public sealed class FloorTests
+public sealed class FloorTests : IDisposable
 {
     private readonly Outline _validOutline = new(new ReadOnlyCollection<Location>([
         new Location(0, 0),
@@ -83,7 +83,29 @@ public sealed class FloorTests
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndNewPerson_RaisesPersonAddedToFloorEvent()
+    public async Task TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndNewPerson_RaisesPersonAddedToFloorEvent()
+    {
+        // Arrange
+        const string floorName = "Floor Name";
+        var personId = Guid.NewGuid();
+        var location = new Location(2, 2);
+        var floor = new Floor(floorName, _validOutline);
+        var personMovement = new PersonLocationUpdate(personId, location);
+        var personAddedToFloorEventTask = DomainEventsExtensions.Register<PersonAddedToFloorEvent>();
+
+        // Act
+        floor.TryAddPersonLocationUpdate(personMovement);
+        var personAddedToFloorEvent = await personAddedToFloorEventTask;
+
+        // Assert
+        Assert.NotNull(personAddedToFloorEvent);
+        Assert.Equal(floorName, personAddedToFloorEvent.FloorName);
+        Assert.Equal(personId, personAddedToFloorEvent.PersonId);
+        Assert.Equal(location, personAddedToFloorEvent.Location);
+    }
+
+    [Fact]
+    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndKnownPerson_DoesNotRaisePersonAddedToFloorEvent()
     {
         // Arrange
         const string floorName = "Floor Name";
@@ -92,6 +114,7 @@ public sealed class FloorTests
         var floor = new Floor(floorName, _validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
         PersonAddedToFloorEvent? personAddedToFloorEvent = null;
+        floor.TryAddPersonLocationUpdate(personMovement);
 
         DomainEvents.Register<PersonAddedToFloorEvent>(e => personAddedToFloorEvent = e);
 
@@ -99,9 +122,11 @@ public sealed class FloorTests
         floor.TryAddPersonLocationUpdate(personMovement);
 
         // Assert
-        Assert.NotNull(personAddedToFloorEvent);
-        Assert.Equal(floorName, personAddedToFloorEvent.FloorName);
-        Assert.Equal(personId, personAddedToFloorEvent.PersonId);
-        Assert.Equal(location, personAddedToFloorEvent.Location);
+        Assert.Null(personAddedToFloorEvent);
+    }
+
+    public void Dispose()
+    {
+        DomainEvents.Reset();
     }
 }

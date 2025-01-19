@@ -2,12 +2,18 @@
 using Opilo.HazardZoneMonitor.Domain.Events;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
 public sealed class PersonTests : IDisposable
 {
-    private Person? _person;
+    Person? _person;
+
+    public PersonTests()
+    {
+        DomainEvents.Reset();
+    }
 
     [Fact]
     public void Create_GivenValidParameters_CreatesValidPerson()
@@ -27,18 +33,18 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public void Create_GivenValidParameters_RaisesPersonCreatedEvent()
+    public async Task Create_GivenValidParameters_RaisesPersonCreatedEvent()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
-        var timeout = TimeSpan.FromSeconds(1);
-        PersonCreatedEvent? personCreatedEvent = null;
+        var timeout = TimeSpan.FromSeconds(5);
 
-        DomainEvents.Register<PersonCreatedEvent>(e => personCreatedEvent = e);
+        var personCreatedEventTask = DomainEventsExtensions.Register<PersonCreatedEvent>();
 
         // Act
         _person = Person.Create(personId, location, timeout);
+        var personCreatedEvent = await personCreatedEventTask;
 
         // Assert
         Assert.NotNull(personCreatedEvent);
@@ -47,20 +53,20 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public void UpdateLocation_WithNewLocation_RaisesPersonLocationChangedEvent()
+    public async Task UpdateLocation_WithNewLocation_RaisesPersonLocationChangedEvent()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var initialLocation = new Location(0, 0);
         var newLocation = new Location(1, 1);
         var timeout = TimeSpan.FromSeconds(1);
-        PersonLocationChangedEvent? personLocationChangedEvent = null;
 
-        DomainEvents.Register<PersonLocationChangedEvent>(e => personLocationChangedEvent = e);
+        var personLocationChangedEventTask = DomainEventsExtensions.Register<PersonLocationChangedEvent>();
         _person = Person.Create(personId, initialLocation, timeout);
 
         // Act
         _person.UpdateLocation(newLocation);
+        var personLocationChangedEvent = await personLocationChangedEventTask;
 
         // Assert
         Assert.NotNull(personLocationChangedEvent);
@@ -75,13 +81,12 @@ public sealed class PersonTests : IDisposable
         var lifespanTimeout = TimeSpan.FromMilliseconds(10);
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
-        PersonExpiredEvent? personExpiredEvent = null;
 
-        DomainEvents.Register<PersonExpiredEvent>(e => personExpiredEvent = e);
+        var personExpiredEventTask = DomainEventsExtensions.Register<PersonExpiredEvent>();
         _person = Person.Create(personId, location, lifespanTimeout);
 
         // Act
-        await Task.Delay(lifespanTimeout * 2);
+        var personExpiredEvent = await personExpiredEventTask;
 
         // Assert
         Assert.NotNull(personExpiredEvent);
@@ -91,5 +96,6 @@ public sealed class PersonTests : IDisposable
     public void Dispose()
     {
         _person?.Dispose();
+        _person = null;
     }
 }

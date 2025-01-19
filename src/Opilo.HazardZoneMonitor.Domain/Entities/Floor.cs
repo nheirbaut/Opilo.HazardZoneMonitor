@@ -7,6 +7,8 @@ namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
 public sealed class Floor
 {
+    private readonly HashSet<Guid> _personsOnFloor = [];
+
     public string Name { get; }
     public Outline Outline { get; }
 
@@ -27,7 +29,8 @@ public sealed class Floor
         if (!locationIsOnFloor)
             return false;
 
-        DomainEvents.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
+        if (_personsOnFloor.Add(personLocationUpdate.PersonId))
+            DomainEvents.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
 
         return true;
     }
