@@ -8,7 +8,7 @@ namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
 public sealed class PersonTests : IDisposable
 {
-    Person? _person;
+    Person? _testPerson;
 
     [Fact]
     public void Create_GivenValidParameters_CreatesValidPerson()
@@ -19,12 +19,12 @@ public sealed class PersonTests : IDisposable
         var timeout = TimeSpan.FromSeconds(1);
 
         // Act
-        _person = Person.Create(personId, location, timeout);
+        _testPerson = Person.Create(personId, location, timeout);
 
         // Assert
-        Assert.NotNull(_person);
-        Assert.Equal(personId, _person.Id);
-        Assert.Equal(location, _person.Location);
+        Assert.NotNull(_testPerson);
+        Assert.Equal(personId, _testPerson.Id);
+        Assert.Equal(location, _testPerson.Location);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public sealed class PersonTests : IDisposable
         var personCreatedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonCreatedEvent>();
 
         // Act
-        _person = Person.Create(personId, location, timeout);
+        _testPerson = Person.Create(personId, location, timeout);
         var personCreatedEvent = await personCreatedEventTask;
 
         // Assert
@@ -55,10 +55,10 @@ public sealed class PersonTests : IDisposable
         var newLocation = new Location(1, 1);
         var timeout = TimeSpan.FromSeconds(1);
         var personLocationChangedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>();
-        _person = Person.Create(personId, initialLocation, timeout);
+        _testPerson = Person.Create(personId, initialLocation, timeout);
 
         // Act
-        _person.UpdateLocation(newLocation);
+        _testPerson.UpdateLocation(newLocation);
         var personLocationChangedEvent = await personLocationChangedEventTask;
 
         // Assert
@@ -75,7 +75,7 @@ public sealed class PersonTests : IDisposable
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
         var personExpiredEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>();
-        _person = Person.Create(personId, location, lifespanTimeout);
+        _testPerson = Person.Create(personId, location, lifespanTimeout);
 
         // Act
         var personExpiredEvent = await personExpiredEventTask;
@@ -87,8 +87,8 @@ public sealed class PersonTests : IDisposable
 
     public void Dispose()
     {
-        _person?.Dispose();
-        _person = null;
+        _testPerson?.Dispose();
+        _testPerson = null;
 
         DomainEvents.Dispose();
     }
