@@ -155,6 +155,31 @@ public sealed class FloorTests : IDisposable
         Assert.Equal(personId, personRemovedFromFloorEvent.PersonId);
     }
 
+    [Fact]
+    public async Task
+        TryAddPersonLocationUpdate_WhenPersonLocationUpdateOffFloorAndKnownPerson_RaisesPersonRemovedFromFloorEvent()
+    {
+        // Arrange
+        var personId = Guid.NewGuid();
+        var locationOnFloor = new Location(2, 2);
+        var locationOffFloor = new Location(200, 200);
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        var personMovementOnFloor = new PersonLocationUpdate(personId, locationOnFloor);
+        var personMovementOffFloor = new PersonLocationUpdate(personId, locationOffFloor);
+        _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
+
+        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>(TimeSpan.FromMilliseconds(10));
+
+        // Act
+        _testFloor.TryAddPersonLocationUpdate(personMovementOffFloor);
+        var personRemovedFromFloorEvent = await personRemovedFromFloorEventTask;
+
+        // Assert
+        Assert.NotNull(personRemovedFromFloorEvent);
+        Assert.Equal(ValidFloorName, personRemovedFromFloorEvent.FloorName);
+        Assert.Equal(personId, personRemovedFromFloorEvent.PersonId);
+    }
+
     public void Dispose()
     {
         DomainEvents.Dispose();

@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Domain.Events;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
@@ -8,9 +7,10 @@ namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
 public sealed class Floor : IDisposable
 {
-    private readonly ConcurrentDictionary<Guid, Person> _personsOnFloor = [];
+    private readonly Dictionary<Guid, Person> _personsOnFloor = [];
     private readonly TimeSpan _personLifespan;
     private volatile bool _disposed;
+    private readonly Lock _personsOnFloorLock = new();
 
     public readonly static TimeSpan DefaultPersonLifespan = TimeSpan.FromMilliseconds(200);
 
@@ -31,37 +31,49 @@ public sealed class Floor : IDisposable
 
     private void OnPersonExpired(PersonExpiredEvent personExpiredEvent)
     {
-        if (_personsOnFloor.Remove(personExpiredEvent.PersonId, out _))
-            DomainEvents.Raise(new PersonRemovedFromFloorEvent(Name, personExpiredEvent.PersonId));
+        RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(personExpiredEvent.PersonId);
     }
 
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
     {
         Guard.Against.Null(personLocationUpdate);
+
         var locationIsOnFloor = Outline.IsLocationInside(personLocationUpdate.Location);
 
-        if (!locationIsOnFloor)
-            return false;
-
-        var personAdded = false;
-
-        _personsOnFloor.AddOrUpdate(
-            personLocationUpdate.PersonId,
-            personId =>
+        lock (_personsOnFloorLock)
+        {
+            if (!locationIsOnFloor)
             {
-                personAdded = true;
-                return Person.Create(personId, personLocationUpdate.Location, _personLifespan);
-            },
-            (_, person) =>
+                if (_personsOnFloor.ContainsKey(personLocationUpdate.PersonId))
+                    RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(personLocationUpdate.PersonId);
+
+                return false;
+            }
+
+            if (_personsOnFloor.TryGetValue(personLocationUpdate.PersonId, out var person))
             {
                 person.UpdateLocation(personLocationUpdate.Location);
-                return person;
-            });
+                return true;
+            }
 
-        if (personAdded)
-            DomainEvents.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
+            _personsOnFloor.Add(
+                personLocationUpdate.PersonId,
+                Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan));
+        }
+
+        DomainEvents.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId,
+            personLocationUpdate.Location));
 
         return true;
+    }
+
+    private void RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(Guid personId)
+    {
+        lock (_personsOnFloorLock)
+        {
+            if (_personsOnFloor.Remove(personId, out _))
+                DomainEvents.Raise(new PersonRemovedFromFloorEvent(Name, personId));
+        }
     }
 
     public void Dispose()
