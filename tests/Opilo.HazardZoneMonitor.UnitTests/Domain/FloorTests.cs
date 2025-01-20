@@ -114,7 +114,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public void
+    public async Task
         TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndKnownPerson_DoesNotRaisePersonAddedToFloorEvent()
     {
         // Arrange
@@ -122,16 +122,37 @@ public sealed class FloorTests : IDisposable
         var location = new Location(2, 2);
         _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
-        PersonAddedToFloorEvent? personAddedToFloorEvent = null;
         _testFloor.TryAddPersonLocationUpdate(personMovement);
 
-        DomainEvents.Register<PersonAddedToFloorEvent>(e => personAddedToFloorEvent = e);
+        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEvent>(TimeSpan.FromMilliseconds(50));
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovement);
+        var personAddedToFloorEvent = await personAddedToFloorEventTask;
 
         // Assert
         Assert.Null(personAddedToFloorEvent);
+    }
+
+    [Fact]
+    public async Task TryAddPersonLocationUpdate_WhenPersonExpires_RaisesPersonRemovedFromFloorEvent()
+    {
+        // Arrange
+        var personId = Guid.NewGuid();
+        var location = new Location(2, 2);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, TimeSpan.FromMilliseconds(10));
+        var personMovement = new PersonLocationUpdate(personId, location);
+
+        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>();
+
+        // Act
+        _testFloor.TryAddPersonLocationUpdate(personMovement);
+        var personRemovedFromFloorEvent = await personRemovedFromFloorEventTask;
+
+        // Assert
+        Assert.NotNull(personRemovedFromFloorEvent);
+        Assert.Equal(ValidFloorName, personRemovedFromFloorEvent.FloorName);
+        Assert.Equal(personId, personRemovedFromFloorEvent.PersonId);
     }
 
     public void Dispose()

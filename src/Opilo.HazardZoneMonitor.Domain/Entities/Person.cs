@@ -45,7 +45,7 @@ public sealed class Person : IDisposable
         if (DateTime.UtcNow < _initialTime.AddMilliseconds(_expiryTimer.Interval))
             return;
 
-        DomainEvents.Raise(new PersonExpiredEvent(this));
+        DomainEvents.Raise(new PersonExpiredEvent(Id));
         _expiryTimer.Stop();
     }
 

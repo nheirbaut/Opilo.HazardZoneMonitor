@@ -82,7 +82,7 @@ public sealed class PersonTests : IDisposable
 
         // Assert
         Assert.NotNull(personExpiredEvent);
-        Assert.Equal(personId, personExpiredEvent.Person.Id);
+        Assert.Equal(personId, personExpiredEvent.PersonId);
     }
 
     public void Dispose()

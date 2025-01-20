@@ -25,6 +25,14 @@ public sealed class Floor : IDisposable
         Name = name;
         Outline = outline;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
+
+        DomainEvents.Register<PersonExpiredEvent>(OnPersonExpired);
+    }
+
+    private void OnPersonExpired(PersonExpiredEvent personExpiredEvent)
+    {
+        if (_personsOnFloor.Remove(personExpiredEvent.PersonId, out _))
+            DomainEvents.Raise(new PersonRemovedFromFloorEvent(Name, personExpiredEvent.PersonId));
     }
 
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
