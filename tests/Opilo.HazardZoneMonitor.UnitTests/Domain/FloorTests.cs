@@ -16,6 +16,8 @@ public sealed class FloorTests : IDisposable
             new Location(0, 4)
         ]));
 
+    private Floor? _testFloor;
+
     private const string ValidFloorName = "TestFloor";
 
     [Fact]
@@ -44,32 +46,32 @@ public sealed class FloorTests : IDisposable
     public void Constructor_WhenValidNameAndOutlineGiven_CreatesInstance()
     {
         // Act
-        var floor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
 
         // Assert
-        Assert.Equal(ValidFloorName, floor.Name);
-        Assert.Equal(s_validOutline, floor.Outline);
+        Assert.Equal(ValidFloorName, _testFloor.Name);
+        Assert.Equal(s_validOutline, _testFloor.Outline);
     }
 
     [Fact]
     public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateIsNull_ThrowsArgumentNullException()
     {
         // Arrange
-        var floor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => floor.TryAddPersonLocationUpdate(null!));
+        Assert.Throws<ArgumentNullException>(() => _testFloor.TryAddPersonLocationUpdate(null!));
     }
 
     [Fact]
     public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateNotOnFloor_ReturnsFalse()
     {
         // Arrange
-        var floor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(8, 8));
 
         // Act
-        var result = floor.TryAddPersonLocationUpdate(personMovement);
+        var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
 
         // Assert
         Assert.False(result);
@@ -79,11 +81,11 @@ public sealed class FloorTests : IDisposable
     public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloor_ReturnsTrue()
     {
         // Arrange
-        var floor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(2, 2));
 
         // Act
-        var result = floor.TryAddPersonLocationUpdate(personMovement);
+        var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
 
         // Assert
         Assert.True(result);
@@ -96,12 +98,12 @@ public sealed class FloorTests : IDisposable
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
-        var floor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
         var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEvent>();
 
         // Act
-        floor.TryAddPersonLocationUpdate(personMovement);
+        _testFloor.TryAddPersonLocationUpdate(personMovement);
         var personAddedToFloorEvent = await personAddedToFloorEventTask;
 
         // Assert
@@ -118,15 +120,15 @@ public sealed class FloorTests : IDisposable
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
-        var floor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
         PersonAddedToFloorEvent? personAddedToFloorEvent = null;
-        floor.TryAddPersonLocationUpdate(personMovement);
+        _testFloor.TryAddPersonLocationUpdate(personMovement);
 
         DomainEvents.Register<PersonAddedToFloorEvent>(e => personAddedToFloorEvent = e);
 
         // Act
-        floor.TryAddPersonLocationUpdate(personMovement);
+        _testFloor.TryAddPersonLocationUpdate(personMovement);
 
         // Assert
         Assert.Null(personAddedToFloorEvent);
@@ -135,5 +137,6 @@ public sealed class FloorTests : IDisposable
     public void Dispose()
     {
         DomainEvents.Dispose();
+        _testFloor?.Dispose();
     }
 }

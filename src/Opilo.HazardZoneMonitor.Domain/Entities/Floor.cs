@@ -6,10 +6,11 @@ using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
-public sealed class Floor
+public sealed class Floor : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, Person> _personsOnFloor = [];
     private readonly TimeSpan _personLifespan;
+    private volatile bool _disposed;
 
     public readonly static TimeSpan DefaultPersonLifespan = TimeSpan.FromMilliseconds(200);
 
@@ -53,5 +54,15 @@ public sealed class Floor
             DomainEvents.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
 
         return true;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+
+        _personsOnFloor.Clear();
     }
 }
