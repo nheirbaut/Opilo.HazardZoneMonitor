@@ -23,18 +23,12 @@ public sealed class FloorTests : IDisposable
         Assert.Throws<ArgumentNullException>(() => new Floor(null!, _validOutline));
     }
 
-    [Fact]
-    public void Constructor_WhenNameIsEmpty_ThrowsArgumentException()
+    [Theory]
+    [ClassData(typeof(InvalidNames))]
+    public void Constructor_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => new Floor(string.Empty, _validOutline));
-    }
-
-    [Fact]
-    public void Constructor_WhenNameIsWhitespace_ThrowsArgumentException()
-    {
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => new Floor("  ", _validOutline));
+        Assert.Throws<ArgumentException>(() => new Floor(invalidName, _validOutline));
     }
 
     [Fact]
