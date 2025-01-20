@@ -5,7 +5,7 @@ namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
 public sealed class OutlineTests
 {
-    private readonly ReadOnlyCollection<Location> _validVertices = new([
+    private static readonly ReadOnlyCollection<Location> s_validVertices = new([
         new Location(0, 0),
         new Location(4, 0),
         new Location(4, 4),
@@ -33,10 +33,20 @@ public sealed class OutlineTests
     }
 
     [Fact]
+    public void COnstructor_WhenVerticesAreValid_CreatesInstance()
+    {
+        // Act
+        var outline = new Outline(s_validVertices);
+
+        // Assert
+        Assert.Equal(s_validVertices, outline.Vertices);
+    }
+
+    [Fact]
     public void IsLocationInside_WhenLocationIsNull_ThrowsArgumentNullException()
     {
         // Arrange
-        var outline = new Outline(_validVertices);
+        var outline = new Outline(s_validVertices);
 
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => outline.IsLocationInside(null!));
@@ -46,7 +56,7 @@ public sealed class OutlineTests
     public void IsLocationInside_WhenPointIsInsidePolygon_ReturnsTrue()
     {
         // Arrange
-        var outline = new Outline(_validVertices);
+        var outline = new Outline(s_validVertices);
         var point = new Location(2, 2);
 
         // Act
@@ -60,7 +70,7 @@ public sealed class OutlineTests
     public void IsLocationInside_WhenPointIsOutsidePolygon_ReturnsFalse()
     {
         // Arrange
-        var outline = new Outline(_validVertices);
+        var outline = new Outline(s_validVertices);
         var point = new Location(5, 5);
 
         // Act
@@ -74,7 +84,7 @@ public sealed class OutlineTests
     public void IsLocationInside_WhenPointIsOnPolygonEdge_ReturnsTrue()
     {
         // Arrange
-        var outline = new Outline(_validVertices);
+        var outline = new Outline(s_validVertices);
         var point = new Location(2, 0);
 
         // Act

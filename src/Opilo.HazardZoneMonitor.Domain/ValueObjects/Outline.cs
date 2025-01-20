@@ -5,16 +5,17 @@ namespace Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
 public sealed class Outline
 {
-    private readonly ReadOnlyCollection<Location> _vertices;
+    public ReadOnlyCollection<Location> Vertices { get; }
 
     public Outline(ReadOnlyCollection<Location> vertices)
     {
+        Vertices = vertices;
         Guard.Against.Null(vertices);
 
         if (vertices.Count < 3)
             throw new ArgumentException("Outline must have at least 3 vertices.");
 
-        _vertices = vertices;
+        Vertices = vertices;
     }
 
     // Based on the Winding Number Algorithm: https://en.wikipedia.org/wiki/Point_in_polygon#Winding_number_algorithm
@@ -24,10 +25,10 @@ public sealed class Outline
 
         var windingNumber = 0;
 
-        for (var i = 0; i < _vertices.Count; i++)
+        for (var i = 0; i < Vertices.Count; i++)
         {
-            Location currentVertex = _vertices[i];
-            Location nextVertex = _vertices[(i + 1) % _vertices.Count];
+            Location currentVertex = Vertices[i];
+            Location nextVertex = Vertices[(i + 1) % Vertices.Count];
 
             if (IsUpwardCrossing(currentVertex, nextVertex, location))
             {
