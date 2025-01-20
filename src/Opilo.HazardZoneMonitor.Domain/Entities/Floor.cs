@@ -1,4 +1,5 @@
-﻿using Ardalis.GuardClauses;
+﻿using System.Collections.Concurrent;
+using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Domain.Events;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
@@ -7,18 +8,22 @@ namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
 public sealed class Floor
 {
-    private readonly HashSet<Guid> _personsOnFloor = [];
+    private readonly ConcurrentDictionary<Guid, Person> _personsOnFloor = [];
+    private readonly TimeSpan _personLifespan;
+
+    public readonly static TimeSpan DefaultPersonLifespan = TimeSpan.FromMilliseconds(200);
 
     public string Name { get; }
     public Outline Outline { get; }
 
-    public Floor(string name, Outline outline)
+    public Floor(string name, Outline outline, TimeSpan? personLifespan = null)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
 
         Name = name;
         Outline = outline;
+        _personLifespan = personLifespan ?? DefaultPersonLifespan;
     }
 
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
@@ -29,7 +34,22 @@ public sealed class Floor
         if (!locationIsOnFloor)
             return false;
 
-        if (_personsOnFloor.Add(personLocationUpdate.PersonId))
+        var personAdded = false;
+
+        _personsOnFloor.AddOrUpdate(
+            personLocationUpdate.PersonId,
+            personId =>
+            {
+                personAdded = true;
+                return Person.Create(personId, personLocationUpdate.Location, _personLifespan);
+            },
+            (_, person) =>
+            {
+                person.UpdateLocation(personLocationUpdate.Location);
+                return person;
+            });
+
+        if (personAdded)
             DomainEvents.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
 
         return true;

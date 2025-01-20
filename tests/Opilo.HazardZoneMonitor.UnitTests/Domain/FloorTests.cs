@@ -52,7 +52,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationIsNull_ThrowsArgumentNullException()
+    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateIsNull_ThrowsArgumentNullException()
     {
         // Arrange
         var floor = new Floor(ValidFloorName, s_validOutline);
