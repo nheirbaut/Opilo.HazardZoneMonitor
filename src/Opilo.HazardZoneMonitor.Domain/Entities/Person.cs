@@ -1,5 +1,5 @@
 ﻿using System.Timers;
-using Opilo.HazardZoneMonitor.Domain.Events;
+using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 using Timer = System.Timers.Timer;
@@ -23,11 +23,17 @@ public sealed class Person : IDisposable
 
     public void UpdateLocation(Location newLocation)
     {
+        if (newLocation == Location)
+            return;
+
+        var previousLocation = Location;
+
         Location = newLocation;
         _expiryTimer.Stop();
         _expiryTimer.Start();
         _initialTime = DateTime.UtcNow;
-        DomainEvents.Raise(new PersonLocationChangedEvent(this));
+
+        DomainEvents.Raise(new PersonLocationChangedEvent(Id, Location, previousLocation));
     }
 
     private Person(Guid id, Location initialLocation, TimeSpan timeout)

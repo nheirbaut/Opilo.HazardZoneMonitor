@@ -1,5 +1,5 @@
 ﻿using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events;
+using Opilo.HazardZoneMonitor.Domain.Events.FloorEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;

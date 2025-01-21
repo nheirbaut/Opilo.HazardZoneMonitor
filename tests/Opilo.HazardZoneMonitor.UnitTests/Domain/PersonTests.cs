@@ -1,5 +1,5 @@
 ﻿using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events;
+using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
@@ -63,8 +63,29 @@ public sealed class PersonTests : IDisposable
 
         // Assert
         Assert.NotNull(personLocationChangedEvent);
-        Assert.Equal(personId, personLocationChangedEvent.Person.Id);
-        Assert.Equal(newLocation, personLocationChangedEvent.Person.Location);
+        Assert.Equal(personId, personLocationChangedEvent.PersonId);
+        Assert.Equal(newLocation, personLocationChangedEvent.CurrentLocation);
+        Assert.Equal(initialLocation, personLocationChangedEvent.PreviousLocation);
+    }
+
+    [Fact]
+    public async Task UpdateLocation_WithSameLocation_DoesNotRaisePersonLocationChangedEvent()
+    {
+        // Arrange
+        var personId = Guid.NewGuid();
+        var testLocation = new Location(0, 0);
+        var timeout = TimeSpan.FromSeconds(1);
+
+        var personLocationChangedEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>(TimeSpan.FromMilliseconds(20));
+        _testPerson = Person.Create(personId, testLocation, timeout);
+
+        // Act
+        _testPerson.UpdateLocation(testLocation);
+        var personLocationChangedEvent = await personLocationChangedEventTask;
+
+        // Assert
+        Assert.Null(personLocationChangedEvent);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
-using Opilo.HazardZoneMonitor.Domain.Events;
+using Opilo.HazardZoneMonitor.Domain.Events.FloorEvents;
+using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
