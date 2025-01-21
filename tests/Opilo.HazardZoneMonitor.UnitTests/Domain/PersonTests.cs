@@ -89,6 +89,27 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateLocation_WithSameLocation_ResetsExpiration()
+    {
+        // Arrange
+        var personId = Guid.NewGuid();
+        var testLocation = new Location(0, 0);
+        var timeout = TimeSpan.FromMilliseconds(100);
+
+        var personExpiredEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>(TimeSpan.FromMilliseconds(150));
+        _testPerson = Person.Create(personId, testLocation, timeout);
+        await Task.Delay(75);
+
+        // Act
+        _testPerson.UpdateLocation(testLocation);
+        var personExpiredEvent = await personExpiredEventTask;
+
+        // Assert
+        Assert.Null(personExpiredEvent);
+    }
+
+    [Fact]
     public async Task ExpirePerson_WhenTimeExpires_RaisesPersonExpiredEvent()
     {
         // Arrange

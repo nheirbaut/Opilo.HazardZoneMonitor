@@ -23,16 +23,16 @@ public sealed class Person : IDisposable
 
     public void UpdateLocation(Location newLocation)
     {
+        _expiryTimer.Stop();
+        _expiryTimer.Start();
+        _initialTime = DateTime.UtcNow;
+
         if (newLocation == Location)
             return;
 
         var previousLocation = Location;
 
         Location = newLocation;
-        _expiryTimer.Stop();
-        _expiryTimer.Start();
-        _initialTime = DateTime.UtcNow;
-
         DomainEvents.Raise(new PersonLocationChangedEvent(Id, Location, previousLocation));
     }
 
