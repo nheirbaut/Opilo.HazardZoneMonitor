@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.Domain.Entities;
+﻿using Opilo.HazardZoneMonitor.Domain.Entities;
+using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
+using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
+using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
@@ -47,5 +49,26 @@ public sealed class HazardZoneTests
         // Assert
         Assert.Equal(ValidHazardZoneName, hazardZone.Name);
         Assert.Equal(s_validOutline, hazardZone.Outline);
+    }
+
+    [Fact]
+    public async Task OnPersonCreatedEvent_WhenPersonCreatedIsLocatedInHazardZone_RaisesPersonAddedToHazardZoneEvent()
+    {
+        // Arrange
+        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(2, 2);
+        var personCreatedEvent = new PersonCreatedEvent(personId, initialLocation);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(personCreatedEvent);
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.NotNull(personAddedToHazardZoneEvent);
+        Assert.Equal(personId, personAddedToHazardZoneEvent.PersonId);
+        Assert.Equal(initialLocation, personAddedToHazardZoneEvent.Location);
     }
 }
