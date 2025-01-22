@@ -25,6 +25,6 @@ public sealed class HazardZone
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
     {
         if (Outline.IsLocationInside(personCreatedEvent.Location))
-            DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personCreatedEvent.PersonId, personCreatedEvent.Location));
+            DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personCreatedEvent.PersonId, Name));
     }
 }

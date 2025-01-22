@@ -2,4 +2,4 @@
 
 namespace Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
 
-public record PersonAddedToHazardZoneEvent(Guid PersonId, Location Location) : IDomainEvent;
+public record PersonAddedToHazardZoneEvent(Guid PersonId, string HazardZoneName) : IDomainEvent;

@@ -69,7 +69,7 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.NotNull(personAddedToHazardZoneEvent);
         Assert.Equal(personId, personAddedToHazardZoneEvent.PersonId);
-        Assert.Equal(initialLocation, personAddedToHazardZoneEvent.Location);
+        Assert.Equal(ValidHazardZoneName, personAddedToHazardZoneEvent.HazardZoneName);
     }
 
     [Fact]
