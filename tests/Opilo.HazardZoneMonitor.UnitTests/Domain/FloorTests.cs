@@ -1,5 +1,6 @@
 ﻿using Opilo.HazardZoneMonitor.Domain.Entities;
 using Opilo.HazardZoneMonitor.Domain.Events.FloorEvents;
+using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
@@ -178,6 +179,27 @@ public sealed class FloorTests : IDisposable
         Assert.NotNull(personRemovedFromFloorEvent);
         Assert.Equal(ValidFloorName, personRemovedFromFloorEvent.FloorName);
         Assert.Equal(personId, personRemovedFromFloorEvent.PersonId);
+    }
+
+    [Fact]
+    public async Task Dispose_WhenPersonLocatedOnFloor_DoesNotRaisePersonExpiredEvent()
+    {
+        // Arrange
+        var personId = Guid.NewGuid();
+        var locationOnFloor = new Location(2, 2);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, TimeSpan.FromMilliseconds(20));
+        var personMovementOnFloor = new PersonLocationUpdate(personId, locationOnFloor);
+        _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
+
+        var personExpiredEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>(TimeSpan.FromMilliseconds(40));
+
+        // Act
+        _testFloor.Dispose();
+        var personExpiredEvent = await personExpiredEventTask;
+
+        // Assert
+        Assert.Null(personExpiredEvent);
     }
 
     public void Dispose()

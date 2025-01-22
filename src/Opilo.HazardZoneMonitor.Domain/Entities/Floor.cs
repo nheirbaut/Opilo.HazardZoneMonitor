@@ -84,6 +84,9 @@ public sealed class Floor : IDisposable
 
         _disposed = true;
 
+        foreach (var (_, person) in _personsOnFloor)
+            person.Dispose();
+
         _personsOnFloor.Clear();
     }
 }
