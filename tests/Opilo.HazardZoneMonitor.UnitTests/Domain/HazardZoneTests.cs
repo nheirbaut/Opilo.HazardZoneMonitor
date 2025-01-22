@@ -7,7 +7,7 @@ using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
-public sealed class HazardZoneTests
+public sealed class HazardZoneTests : IDisposable
 {
     private static readonly Outline s_validOutline = new(new([
         new Location(0, 0),
@@ -70,5 +70,10 @@ public sealed class HazardZoneTests
         Assert.NotNull(personAddedToHazardZoneEvent);
         Assert.Equal(personId, personAddedToHazardZoneEvent.PersonId);
         Assert.Equal(initialLocation, personAddedToHazardZoneEvent.Location);
+    }
+
+    public void Dispose()
+    {
+        DomainEvents.Dispose();
     }
 }
