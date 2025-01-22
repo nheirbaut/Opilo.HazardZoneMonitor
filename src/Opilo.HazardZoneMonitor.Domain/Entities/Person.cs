@@ -17,7 +17,7 @@ public sealed class Person : IDisposable
     public static Person Create(Guid id, Location location, TimeSpan lifespanTimeout)
     {
         var person = new Person(id, location, lifespanTimeout);
-        DomainEvents.Raise(new PersonCreatedEvent(person));
+        DomainEvents.Raise(new PersonCreatedEvent(id, location));
         return person;
     }
 

@@ -1,3 +1,5 @@
-﻿namespace Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
+﻿using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
-public record PersonCreatedEvent(Entities.Person Person) : IDomainEvent;
+namespace Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
+
+public record PersonCreatedEvent(Guid PersonId, Location Location) : IDomainEvent;

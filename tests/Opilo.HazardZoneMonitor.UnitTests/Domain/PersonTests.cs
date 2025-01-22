@@ -42,8 +42,8 @@ public sealed class PersonTests : IDisposable
 
         // Assert
         Assert.NotNull(personCreatedEvent);
-        Assert.Equal(personId, personCreatedEvent.Person.Id);
-        Assert.Equal(location, personCreatedEvent.Person.Location);
+        Assert.Equal(personId, personCreatedEvent.PersonId);
+        Assert.Equal(location, personCreatedEvent.Location);
     }
 
     [Fact]
