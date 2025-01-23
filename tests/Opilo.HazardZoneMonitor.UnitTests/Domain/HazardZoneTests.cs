@@ -91,6 +91,27 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Null(personAddedToHazardZoneEvent);
     }
 
+    [Fact]
+    public async Task OnPersonExpiredEvent_WhenPersonIsInZone_RaisesPersonRemovedFromHazardZoneEvent()
+    {
+        // Arrange
+        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(2, 2);
+        DomainEvents.Raise(new PersonCreatedEvent(personId, initialLocation));
+        var personRemovedFromHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(new PersonExpiredEvent(personId));
+        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
+
+        // Assert
+        Assert.NotNull(personRemovedFromHazardZoneEvent);
+        Assert.Equal(personId, personRemovedFromHazardZoneEvent.PersonId);
+        Assert.Equal(ValidHazardZoneName, personRemovedFromHazardZoneEvent.HazardZoneName);
+    }
+
     public void Dispose()
     {
         DomainEvents.Dispose();
