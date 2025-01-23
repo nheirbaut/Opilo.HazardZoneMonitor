@@ -65,7 +65,6 @@ public sealed class PersonTests : IDisposable
         Assert.NotNull(personLocationChangedEvent);
         Assert.Equal(personId, personLocationChangedEvent.PersonId);
         Assert.Equal(newLocation, personLocationChangedEvent.CurrentLocation);
-        Assert.Equal(initialLocation, personLocationChangedEvent.PreviousLocation);
     }
 
     [Fact]

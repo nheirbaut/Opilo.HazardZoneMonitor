@@ -1,5 +1,3 @@
-﻿using Opilo.HazardZoneMonitor.Domain.Events;
+﻿namespace Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
-namespace Opilo.HazardZoneMonitor.Domain.ValueObjects;
-
-public record PersonLocationUpdate(Guid PersonId, Location Location) : IDomainEvent;
+public record PersonLocationUpdate(Guid PersonId, Location Location);

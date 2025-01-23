@@ -30,10 +30,8 @@ public sealed class Person : IDisposable
         if (newLocation == Location)
             return;
 
-        var previousLocation = Location;
-
         Location = newLocation;
-        DomainEvents.Raise(new PersonLocationChangedEvent(Id, Location, previousLocation));
+        DomainEvents.Raise(new PersonLocationChangedEvent(Id, Location));
     }
 
     private Person(Guid id, Location initialLocation, TimeSpan timeout)

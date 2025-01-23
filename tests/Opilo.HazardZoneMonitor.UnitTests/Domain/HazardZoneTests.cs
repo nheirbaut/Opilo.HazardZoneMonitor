@@ -73,7 +73,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_WhenPersonCreatedIsNotLocatedInHazardZone_DoesNotRaisePersonAddedToHazardZoneEvent()
+    public async Task
+        OnPersonCreatedEvent_WhenPersonCreatedIsNotLocatedInHazardZone_DoesNotRaisePersonAddedToHazardZoneEvent()
     {
         // Arrange
         _ = new HazardZone(ValidHazardZoneName, s_validOutline);
@@ -110,6 +111,115 @@ public sealed class HazardZoneTests : IDisposable
         Assert.NotNull(personRemovedFromHazardZoneEvent);
         Assert.Equal(personId, personRemovedFromHazardZoneEvent.PersonId);
         Assert.Equal(ValidHazardZoneName, personRemovedFromHazardZoneEvent.HazardZoneName);
+    }
+
+    [Fact]
+    public async Task OnPersonExpiredEvent_WhenPersonIsNotInZone_RaisesPersonRemovedFromHazardZoneEvent()
+    {
+        // Arrange
+        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(8, 8);
+        DomainEvents.Raise(new PersonCreatedEvent(personId, initialLocation));
+        var personRemovedFromHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+                TimeSpan.FromMilliseconds(40));
+
+        // Act
+        DomainEvents.Raise(new PersonExpiredEvent(personId));
+        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
+
+        // Assert
+        Assert.Null(personRemovedFromHazardZoneEvent);
+    }
+
+    [Fact]
+    public async Task PersonLocationChangedEvent_WhenPersonNotKnownAndLocationUpdateInZone_RaisesPersonAddedToHazardZoneEvent()
+    {
+        // Arrange
+        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(2, 2);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(new PersonLocationChangedEvent(personId, initialLocation));
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.NotNull(personAddedToHazardZoneEvent);
+        Assert.Equal(personId, personAddedToHazardZoneEvent.PersonId);
+        Assert.Equal(ValidHazardZoneName, personAddedToHazardZoneEvent.HazardZoneName);
+    }
+
+    [Fact]
+    public async Task
+        PersonLocationChangedEvent_WhenPersonNotKnownAndLocationUpdateNotInZone_DoesNotRaisePersonAddedToHazardZoneEvent()
+    {
+        // Arrange
+        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(8, 8);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromMilliseconds(40));
+
+        // Act
+        DomainEvents.Raise(new PersonLocationChangedEvent(personId, initialLocation));
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.Null(personAddedToHazardZoneEvent);
+    }
+
+    [Fact]
+    public async Task PersonLocationChangedEvent_WhenPersonKnownAndLocationUpdateNotInZone_RaisesPersonRemovedFromHazardZoneEvent()
+    {
+        // Arrange
+        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(2, 2);
+        var newLocation = new Location(8, 8);
+        DomainEvents.Raise(new PersonLocationChangedEvent(personId, initialLocation));
+        var personRemovedFromHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(new PersonLocationChangedEvent(personId, newLocation));
+        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
+
+        // Assert
+        Assert.NotNull(personRemovedFromHazardZoneEvent);
+        Assert.Equal(personId, personRemovedFromHazardZoneEvent.PersonId);
+        Assert.Equal(ValidHazardZoneName, personRemovedFromHazardZoneEvent.HazardZoneName);
+    }
+
+    [Fact]
+    public async Task
+        PersonLocationChangedEvent_WhenPersonKnownAndLocationUpdateInZone_DoesNotRaisePersonAddedToHazardZoneEventOrPersonRemovedFromHazardZoneEvent()
+    {
+        // Arrange
+        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(2, 2);
+        var newLocation = new Location(3, 3);
+        var initialPersonLocationChangedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>();
+        DomainEvents.Raise(new PersonLocationChangedEvent(personId, initialLocation));
+        await initialPersonLocationChangedEventTask;
+        var personRemovedFromHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+                TimeSpan.FromMilliseconds(40));
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromMilliseconds(40));
+
+        // Act
+        DomainEvents.Raise(new PersonLocationChangedEvent(personId, newLocation));
+        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.Null(personRemovedFromHazardZoneEvent);
+        Assert.Null(personAddedToHazardZoneEvent);
     }
 
     public void Dispose()

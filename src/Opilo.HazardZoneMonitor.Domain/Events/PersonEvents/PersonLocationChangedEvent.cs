@@ -2,4 +2,4 @@
 
 namespace Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 
-public record PersonLocationChangedEvent(Guid PersonId, Location CurrentLocation, Location PreviousLocation) : IDomainEvent;
+public record PersonLocationChangedEvent(Guid PersonId, Location CurrentLocation) : IDomainEvent;

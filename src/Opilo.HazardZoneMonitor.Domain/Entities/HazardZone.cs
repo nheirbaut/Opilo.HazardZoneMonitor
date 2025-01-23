@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
 using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
@@ -25,17 +24,18 @@ public sealed class HazardZone
 
         DomainEvents.Register<PersonCreatedEvent>(OnPersonCreatedEvent);
         DomainEvents.Register<PersonExpiredEvent>(OnPersonExpiredEvent);
+        DomainEvents.Register<PersonLocationChangedEvent>(OnPersonLocationChangedEvent);
     }
 
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
     {
         lock (_personsInZoneLock)
         {
-            if (Outline.IsLocationInside(personCreatedEvent.Location))
-            {
-                _personInZone.Add(personCreatedEvent.PersonId);
-                DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personCreatedEvent.PersonId, Name));
-            }
+            if (!Outline.IsLocationInside(personCreatedEvent.Location))
+                return;
+
+            _personInZone.Add(personCreatedEvent.PersonId);
+            DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personCreatedEvent.PersonId, Name));
         }
     }
 
@@ -45,6 +45,29 @@ public sealed class HazardZone
         {
             if (_personInZone.Remove(personExpiredEvent.PersonId))
                 DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personExpiredEvent.PersonId, Name));
+        }
+    }
+
+    private void OnPersonLocationChangedEvent(PersonLocationChangedEvent personLocationChangedEvent)
+    {
+        lock (_personsInZoneLock)
+        {
+            if (_personInZone.Contains(personLocationChangedEvent.PersonId))
+            {
+                if (Outline.IsLocationInside(personLocationChangedEvent.CurrentLocation))
+                    return;
+
+                _personInZone.Remove(personLocationChangedEvent.PersonId);
+                DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personLocationChangedEvent.PersonId, Name));
+
+                return;
+            }
+
+            if (!Outline.IsLocationInside(personLocationChangedEvent.CurrentLocation))
+                return;
+
+            _personInZone.Add(personLocationChangedEvent.PersonId);
+            DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personLocationChangedEvent.PersonId, Name));
         }
     }
 }
