@@ -10,6 +10,8 @@ public sealed class HazardZone
 {
     private readonly HashSet<Guid> _personInZone = [];
     private readonly Lock _personsInZoneLock = new();
+    private readonly Lock _activationStateLock = new();
+    private bool _zoneIsActivating;
 
     public string Name { get; }
     public Outline Outline { get; }
@@ -29,7 +31,14 @@ public sealed class HazardZone
 
     public void Activate()
     {
-        DomainEvents.Raise(new HazardZoneActivationStartedEvent(Name));
+        lock (_activationStateLock)
+        {
+            if (_zoneIsActivating)
+                return;
+
+            _zoneIsActivating = true;
+            DomainEvents.Raise(new HazardZoneActivationStartedEvent(Name));
+        }
     }
 
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)

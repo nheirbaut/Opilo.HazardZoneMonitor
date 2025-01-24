@@ -239,6 +239,26 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Equal(ValidHazardZoneName, hazardZoneActivationStartedEvent.HazardZoneName);
     }
 
+    [Fact]
+    public async Task Activate_WhenHazardZoneActivationStarted_DoesNotHazardZoneActivationStartedEvent()
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var hazardZoneActivationStartedEventFirstTimeTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<HazardZoneActivationStartedEvent>();
+        hazardZone.Activate();
+        await hazardZoneActivationStartedEventFirstTimeTask;
+        var hazardZoneActivationStartedEventSecondTimeTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<HazardZoneActivationStartedEvent>(TimeSpan.FromMilliseconds(40));
+
+        // Act
+        hazardZone.Activate();
+        var hazardZoneActivationStartedEventSecondTime = await hazardZoneActivationStartedEventSecondTimeTask;
+
+        // Assert
+        Assert.Null(hazardZoneActivationStartedEventSecondTime);
+    }
+
     public void Dispose()
     {
         DomainEvents.Dispose();
