@@ -27,6 +27,11 @@ public sealed class HazardZone
         DomainEvents.Register<PersonLocationChangedEvent>(OnPersonLocationChangedEvent);
     }
 
+    public void Activate()
+    {
+        DomainEvents.Raise(new HazardZoneActivationStartedEvent(Name));
+    }
+
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
     {
         lock (_personsInZoneLock)

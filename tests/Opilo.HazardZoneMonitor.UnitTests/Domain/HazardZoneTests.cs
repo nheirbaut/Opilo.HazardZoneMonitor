@@ -222,6 +222,23 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Null(personAddedToHazardZoneEvent);
     }
 
+    [Fact]
+    public async Task Activate_WhenHazardZoneIsNotActive_RaisesHazardZoneActivationStartedEvent()
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var hazardZoneActivationStartedEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<HazardZoneActivationStartedEvent>();
+
+        // Act
+        hazardZone.Activate();
+        var hazardZoneActivationStartedEvent = await hazardZoneActivationStartedEventTask;
+
+        // Assert
+        Assert.NotNull(hazardZoneActivationStartedEvent);
+        Assert.Equal(ValidHazardZoneName, hazardZoneActivationStartedEvent.HazardZoneName);
+    }
+
     public void Dispose()
     {
         DomainEvents.Dispose();
