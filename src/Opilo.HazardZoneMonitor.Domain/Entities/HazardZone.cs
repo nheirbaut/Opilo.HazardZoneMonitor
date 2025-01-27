@@ -1,4 +1,5 @@
-﻿using Ardalis.GuardClauses;
+﻿using System.Diagnostics.CodeAnalysis;
+using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Domain.Enums;
 using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
 using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
@@ -7,12 +8,13 @@ using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
+[SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
 public sealed class HazardZone
 {
     private readonly HashSet<Guid> _personInZone = [];
     private readonly Lock _personsInZoneLock = new();
     private readonly Lock _zoneStateLock = new();
-    private readonly HazardZoneStateBase _currentState;
+    private HazardZoneStateBase _currentState;
 
     public string Name { get; }
     public Outline Outline { get; }
@@ -94,6 +96,7 @@ public sealed class HazardZone
         }
     }
 
+    internal void TransitionTo(HazardZoneStateBase newState) => _currentState = newState;
     internal void SetIsActive(bool active) => IsActive = active;
     internal void SetAlarmState(AlarmState state) => AlarmState = state;
 }
@@ -117,5 +120,21 @@ internal sealed class InactiveHazardZoneState : HazardZoneStateBase
         : base(hazardZone)
     {
         hazardZone.SetIsActive(false);
+        hazardZone.SetAlarmState(AlarmState.None);
+    }
+
+    public override void ManuallyActivate()
+    {
+        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone));
+    }
+}
+
+internal sealed class ActiveHazardZoneState : HazardZoneStateBase
+{
+    public ActiveHazardZoneState(HazardZone hazardZone)
+        : base(hazardZone)
+    {
+        hazardZone.SetIsActive(true);
+        hazardZone.SetAlarmState(AlarmState.None);
     }
 }

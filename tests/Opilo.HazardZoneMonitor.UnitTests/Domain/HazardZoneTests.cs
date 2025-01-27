@@ -1,5 +1,4 @@
-﻿using Opilo.HazardZoneMonitor.Domain;
-using Opilo.HazardZoneMonitor.Domain.Entities;
+﻿using Opilo.HazardZoneMonitor.Domain.Entities;
 using Opilo.HazardZoneMonitor.Domain.Enums;
 using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
 using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
@@ -52,6 +51,20 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Equal(ValidHazardZoneName, hazardZone.Name);
         Assert.Equal(s_validOutline, hazardZone.Outline);
         Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void ManuallyActivate_WhenStateIsInactive_ActivatesTheHazardZone()
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
         Assert.Equal(AlarmState.None, hazardZone.AlarmState);
     }
 
