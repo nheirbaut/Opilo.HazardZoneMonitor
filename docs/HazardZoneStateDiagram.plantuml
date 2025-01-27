@@ -1,0 +1,57 @@
+@startuml
+
+hide empty description
+
+title HazardZone State Diagram
+
+[*] --> Inactive
+
+'------------------------------------------------------------------------------
+' Inactive (IsActive=false, AlarmState=None)
+'------------------------------------------------------------------------------
+
+Inactive : IsActive = false
+Inactive : AlarmState = None
+
+Inactive --> Active : ManuallyActivate()
+Inactive --> Active : ActivateFromExternalSource(source ID)\n[source ID unknown]
+
+'------------------------------------------------------------------------------
+' Active (IsActive=true, AlarmState=None)
+'------------------------------------------------------------------------------
+
+Active : IsActive = true
+Active : AlarmState = None
+
+Active --> PreAlarm : AddPerson()\n[occupantCount > allowed]
+Active --> PreAlarm : SetAllowedPersons(allowed)\n[occupantCount > allowed]
+Active --> Inactive : ManuallyDeactivate()
+Active --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
+
+'------------------------------------------------------------------------------
+' PreAlarm (IsActive=true, AlarmState=PreAlarm)
+'------------------------------------------------------------------------------
+
+PreAlarm : IsActive = true
+PreAlarm : AlarmState = PreAlarm
+
+PreAlarm --> Active : RemovePerson()\n[occupantCount <= allowed]
+PreAlarm --> Active : SetAllowedPersons(allowed)\n[occupantCount <= allowed]
+PreAlarm --> Alarm : OnPreAlarmTimerExpired()\n[occupantCount > allowed]
+PreAlarm --> Active : OnPreAlarmTimerExpired()\n[occupantCount <= allowed]
+PreAlarm --> Inactive : ManuallyDeactivate()
+PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
+
+'------------------------------------------------------------------------------
+' Alarm (IsActive=true, AlarmState=Alarm)
+'------------------------------------------------------------------------------
+
+Alarm : IsActive = true
+Alarm : AlarmState = Alarm
+
+Alarm --> Active : RemovePerson()\n[occupantCount <= allowed]
+Alarm --> Active : SetAllowedPersons(allowed)\n[occupantCount <= allowed]
+Alarm --> Inactive : ManuallyDeactivate()
+Alarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
+
+@enduml
