@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Opilo.HazardZoneMonitor.Domain.Enums;
 using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
 using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
@@ -10,11 +11,13 @@ public sealed class HazardZone
 {
     private readonly HashSet<Guid> _personInZone = [];
     private readonly Lock _personsInZoneLock = new();
-    private readonly Lock _activationStateLock = new();
-    private bool _zoneIsActivating;
+    private readonly Lock _zoneStateLock = new();
+    private readonly HazardZoneStateBase _currentState;
 
     public string Name { get; }
     public Outline Outline { get; }
+    public bool IsActive { get; private set; }
+    public AlarmState AlarmState { get; private set; }
 
     public HazardZone(string name, Outline outline)
     {
@@ -24,20 +27,26 @@ public sealed class HazardZone
         Name = name;
         Outline = outline;
 
+        _currentState = new InactiveHazardZoneState(this);
+
         DomainEvents.Register<PersonCreatedEvent>(OnPersonCreatedEvent);
         DomainEvents.Register<PersonExpiredEvent>(OnPersonExpiredEvent);
         DomainEvents.Register<PersonLocationChangedEvent>(OnPersonLocationChangedEvent);
     }
 
-    public void Activate()
+    public void ManuallyActivate()
     {
-        lock (_activationStateLock)
+        lock (_zoneStateLock)
         {
-            if (_zoneIsActivating)
-                return;
+            _currentState.ManuallyActivate();
+        }
+    }
 
-            _zoneIsActivating = true;
-            DomainEvents.Raise(new HazardZoneActivationStartedEvent(Name));
+    public void ActivateFromExternalSource(string sourceId)
+    {
+        lock (_zoneStateLock)
+        {
+            _currentState.ActivateFromExternalSource(sourceId);
         }
     }
 
@@ -83,5 +92,30 @@ public sealed class HazardZone
             _personInZone.Add(personLocationChangedEvent.PersonId);
             DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personLocationChangedEvent.PersonId, Name));
         }
+    }
+
+    internal void SetIsActive(bool active) => IsActive = active;
+    internal void SetAlarmState(AlarmState state) => AlarmState = state;
+}
+
+internal abstract class HazardZoneStateBase(HazardZone hazardZone)
+{
+    protected HazardZone HazardZone { get; } = hazardZone;
+
+    public virtual void ManuallyActivate()
+    {
+    }
+
+    public virtual void ActivateFromExternalSource(string sourceId)
+    {
+    }
+}
+
+internal sealed class InactiveHazardZoneState : HazardZoneStateBase
+{
+    public InactiveHazardZoneState(HazardZone hazardZone)
+        : base(hazardZone)
+    {
+        hazardZone.SetIsActive(false);
     }
 }

@@ -1,4 +1,6 @@
-﻿using Opilo.HazardZoneMonitor.Domain.Entities;
+﻿using Opilo.HazardZoneMonitor.Domain;
+using Opilo.HazardZoneMonitor.Domain.Entities;
+using Opilo.HazardZoneMonitor.Domain.Enums;
 using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
 using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
@@ -41,7 +43,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_WhenValidNameAndOutlineGiven_CreatesInstance()
+    public void Constructor_WhenValidNameAndOutlineGiven_CreatesInactiveInstance()
     {
         // Act
         var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
@@ -49,6 +51,8 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.Equal(ValidHazardZoneName, hazardZone.Name);
         Assert.Equal(s_validOutline, hazardZone.Outline);
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
     }
 
     [Fact]
@@ -220,43 +224,6 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.Null(personRemovedFromHazardZoneEvent);
         Assert.Null(personAddedToHazardZoneEvent);
-    }
-
-    [Fact]
-    public async Task Activate_WhenHazardZoneIsNotActive_RaisesHazardZoneActivationStartedEvent()
-    {
-        // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
-        var hazardZoneActivationStartedEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<HazardZoneActivationStartedEvent>();
-
-        // Act
-        hazardZone.Activate();
-        var hazardZoneActivationStartedEvent = await hazardZoneActivationStartedEventTask;
-
-        // Assert
-        Assert.NotNull(hazardZoneActivationStartedEvent);
-        Assert.Equal(ValidHazardZoneName, hazardZoneActivationStartedEvent.HazardZoneName);
-    }
-
-    [Fact]
-    public async Task Activate_WhenHazardZoneActivationStarted_DoesNotHazardZoneActivationStartedEvent()
-    {
-        // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
-        var hazardZoneActivationStartedEventFirstTimeTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<HazardZoneActivationStartedEvent>();
-        hazardZone.Activate();
-        await hazardZoneActivationStartedEventFirstTimeTask;
-        var hazardZoneActivationStartedEventSecondTimeTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<HazardZoneActivationStartedEvent>(TimeSpan.FromMilliseconds(40));
-
-        // Act
-        hazardZone.Activate();
-        var hazardZoneActivationStartedEventSecondTime = await hazardZoneActivationStartedEventSecondTimeTask;
-
-        // Assert
-        Assert.Null(hazardZoneActivationStartedEventSecondTime);
     }
 
     public void Dispose()
