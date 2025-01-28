@@ -104,6 +104,21 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ManuallyDeactivate_WhenStateIsActive_DeactivatesTheHazardZone()
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        hazardZone.ManuallyActivate();
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
     public async Task OnPersonCreatedEvent_WhenPersonCreatedIsLocatedInHazardZone_RaisesPersonAddedToHazardZoneEvent()
     {
         // Arrange

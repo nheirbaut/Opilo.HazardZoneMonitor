@@ -44,6 +44,14 @@ public sealed class HazardZone
         }
     }
 
+    public void ManuallyDeactivate()
+    {
+        lock (_zoneStateLock)
+        {
+            _currentState.ManuallyDeactivate();
+        }
+    }
+
     public void ActivateFromExternalSource(string sourceId)
     {
         Guard.Against.NullOrWhiteSpace(sourceId);
@@ -111,6 +119,10 @@ internal abstract class HazardZoneStateBase(HazardZone hazardZone)
     {
     }
 
+    public virtual void ManuallyDeactivate()
+    {
+    }
+
     public virtual void ActivateFromExternalSource(string sourceId)
     {
     }
@@ -143,5 +155,10 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
     {
         hazardZone.SetIsActive(true);
         hazardZone.SetAlarmState(AlarmState.None);
+    }
+
+    public override void ManuallyDeactivate()
+    {
+        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone));
     }
 }
