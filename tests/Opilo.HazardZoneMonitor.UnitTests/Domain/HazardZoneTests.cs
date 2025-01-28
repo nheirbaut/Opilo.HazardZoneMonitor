@@ -69,6 +69,41 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ActivateFromExternalSource_WhenStateIsInactiveAndSourceIdUnknown_ActivatesTheHazardZone()
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void ActivateFromExternalSource_WhenNameNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => hazardZone.ActivateFromExternalSource(null!));
+    }
+
+    [Theory]
+    [ClassData(typeof(InvalidNames))]
+    public void ActivateFromExternalSource_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => hazardZone.ActivateFromExternalSource(invalidName));
+    }
+
+    [Fact]
     public async Task OnPersonCreatedEvent_WhenPersonCreatedIsLocatedInHazardZone_RaisesPersonAddedToHazardZoneEvent()
     {
         // Arrange

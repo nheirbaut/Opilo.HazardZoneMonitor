@@ -46,6 +46,8 @@ public sealed class HazardZone
 
     public void ActivateFromExternalSource(string sourceId)
     {
+        Guard.Against.NullOrWhiteSpace(sourceId);
+
         lock (_zoneStateLock)
         {
             _currentState.ActivateFromExternalSource(sourceId);
@@ -124,6 +126,11 @@ internal sealed class InactiveHazardZoneState : HazardZoneStateBase
     }
 
     public override void ManuallyActivate()
+    {
+        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone));
+    }
+
+    public override void ActivateFromExternalSource(string sourceId)
     {
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone));
     }
