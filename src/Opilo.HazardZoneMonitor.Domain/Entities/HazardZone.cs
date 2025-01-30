@@ -15,6 +15,7 @@ public sealed class HazardZone
     private readonly Lock _personsInZoneLock = new();
     private readonly Lock _zoneStateLock = new();
     private HazardZoneStateBase _currentState;
+    private readonly HashSet<string> _registeredActivationSourceIds = [];
 
     public string Name { get; }
     public Outline Outline { get; }
@@ -109,6 +110,7 @@ public sealed class HazardZone
     internal void TransitionTo(HazardZoneStateBase newState) => _currentState = newState;
     internal void SetIsActive(bool active) => IsActive = active;
     internal void SetAlarmState(AlarmState state) => AlarmState = state;
+    internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
 }
 
 internal abstract class HazardZoneStateBase(HazardZone hazardZone)
@@ -144,6 +146,9 @@ internal sealed class InactiveHazardZoneState : HazardZoneStateBase
 
     public override void ActivateFromExternalSource(string sourceId)
     {
+        if (!HazardZone.RegisterActivationSourceId(sourceId))
+            return;
+
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone));
     }
 }

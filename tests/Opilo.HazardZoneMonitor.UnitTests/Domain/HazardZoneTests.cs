@@ -83,6 +83,22 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ActivateFromExternalSource_WhenStateIsInactiveAndSourceIdKnown_DoesNotActivateTheHazardZone()
+    {
+        // Arrange
+        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        hazardZone.ActivateFromExternalSource("ext-src");
+        hazardZone.ManuallyDeactivate();
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
     public void ActivateFromExternalSource_WhenNameNull_ThrowsArgumentNullException()
     {
         // Arrange
