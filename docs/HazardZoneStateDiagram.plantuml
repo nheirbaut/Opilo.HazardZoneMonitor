@@ -23,7 +23,7 @@ Inactive --> Active : ActivateFromExternalSource(source ID)\n[source ID unknown]
 Active : IsActive = true
 Active : AlarmState = None
 
-Active --> PreAlarm : AddPerson()\n[occupantCount > allowed]
+Active --> PreAlarm : OnPersonAdded()\n[occupantCount > allowed]
 Active --> PreAlarm : SetAllowedPersons(allowed)\n[occupantCount > allowed]
 Active --> Inactive : ManuallyDeactivate()
 Active --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]

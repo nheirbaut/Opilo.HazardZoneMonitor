@@ -11,7 +11,7 @@ namespace Opilo.HazardZoneMonitor.Domain.Entities;
 [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
 public sealed class HazardZone
 {
-    private readonly HashSet<Guid> _personInZone = [];
+    private readonly HashSet<Guid> _personsInZone = [];
     private readonly Lock _personsInZoneLock = new();
     private readonly Lock _zoneStateLock = new();
     private HazardZoneStateBase _currentState;
@@ -63,6 +63,11 @@ public sealed class HazardZone
         }
     }
 
+    internal void TransitionTo(HazardZoneStateBase newState) => _currentState = newState;
+    internal void SetIsActive(bool active) => IsActive = active;
+    internal void SetAlarmState(AlarmState state) => AlarmState = state;
+    internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
+
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
     {
         lock (_personsInZoneLock)
@@ -70,8 +75,7 @@ public sealed class HazardZone
             if (!Outline.IsLocationInside(personCreatedEvent.Location))
                 return;
 
-            _personInZone.Add(personCreatedEvent.PersonId);
-            DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personCreatedEvent.PersonId, Name));
+            AddPerson(personCreatedEvent.PersonId);
         }
     }
 
@@ -79,7 +83,7 @@ public sealed class HazardZone
     {
         lock (_personsInZoneLock)
         {
-            if (_personInZone.Remove(personExpiredEvent.PersonId))
+            if (_personsInZone.Remove(personExpiredEvent.PersonId))
                 DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personExpiredEvent.PersonId, Name));
         }
     }
@@ -88,12 +92,12 @@ public sealed class HazardZone
     {
         lock (_personsInZoneLock)
         {
-            if (_personInZone.Contains(personLocationChangedEvent.PersonId))
+            if (_personsInZone.Contains(personLocationChangedEvent.PersonId))
             {
                 if (Outline.IsLocationInside(personLocationChangedEvent.CurrentLocation))
                     return;
 
-                _personInZone.Remove(personLocationChangedEvent.PersonId);
+                _personsInZone.Remove(personLocationChangedEvent.PersonId);
                 DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personLocationChangedEvent.PersonId, Name));
 
                 return;
@@ -102,15 +106,17 @@ public sealed class HazardZone
             if (!Outline.IsLocationInside(personLocationChangedEvent.CurrentLocation))
                 return;
 
-            _personInZone.Add(personLocationChangedEvent.PersonId);
-            DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personLocationChangedEvent.PersonId, Name));
+            AddPerson(personLocationChangedEvent.PersonId);
         }
     }
 
-    internal void TransitionTo(HazardZoneStateBase newState) => _currentState = newState;
-    internal void SetIsActive(bool active) => IsActive = active;
-    internal void SetAlarmState(AlarmState state) => AlarmState = state;
-    internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
+    private void AddPerson(Guid personId)
+    {
+        _personsInZone.Add(personId);
+        DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personId, Name));
+
+        _currentState.OnPersonAddedToHazardZone();
+    }
 }
 
 internal abstract class HazardZoneStateBase(HazardZone hazardZone)
@@ -126,6 +132,10 @@ internal abstract class HazardZoneStateBase(HazardZone hazardZone)
     }
 
     public virtual void ActivateFromExternalSource(string sourceId)
+    {
+    }
+
+    public virtual void OnPersonAddedToHazardZone()
     {
     }
 }
@@ -165,5 +175,20 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
     public override void ManuallyDeactivate()
     {
         HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone));
+    }
+
+    public override void OnPersonAddedToHazardZone()
+    {
+        HazardZone.TransitionTo(new PreAlarmHazradZoneState(HazardZone));
+    }
+}
+
+internal sealed class PreAlarmHazradZoneState : HazardZoneStateBase
+{
+    public PreAlarmHazradZoneState(HazardZone hazardZone)
+        : base(hazardZone)
+    {
+        hazardZone.SetIsActive(true);
+        hazardZone.SetAlarmState(AlarmState.PreAlarm);
     }
 }
