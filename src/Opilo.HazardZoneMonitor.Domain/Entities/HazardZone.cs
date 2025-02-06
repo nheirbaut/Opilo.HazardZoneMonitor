@@ -107,8 +107,10 @@ public sealed class HazardZone
     {
         lock (_personsInZoneLock)
         {
-            if (_personsInZone.Remove(personExpiredEvent.PersonId))
-                DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personExpiredEvent.PersonId, Name));
+            if (!_personsInZone.Contains(personExpiredEvent.PersonId))
+                return;
+
+            RemovePerson(personExpiredEvent.PersonId);
         }
     }
 
@@ -121,9 +123,7 @@ public sealed class HazardZone
                 if (Outline.IsLocationInside(personLocationChangedEvent.CurrentLocation))
                     return;
 
-                _personsInZone.Remove(personLocationChangedEvent.PersonId);
-                DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personLocationChangedEvent.PersonId, Name));
-
+                RemovePerson(personLocationChangedEvent.PersonId);
                 return;
             }
 
@@ -140,6 +140,14 @@ public sealed class HazardZone
         DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personId, Name));
 
         _currentState.OnPersonAddedToHazardZone();
+    }
+
+    private void RemovePerson(Guid personId)
+    {
+        _personsInZone.Remove(personId);
+        DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personId, Name));
+
+        _currentState.OnPersonRemovedFromHazardZone();
     }
 }
 
@@ -164,6 +172,10 @@ internal abstract class HazardZoneStateBase(HazardZone hazardZone)
     }
 
     public virtual void OnPersonAddedToHazardZone()
+    {
+    }
+
+    public virtual void OnPersonRemovedFromHazardZone()
     {
     }
 }
@@ -226,5 +238,10 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
     {
         hazardZone.SetIsActive(true);
         hazardZone.SetAlarmState(AlarmState.PreAlarm);
+    }
+
+    public override void OnPersonRemovedFromHazardZone()
+    {
+        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone));
     }
 }

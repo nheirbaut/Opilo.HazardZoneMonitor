@@ -418,6 +418,30 @@ public sealed class HazardZoneTests : IDisposable
     // PreAlarm (IsActive=true, AlarmState=PreAlarm)
     //------------------------------------------------------------------------------
 
+    [Fact]
+    public async Task RemovePerson_WhenStateIsPreAlarm_SetsZoneAsActiveAndAlarmStateNone()
+    {
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+        Assert.NotNull(personAddedToHazardZoneEvent);
+        var personExpiredEvent = new PersonExpiredEvent(personAddedToHazardZoneEvent.PersonId);
+        var personRemovedFromHazardZoneEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(personExpiredEvent);
+        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
+
+        // Assert
+        Assert.NotNull(personRemovedFromHazardZoneEvent);
+        Assert.Equal(personExpiredEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
     //------------------------------------------------------------------------------
     // Alarm (IsActive=true, AlarmState=Alarm)
     //------------------------------------------------------------------------------
