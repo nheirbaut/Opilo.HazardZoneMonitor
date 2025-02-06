@@ -177,6 +177,65 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void DeactivateFromExternalSource_WhenStateIsInactiveAndSourceIdKnown_DeactivatesTheHazardZone()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithExternalActivationSource(sourceId)
+            .Build();
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_WhenNameNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var hazardZone = HazardZoneBuilder.BuildSimple();
+
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => hazardZone.DeactivateFromExternalSource(null!));
+    }
+
+    [Theory]
+    [ClassData(typeof(InvalidNames))]
+    public void DeactivateFromExternalSource_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
+    {
+        // Arrange
+        var hazardZone = HazardZoneBuilder.BuildSimple();
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => hazardZone.DeactivateFromExternalSource(invalidName));
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_WhenStateIsInactiveAndSourceIdUnknown_DoesNotDeactivateTheHazardZone()
+    {
+        // Arrange
+        var sourceId1 = "ext-src1";
+        var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithExternalActivationSource(sourceId1)
+            .Build();
+
+        var sourceId2 = "ext-src2";
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId2);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
     public async Task OnPersonCreatedEvent_WhenPersonCreatedIsLocatedInHazardZone_RaisesPersonAddedToHazardZoneEvent()
     {
         // Arrange

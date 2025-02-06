@@ -65,6 +65,16 @@ public sealed class HazardZone
         }
     }
 
+    public void DeactivateFromExternalSource(string sourceId)
+    {
+        Guard.Against.NullOrWhiteSpace(sourceId);
+
+        lock (_zoneStateLock)
+        {
+            _currentState.DeactivateFromExternalSource(sourceId);
+        }
+    }
+
     public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
     {
         if (allowedNumberOfPersons < 0)
@@ -80,6 +90,7 @@ public sealed class HazardZone
     internal void SetIsActive(bool active) => IsActive = active;
     internal void SetAlarmState(AlarmState state) => AlarmState = state;
     internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
+    internal bool UnregisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Remove(sourceId);
 
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
     {
@@ -148,6 +159,10 @@ internal abstract class HazardZoneStateBase(HazardZone hazardZone)
     {
     }
 
+    public virtual void DeactivateFromExternalSource(string sourceId)
+    {
+    }
+
     public virtual void OnPersonAddedToHazardZone()
     {
     }
@@ -193,6 +208,14 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
     public override void OnPersonAddedToHazardZone()
     {
         HazardZone.TransitionTo(new PreAlarmHazradZoneState(HazardZone));
+    }
+
+    public override void DeactivateFromExternalSource(string sourceId)
+    {
+        if (!HazardZone.UnregisterActivationSourceId(sourceId))
+            return;
+
+        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone));
     }
 }
 
