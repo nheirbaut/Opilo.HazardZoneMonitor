@@ -5,25 +5,17 @@ using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+using Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
 public sealed class HazardZoneTests : IDisposable
 {
-    private static readonly Outline s_validOutline = new(new([
-        new Location(0, 0),
-        new Location(4, 0),
-        new Location(4, 4),
-        new Location(0, 4)
-    ]));
-
-    private const string ValidHazardZoneName = "TestHazardZone";
-
     [Fact]
     public void Constructor_WhenNameIsNull_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new HazardZone(null!, s_validOutline));
+        Assert.Throws<ArgumentNullException>(() => new HazardZone(null!, HazardZoneBuilder.DefaultOutline));
     }
 
     [Theory]
@@ -31,25 +23,25 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => new HazardZone(invalidName, s_validOutline));
+        Assert.Throws<ArgumentException>(() => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline));
     }
 
     [Fact]
     public void Constructor_WhenOutlineIsNull_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new HazardZone(ValidHazardZoneName, null!));
+        Assert.Throws<ArgumentNullException>(() => new HazardZone(HazardZoneBuilder.DefaultName, null!));
     }
 
     [Fact]
     public void Constructor_WhenValidNameAndOutlineGiven_CreatesInactiveInstance()
     {
         // Act
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var hazardZone = new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline);
 
         // Assert
-        Assert.Equal(ValidHazardZoneName, hazardZone.Name);
-        Assert.Equal(s_validOutline, hazardZone.Outline);
+        Assert.Equal(HazardZoneBuilder.DefaultName, hazardZone.Name);
+        Assert.Equal(HazardZoneBuilder.DefaultOutline, hazardZone.Outline);
         Assert.False(hazardZone.IsActive);
         Assert.Equal(AlarmState.None, hazardZone.AlarmState);
     }
@@ -58,7 +50,7 @@ public sealed class HazardZoneTests : IDisposable
     public void ManuallyActivate_WhenStateIsInactive_ActivatesTheHazardZone()
     {
         // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act
         hazardZone.ManuallyActivate();
@@ -72,7 +64,7 @@ public sealed class HazardZoneTests : IDisposable
     public void ActivateFromExternalSource_WhenStateIsInactiveAndSourceIdUnknown_ActivatesTheHazardZone()
     {
         // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act
         hazardZone.ActivateFromExternalSource("ext-src");
@@ -86,12 +78,13 @@ public sealed class HazardZoneTests : IDisposable
     public void ActivateFromExternalSource_WhenStateIsInactiveAndSourceIdKnown_DoesNotActivateTheHazardZone()
     {
         // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
-        hazardZone.ActivateFromExternalSource("ext-src");
-        hazardZone.ManuallyDeactivate();
+        var sourceId = "ext-src";
+        var hazardZone = HazardZoneBuilder.Create()
+            .WithExternalActivationSource(sourceId)
+            .Build();
 
         // Act
-        hazardZone.ActivateFromExternalSource("ext-src");
+        hazardZone.ActivateFromExternalSource(sourceId);
 
         // Assert
         Assert.False(hazardZone.IsActive);
@@ -102,7 +95,7 @@ public sealed class HazardZoneTests : IDisposable
     public void ActivateFromExternalSource_WhenNameNull_ThrowsArgumentNullException()
     {
         // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => hazardZone.ActivateFromExternalSource(null!));
@@ -113,7 +106,7 @@ public sealed class HazardZoneTests : IDisposable
     public void ActivateFromExternalSource_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
     {
         // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
+        var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => hazardZone.ActivateFromExternalSource(invalidName));
@@ -123,8 +116,10 @@ public sealed class HazardZoneTests : IDisposable
     public async Task AddPerson_WhenStateIsActiveAndThresholdIsZero_SetsPreAlarm()
     {
         // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
-        hazardZone.ManuallyActivate();
+        var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .Build();
+
         var personId = Guid.NewGuid();
         var initialLocation = new Location(2, 2);
         var personCreatedEvent = new PersonCreatedEvent(personId, initialLocation);
@@ -141,11 +136,37 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public async Task SetAllowedNumberOfPersons_WhenAllowedIsOneLessThanCurrentlyInZone_SetsPreAlarm()
+    {
+        // Arrange
+        var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(2, 2);
+        var personCreatedEvent = new PersonCreatedEvent(personId, initialLocation);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        DomainEvents.Raise(personCreatedEvent);
+        await personAddedToHazardZoneEventTask;
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(0);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
     public void ManuallyDeactivate_WhenStateIsActive_DeactivatesTheHazardZone()
     {
         // Arrange
-        var hazardZone = new HazardZone(ValidHazardZoneName, s_validOutline);
-        hazardZone.ManuallyActivate();
+        var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .Build();
 
         // Act
         hazardZone.ManuallyDeactivate();
@@ -159,7 +180,7 @@ public sealed class HazardZoneTests : IDisposable
     public async Task OnPersonCreatedEvent_WhenPersonCreatedIsLocatedInHazardZone_RaisesPersonAddedToHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(2, 2);
         var personCreatedEvent = new PersonCreatedEvent(personId, initialLocation);
@@ -173,7 +194,7 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.NotNull(personAddedToHazardZoneEvent);
         Assert.Equal(personId, personAddedToHazardZoneEvent.PersonId);
-        Assert.Equal(ValidHazardZoneName, personAddedToHazardZoneEvent.HazardZoneName);
+        Assert.Equal(HazardZoneBuilder.DefaultName, personAddedToHazardZoneEvent.HazardZoneName);
     }
 
     [Fact]
@@ -181,7 +202,7 @@ public sealed class HazardZoneTests : IDisposable
         OnPersonCreatedEvent_WhenPersonCreatedIsNotLocatedInHazardZone_DoesNotRaisePersonAddedToHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(8, 8);
         var personCreatedEvent = new PersonCreatedEvent(personId, initialLocation);
@@ -200,7 +221,7 @@ public sealed class HazardZoneTests : IDisposable
     public async Task OnPersonExpiredEvent_WhenPersonIsInZone_RaisesPersonRemovedFromHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(2, 2);
         DomainEvents.Raise(new PersonCreatedEvent(personId, initialLocation));
@@ -214,14 +235,14 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.NotNull(personRemovedFromHazardZoneEvent);
         Assert.Equal(personId, personRemovedFromHazardZoneEvent.PersonId);
-        Assert.Equal(ValidHazardZoneName, personRemovedFromHazardZoneEvent.HazardZoneName);
+        Assert.Equal(HazardZoneBuilder.DefaultName, personRemovedFromHazardZoneEvent.HazardZoneName);
     }
 
     [Fact]
     public async Task OnPersonExpiredEvent_WhenPersonIsNotInZone_RaisesPersonRemovedFromHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(8, 8);
         DomainEvents.Raise(new PersonCreatedEvent(personId, initialLocation));
@@ -241,7 +262,7 @@ public sealed class HazardZoneTests : IDisposable
     public async Task PersonLocationChangedEvent_WhenPersonNotKnownAndLocationUpdateInZone_RaisesPersonAddedToHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(2, 2);
         var personAddedToHazardZoneEventTask =
@@ -254,7 +275,7 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.NotNull(personAddedToHazardZoneEvent);
         Assert.Equal(personId, personAddedToHazardZoneEvent.PersonId);
-        Assert.Equal(ValidHazardZoneName, personAddedToHazardZoneEvent.HazardZoneName);
+        Assert.Equal(HazardZoneBuilder.DefaultName, personAddedToHazardZoneEvent.HazardZoneName);
     }
 
     [Fact]
@@ -262,7 +283,7 @@ public sealed class HazardZoneTests : IDisposable
         PersonLocationChangedEvent_WhenPersonNotKnownAndLocationUpdateNotInZone_DoesNotRaisePersonAddedToHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(8, 8);
         var personAddedToHazardZoneEventTask =
@@ -280,7 +301,7 @@ public sealed class HazardZoneTests : IDisposable
     public async Task PersonLocationChangedEvent_WhenPersonKnownAndLocationUpdateNotInZone_RaisesPersonRemovedFromHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(2, 2);
         var newLocation = new Location(8, 8);
@@ -295,7 +316,7 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.NotNull(personRemovedFromHazardZoneEvent);
         Assert.Equal(personId, personRemovedFromHazardZoneEvent.PersonId);
-        Assert.Equal(ValidHazardZoneName, personRemovedFromHazardZoneEvent.HazardZoneName);
+        Assert.Equal(HazardZoneBuilder.DefaultName, personRemovedFromHazardZoneEvent.HazardZoneName);
     }
 
     [Fact]
@@ -303,7 +324,7 @@ public sealed class HazardZoneTests : IDisposable
         PersonLocationChangedEvent_WhenPersonKnownAndLocationUpdateInZone_DoesNotRaisePersonAddedToHazardZoneEventOrPersonRemovedFromHazardZoneEvent()
     {
         // Arrange
-        _ = new HazardZone(ValidHazardZoneName, s_validOutline);
+        _ = HazardZoneBuilder.BuildSimple();
         var personId = Guid.NewGuid();
         var initialLocation = new Location(2, 2);
         var newLocation = new Location(3, 3);

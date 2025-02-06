@@ -16,11 +16,13 @@ public sealed class HazardZone
     private readonly Lock _zoneStateLock = new();
     private HazardZoneStateBase _currentState;
     private readonly HashSet<string> _registeredActivationSourceIds = [];
+    private int _maximumAllowedNumberOfPersons;
 
     public string Name { get; }
     public Outline Outline { get; }
     public bool IsActive { get; private set; }
     public AlarmState AlarmState { get; private set; }
+    public bool MorePersonsThanAllowed => _personsInZone.Count > _maximumAllowedNumberOfPersons;
 
     public HazardZone(string name, Outline outline)
     {
@@ -60,6 +62,17 @@ public sealed class HazardZone
         lock (_zoneStateLock)
         {
             _currentState.ActivateFromExternalSource(sourceId);
+        }
+    }
+
+    public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
+    {
+        if (allowedNumberOfPersons < 0)
+            return;
+
+        lock (_zoneStateLock)
+        {
+            _maximumAllowedNumberOfPersons = allowedNumberOfPersons;
         }
     }
 

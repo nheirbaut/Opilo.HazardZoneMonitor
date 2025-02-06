@@ -23,8 +23,8 @@ Inactive --> Active : ActivateFromExternalSource(source ID)\n[source ID unknown]
 Active : IsActive = true
 Active : AlarmState = None
 
-Active --> PreAlarm : OnPersonAdded()\n[occupantCount > allowed]
-Active --> PreAlarm : SetAllowedPersons(allowed)\n[occupantCount > allowed]
+Active --> PreAlarm : OnPersonAdded()\n[numberOfPersons > allowedNumberOfPersons]
+Active --> PreAlarm : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons > allowedNumberOfPersons]
 Active --> Inactive : ManuallyDeactivate()
 Active --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
 
@@ -35,10 +35,10 @@ Active --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
 PreAlarm : IsActive = true
 PreAlarm : AlarmState = PreAlarm
 
-PreAlarm --> Active : RemovePerson()\n[occupantCount <= allowed]
-PreAlarm --> Active : SetAllowedPersons(allowed)\n[occupantCount <= allowed]
-PreAlarm --> Alarm : OnPreAlarmTimerExpired()\n[occupantCount > allowed]
-PreAlarm --> Active : OnPreAlarmTimerExpired()\n[occupantCount <= allowed]
+PreAlarm --> Active : RemovePerson()\n[numberOfPersons <= allowedNumberOfPersons]
+PreAlarm --> Active : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons <= allowedNumberOfPersons]
+PreAlarm --> Alarm : OnPreAlarmTimerExpired()\n[numberOfPersons > allowedNumberOfPersons]
+PreAlarm --> Active : OnPreAlarmTimerExpired()\n[numberOfPersons <= allowedNumberOfPersons]
 PreAlarm --> Inactive : ManuallyDeactivate()
 PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
 
@@ -49,8 +49,8 @@ PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unkn
 Alarm : IsActive = true
 Alarm : AlarmState = Alarm
 
-Alarm --> Active : RemovePerson()\n[occupantCount <= allowed]
-Alarm --> Active : SetAllowedPersons(allowed)\n[occupantCount <= allowed]
+Alarm --> Active : RemovePerson()\n[numberOfPersons <= allowedNumberOfPersons]
+Alarm --> Active : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons <= allowedNumberOfPersons]
 Alarm --> Inactive : ManuallyDeactivate()
 Alarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
 
