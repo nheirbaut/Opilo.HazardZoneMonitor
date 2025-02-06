@@ -207,7 +207,7 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
 
     public override void OnPersonAddedToHazardZone()
     {
-        HazardZone.TransitionTo(new PreAlarmHazradZoneState(HazardZone));
+        HazardZone.TransitionTo(new PreAlarmHazardZoneState(HazardZone));
     }
 
     public override void DeactivateFromExternalSource(string sourceId)
@@ -219,9 +219,9 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
     }
 }
 
-internal sealed class PreAlarmHazradZoneState : HazardZoneStateBase
+internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 {
-    public PreAlarmHazradZoneState(HazardZone hazardZone)
+    public PreAlarmHazardZoneState(HazardZone hazardZone)
         : base(hazardZone)
     {
         hazardZone.SetIsActive(true);
