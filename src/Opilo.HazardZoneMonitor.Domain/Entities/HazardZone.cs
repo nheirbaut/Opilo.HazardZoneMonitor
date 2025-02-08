@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Timers;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Domain.Enums;
 using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
 using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Domain.Services;
 using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Timer = System.Timers.Timer;
 
 namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
@@ -23,6 +25,7 @@ public sealed class HazardZone : IDisposable
     public bool IsActive => _currentState.IsActive;
     public AlarmState AlarmState => _currentState.AlarmState;
     public bool MorePersonsThanAllowed => _personsInZone.Count > _maximumAllowedNumberOfPersons;
+    public static TimeSpan PreAlarmTimeout => TimeSpan.FromSeconds(5);
 
     public HazardZone(string name, Outline outline)
     {
@@ -95,6 +98,14 @@ public sealed class HazardZone : IDisposable
 
     internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
     internal bool UnregisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Remove(sourceId);
+
+    internal void OnPreAlarmTimerElapsed()
+    {
+        lock (_zoneStateLock)
+        {
+            _currentState.OnPreAlarmTimerElapsed();
+        }
+    }
 
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
     {
@@ -191,6 +202,10 @@ internal abstract class HazardZoneStateBase(HazardZone hazardZone) : IDisposable
     {
     }
 
+    public virtual void OnPreAlarmTimerElapsed()
+    {
+    }
+
     public void Dispose()
     {
         Dispose(true);
@@ -250,8 +265,16 @@ internal sealed class ActiveHazardZoneState(HazardZone hazardZone) : HazardZoneS
     }
 }
 
-internal sealed class PreAlarmHazardZoneState(HazardZone hazardZone) : HazardZoneStateBase(hazardZone)
+internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 {
+    private readonly Timer _preAlarmTimer;
+
+    public PreAlarmHazardZoneState(HazardZone hazardZone) : base(hazardZone)
+    {
+        _preAlarmTimer = new Timer(HazardZone.PreAlarmTimeout);
+        _preAlarmTimer.Elapsed += OnPreAlarmTimerElapsed;
+    }
+
     public override bool IsActive => true;
     public override AlarmState AlarmState => AlarmState.PreAlarm;
 
@@ -259,4 +282,28 @@ internal sealed class PreAlarmHazardZoneState(HazardZone hazardZone) : HazardZon
     {
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone));
     }
+
+    public override void OnPreAlarmTimerElapsed()
+    {
+        HazardZone.TransitionTo(new AlarmHazardZoneState(HazardZone));
+    }
+
+    private void OnPreAlarmTimerElapsed(object? _, ElapsedEventArgs __)
+    {
+        HazardZone.OnPreAlarmTimerElapsed();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        _preAlarmTimer.Elapsed -= OnPreAlarmTimerElapsed;
+        _preAlarmTimer.Dispose();
+
+        base.Dispose(disposing);
+    }
+}
+
+internal sealed class AlarmHazardZoneState(HazardZone hazardZone) : HazardZoneStateBase(hazardZone)
+{
+    public override bool IsActive => true;
+    public override AlarmState AlarmState => AlarmState.Alarm;
 }
