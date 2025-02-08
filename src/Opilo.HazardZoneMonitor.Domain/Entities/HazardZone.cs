@@ -20,8 +20,8 @@ public sealed class HazardZone : IDisposable
 
     public string Name { get; }
     public Outline Outline { get; }
-    public bool IsActive { get; private set; }
-    public AlarmState AlarmState { get; private set; }
+    public bool IsActive => _currentState.IsActive;
+    public AlarmState AlarmState => _currentState.AlarmState;
     public bool MorePersonsThanAllowed => _personsInZone.Count > _maximumAllowedNumberOfPersons;
 
     public HazardZone(string name, Outline outline)
@@ -93,8 +93,6 @@ public sealed class HazardZone : IDisposable
         oldState.Dispose();
     }
 
-    internal void SetIsActive(bool active) => IsActive = active;
-    internal void SetAlarmState(AlarmState state) => AlarmState = state;
     internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
     internal bool UnregisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Remove(sourceId);
 
@@ -164,6 +162,9 @@ public sealed class HazardZone : IDisposable
 
 internal abstract class HazardZoneStateBase(HazardZone hazardZone) : IDisposable
 {
+    public abstract bool IsActive { get; }
+    public abstract AlarmState AlarmState { get; }
+
     protected HazardZone HazardZone { get; } = hazardZone;
 
     public virtual void ManuallyActivate()
@@ -206,14 +207,10 @@ internal abstract class HazardZoneStateBase(HazardZone hazardZone) : IDisposable
     }
 }
 
-internal sealed class InactiveHazardZoneState : HazardZoneStateBase
+internal sealed class InactiveHazardZoneState(HazardZone hazardZone) : HazardZoneStateBase(hazardZone)
 {
-    public InactiveHazardZoneState(HazardZone hazardZone)
-        : base(hazardZone)
-    {
-        hazardZone.SetIsActive(false);
-        hazardZone.SetAlarmState(AlarmState.None);
-    }
+    public override bool IsActive => false;
+    public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyActivate()
     {
@@ -229,14 +226,10 @@ internal sealed class InactiveHazardZoneState : HazardZoneStateBase
     }
 }
 
-internal sealed class ActiveHazardZoneState : HazardZoneStateBase
+internal sealed class ActiveHazardZoneState(HazardZone hazardZone) : HazardZoneStateBase(hazardZone)
 {
-    public ActiveHazardZoneState(HazardZone hazardZone)
-        : base(hazardZone)
-    {
-        hazardZone.SetIsActive(true);
-        hazardZone.SetAlarmState(AlarmState.None);
-    }
+    public override bool IsActive => true;
+    public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyDeactivate()
     {
@@ -257,14 +250,10 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
     }
 }
 
-internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
+internal sealed class PreAlarmHazardZoneState(HazardZone hazardZone) : HazardZoneStateBase(hazardZone)
 {
-    public PreAlarmHazardZoneState(HazardZone hazardZone)
-        : base(hazardZone)
-    {
-        hazardZone.SetIsActive(true);
-        hazardZone.SetAlarmState(AlarmState.PreAlarm);
-    }
+    public override bool IsActive => true;
+    public override AlarmState AlarmState => AlarmState.PreAlarm;
 
     public override void OnPersonRemovedFromHazardZone()
     {
