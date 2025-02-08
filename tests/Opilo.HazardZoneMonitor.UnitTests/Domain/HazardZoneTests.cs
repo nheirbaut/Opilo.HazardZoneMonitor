@@ -15,7 +15,8 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_WhenNameIsNull_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new HazardZone(null!, HazardZoneBuilder.DefaultOutline));
+        Assert.Throws<ArgumentNullException>(() =>
+            new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero));
     }
 
     [Theory]
@@ -23,21 +24,23 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline));
+        Assert.Throws<ArgumentException>(() =>
+            new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero));
     }
 
     [Fact]
     public void Constructor_WhenOutlineIsNull_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new HazardZone(HazardZoneBuilder.DefaultName, null!));
+        Assert.Throws<ArgumentNullException>(() => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero));
     }
 
     [Fact]
     public void Constructor_WhenValidNameAndOutlineGiven_CreatesInactiveInstance()
     {
         // Act
-        using var hazardZone = new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline);
+        using var hazardZone =
+            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
 
         // Assert
         Assert.Equal(HazardZoneBuilder.DefaultName, hazardZone.Name);
