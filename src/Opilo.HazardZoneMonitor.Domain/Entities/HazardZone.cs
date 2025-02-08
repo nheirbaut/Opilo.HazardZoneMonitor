@@ -15,7 +15,6 @@ public sealed class HazardZone : IDisposable
 {
     private readonly Lock _zoneStateLock = new();
     private HazardZoneStateBase _currentState;
-    private readonly HashSet<string> _registeredActivationSourceIds = [];
 
     public string Name { get; }
     public Outline Outline { get; }
@@ -32,7 +31,7 @@ public sealed class HazardZone : IDisposable
         Name = name;
         Outline = outline;
 
-        _currentState = new InactiveHazardZoneState(this, [], 0);
+        _currentState = new InactiveHazardZoneState(this, [], [], 0);
 
         DomainEvents.Register<PersonCreatedEvent>(OnPersonCreatedEvent);
         DomainEvents.Register<PersonExpiredEvent>(OnPersonExpiredEvent);
@@ -93,9 +92,6 @@ public sealed class HazardZone : IDisposable
         oldState.Dispose();
     }
 
-    internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
-    internal bool UnregisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Remove(sourceId);
-
     internal void OnPreAlarmTimerElapsed()
     {
         lock (_zoneStateLock)
@@ -141,6 +137,7 @@ public sealed class HazardZone : IDisposable
 internal abstract class HazardZoneStateBase(
     HazardZone hazardZone,
     HashSet<Guid> personsInZone,
+    HashSet<string> registeredActivationSourceIds,
     int allowedNumberOfPersons) : IDisposable
 {
     public abstract bool IsActive { get; }
@@ -149,6 +146,7 @@ internal abstract class HazardZoneStateBase(
 
     protected HazardZone HazardZone => hazardZone;
     protected HashSet<Guid> PersonsInZone => personsInZone;
+    protected HashSet<string> RegisteredActivationSourceIds = registeredActivationSourceIds;
 
     public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
     {
@@ -162,10 +160,6 @@ internal abstract class HazardZoneStateBase(
             DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personId, HazardZone.Name));
 
         OnPersonAddedToHazardZone();
-    }
-
-    protected virtual void OnPersonAddedToHazardZone()
-    {
     }
 
     public void OnPersonRemovedFromHazardZone(Guid personId)
@@ -190,6 +184,10 @@ internal abstract class HazardZoneStateBase(
             return;
 
         OnPersonAddedToHazardZone(personId);
+    }
+
+    protected virtual void OnPersonAddedToHazardZone()
+    {
     }
 
     protected virtual void OnPersonRemovedFromHazardZone()
@@ -239,51 +237,58 @@ internal abstract class HazardZoneStateBase(
 internal sealed class InactiveHazardZoneState(
     HazardZone hazardZone,
     HashSet<Guid> personsInZone,
+    HashSet<string> registeredActivationSourceIds,
     int allowedNumberOfPersons)
-    : HazardZoneStateBase(hazardZone, personsInZone, allowedNumberOfPersons)
+    : HazardZoneStateBase(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
 {
     public override bool IsActive => false;
     public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyActivate()
     {
-        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, AllowedNumberOfPersons));
+        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
     }
 
     public override void ActivateFromExternalSource(string sourceId)
     {
-        if (!HazardZone.RegisterActivationSourceId(sourceId))
+        if (!RegisteredActivationSourceIds.Add(sourceId))
             return;
 
-        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, AllowedNumberOfPersons));
+        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
     }
 }
 
 internal sealed class ActiveHazardZoneState(
     HazardZone hazardZone,
     HashSet<Guid> personsInZone,
+    HashSet<string> registeredActivationSourceIds,
     int allowedNumberOfPersons)
-    : HazardZoneStateBase(hazardZone, personsInZone, allowedNumberOfPersons)
+    : HazardZoneStateBase(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
 {
     public override bool IsActive => true;
     public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyDeactivate()
     {
-        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, AllowedNumberOfPersons));
+        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
     }
 
     public override void DeactivateFromExternalSource(string sourceId)
     {
-        if (!HazardZone.UnregisterActivationSourceId(sourceId))
+        if (!RegisteredActivationSourceIds.Remove(sourceId))
             return;
 
-        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, AllowedNumberOfPersons));
+        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
     }
 
     protected override void OnPersonAddedToHazardZone()
     {
-        HazardZone.TransitionTo(new PreAlarmHazardZoneState(HazardZone, PersonsInZone, AllowedNumberOfPersons));
+        HazardZone.TransitionTo(new PreAlarmHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
     }
 }
 
@@ -291,8 +296,9 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 {
     private readonly Timer _preAlarmTimer;
 
-    public PreAlarmHazardZoneState(HazardZone hazardZone, HashSet<Guid> personsInZone, int allowedNumberOfPersons) :
-        base(hazardZone, personsInZone, allowedNumberOfPersons)
+    public PreAlarmHazardZoneState(HazardZone hazardZone, HashSet<Guid> personsInZone,
+        HashSet<string> registeredActivationSourceIds, int allowedNumberOfPersons) :
+        base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
         _preAlarmTimer = new Timer(HazardZone.PreAlarmTimeout);
         _preAlarmTimer.Elapsed += OnPreAlarmTimerElapsed;
@@ -303,12 +309,14 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 
     public override void OnPreAlarmTimerElapsed()
     {
-        HazardZone.TransitionTo(new AlarmHazardZoneState(HazardZone, PersonsInZone, AllowedNumberOfPersons));
+        HazardZone.TransitionTo(new AlarmHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
     }
 
     protected override void OnPersonRemovedFromHazardZone()
     {
-        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, AllowedNumberOfPersons));
+        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
     }
 
     private void OnPreAlarmTimerElapsed(object? _, ElapsedEventArgs __)
@@ -328,8 +336,9 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 internal sealed class AlarmHazardZoneState(
     HazardZone hazardZone,
     HashSet<Guid> personsInZone,
+    HashSet<string> registeredActivationSourceIds,
     int allowedNumberOfPersons)
-    : HazardZoneStateBase(hazardZone, personsInZone, allowedNumberOfPersons)
+    : HazardZoneStateBase(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
 {
     public override bool IsActive => true;
     public override AlarmState AlarmState => AlarmState.Alarm;
