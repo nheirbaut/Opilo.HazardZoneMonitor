@@ -40,38 +40,26 @@ public sealed class HazardZone : IDisposable
 
     public void ManuallyActivate()
     {
-        lock (_zoneStateLock)
-        {
-            _currentState.ManuallyActivate();
-        }
+        lock (_zoneStateLock) _currentState.ManuallyActivate();
     }
 
     public void ManuallyDeactivate()
     {
-        lock (_zoneStateLock)
-        {
-            _currentState.ManuallyDeactivate();
-        }
+        lock (_zoneStateLock) _currentState.ManuallyDeactivate();
     }
 
     public void ActivateFromExternalSource(string sourceId)
     {
         Guard.Against.NullOrWhiteSpace(sourceId);
 
-        lock (_zoneStateLock)
-        {
-            _currentState.ActivateFromExternalSource(sourceId);
-        }
+        lock (_zoneStateLock) _currentState.ActivateFromExternalSource(sourceId);
     }
 
     public void DeactivateFromExternalSource(string sourceId)
     {
         Guard.Against.NullOrWhiteSpace(sourceId);
 
-        lock (_zoneStateLock)
-        {
-            _currentState.DeactivateFromExternalSource(sourceId);
-        }
+        lock (_zoneStateLock) _currentState.DeactivateFromExternalSource(sourceId);
     }
 
     public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
@@ -79,10 +67,7 @@ public sealed class HazardZone : IDisposable
         if (allowedNumberOfPersons < 0)
             return;
 
-        lock (_zoneStateLock)
-        {
-            _currentState.SetAllowedNumberOfPersons(allowedNumberOfPersons);
-        }
+        lock (_zoneStateLock) _currentState.SetAllowedNumberOfPersons(allowedNumberOfPersons);
     }
 
     internal void TransitionTo(HazardZoneStateBase newState)
@@ -94,10 +79,7 @@ public sealed class HazardZone : IDisposable
 
     internal void OnPreAlarmTimerElapsed()
     {
-        lock (_zoneStateLock)
-        {
-            _currentState.OnPreAlarmTimerElapsed();
-        }
+        lock (_zoneStateLock) _currentState.OnPreAlarmTimerElapsed();
     }
 
     private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
@@ -113,19 +95,14 @@ public sealed class HazardZone : IDisposable
 
     private void OnPersonExpiredEvent(PersonExpiredEvent personExpiredEvent)
     {
-        lock (_zoneStateLock)
-        {
-            _currentState.OnPersonRemovedFromHazardZone(personExpiredEvent.PersonId);
-        }
+        lock (_zoneStateLock) _currentState.OnPersonRemovedFromHazardZone(personExpiredEvent.PersonId);
     }
 
     private void OnPersonLocationChangedEvent(PersonLocationChangedEvent personLocationChangedEvent)
     {
         lock (_zoneStateLock)
-        {
             _currentState.OnPersonChangedLocation(personLocationChangedEvent.PersonId,
                 personLocationChangedEvent.CurrentLocation);
-        }
     }
 
     public void Dispose()
@@ -214,7 +191,7 @@ internal abstract class HazardZoneStateBase(
     {
     }
 
-    public virtual void OnAllowedNumberOfPersonsChanged()
+    protected virtual void OnAllowedNumberOfPersonsChanged()
     {
     }
 
@@ -317,6 +294,13 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
     {
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
+    }
+
+    protected override void OnAllowedNumberOfPersonsChanged()
+    {
+        if (PersonsInZone.Count <= AllowedNumberOfPersons)
+            HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+                AllowedNumberOfPersons));
     }
 
     private void OnPreAlarmTimerElapsed(object? _, ElapsedEventArgs __)
