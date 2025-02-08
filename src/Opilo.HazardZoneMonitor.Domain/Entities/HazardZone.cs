@@ -9,7 +9,7 @@ using Opilo.HazardZoneMonitor.Domain.ValueObjects;
 namespace Opilo.HazardZoneMonitor.Domain.Entities;
 
 [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
-public sealed class HazardZone
+public sealed class HazardZone : IDisposable
 {
     private readonly HashSet<Guid> _personsInZone = [];
     private readonly Lock _personsInZoneLock = new();
@@ -149,9 +149,14 @@ public sealed class HazardZone
 
         _currentState.OnPersonRemovedFromHazardZone();
     }
+
+    public void Dispose()
+    {
+        _currentState.Dispose();
+    }
 }
 
-internal abstract class HazardZoneStateBase(HazardZone hazardZone)
+internal abstract class HazardZoneStateBase(HazardZone hazardZone) : IDisposable
 {
     protected HazardZone HazardZone { get; } = hazardZone;
 
@@ -177,6 +182,21 @@ internal abstract class HazardZoneStateBase(HazardZone hazardZone)
 
     public virtual void OnPersonRemovedFromHazardZone()
     {
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+    }
+
+    ~HazardZoneStateBase()
+    {
+        Dispose(false);
     }
 }
 
