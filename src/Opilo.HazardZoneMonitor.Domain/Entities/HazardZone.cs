@@ -86,7 +86,13 @@ public sealed class HazardZone : IDisposable
         }
     }
 
-    internal void TransitionTo(HazardZoneStateBase newState) => _currentState = newState;
+    internal void TransitionTo(HazardZoneStateBase newState)
+    {
+        var oldState = _currentState;
+        _currentState = newState;
+        oldState.Dispose();
+    }
+
     internal void SetIsActive(bool active) => IsActive = active;
     internal void SetAlarmState(AlarmState state) => AlarmState = state;
     internal bool RegisterActivationSourceId(string sourceId) => _registeredActivationSourceIds.Add(sourceId);
