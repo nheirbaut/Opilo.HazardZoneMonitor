@@ -37,7 +37,7 @@ PreAlarm : AlarmState = PreAlarm
 
 PreAlarm --> Active : RemovePerson()\n[numberOfPersons <= allowedNumberOfPersons]
 PreAlarm --> Active : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons <= allowedNumberOfPersons]
-PreAlarm --> Alarm : OnPreAlarmTimerExpired()
+PreAlarm --> Alarm : OnPreAlarmTimerElapsed()
 PreAlarm --> Inactive : ManuallyDeactivate()
 PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
 

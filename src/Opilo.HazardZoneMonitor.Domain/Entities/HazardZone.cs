@@ -18,19 +18,19 @@ public sealed class HazardZone : IDisposable
 
     public string Name { get; }
     public Outline Outline { get; }
-    public TimeSpan PreAlarmTimeout { get; }
+    public TimeSpan PreAlarmDuration { get; }
     public bool IsActive => _currentState.IsActive;
     public AlarmState AlarmState => _currentState.AlarmState;
     public int AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
 
-    public HazardZone(string name, Outline outline, TimeSpan preAlarmTimeout)
+    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
 
         Name = name;
         Outline = outline;
-        PreAlarmTimeout = preAlarmTimeout;
+        PreAlarmDuration = preAlarmDuration;
 
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
 
@@ -124,7 +124,7 @@ internal abstract class HazardZoneStateBase(
 
     protected HazardZone HazardZone => hazardZone;
     protected HashSet<Guid> PersonsInZone => personsInZone;
-    protected HashSet<string> RegisteredActivationSourceIds = registeredActivationSourceIds;
+    protected readonly HashSet<string> RegisteredActivationSourceIds = registeredActivationSourceIds;
 
     public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
     {
@@ -278,8 +278,9 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         HashSet<string> registeredActivationSourceIds, int allowedNumberOfPersons) :
         base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
-        _preAlarmTimer = new Timer(HazardZone.PreAlarmTimeout);
+        _preAlarmTimer = new Timer(HazardZone.PreAlarmDuration);
         _preAlarmTimer.Elapsed += OnPreAlarmTimerElapsed;
+        _preAlarmTimer.Start();
     }
 
     public override bool IsActive => true;
@@ -311,6 +312,7 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 
     protected override void Dispose(bool disposing)
     {
+        _preAlarmTimer.Stop();
         _preAlarmTimer.Elapsed -= OnPreAlarmTimerElapsed;
         _preAlarmTimer.Dispose();
 

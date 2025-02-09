@@ -17,6 +17,7 @@ internal sealed class HazardZoneBuilder
     private HazardZoneTestState _desiredState = HazardZoneTestState.Inactive;
     private readonly List<string> _externalActivationSourceIds = new();
     private int _allowedNumberOfPersons;
+    private TimeSpan _preAlarmDuration = DefaultPreAlarmDuration;
 
     public const string DefaultName = "HazardZone";
 
@@ -27,7 +28,9 @@ internal sealed class HazardZoneBuilder
         new Location(0, 4)
     ]));
 
-    public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline);
+    public static readonly TimeSpan DefaultPreAlarmDuration = TimeSpan.FromSeconds(5);
+
+    public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline, DefaultPreAlarmDuration);
 
     public static HazardZoneBuilder Create() => new();
 
@@ -49,9 +52,15 @@ internal sealed class HazardZoneBuilder
         return this;
     }
 
+    public HazardZoneBuilder WithPreAlarmDuration(TimeSpan duration)
+    {
+        _preAlarmDuration = duration;
+        return this;
+    }
+
     public HazardZone Build()
     {
-        var hazardZone = new HazardZone(DefaultName, DefaultOutline);
+        var hazardZone = new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration);
         hazardZone.SetAllowedNumberOfPersons(_allowedNumberOfPersons);
 
         foreach (var sourceId in _externalActivationSourceIds)

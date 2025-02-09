@@ -452,7 +452,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task SetAllowedNumberOfPersons_WhenNumberIsEqualToCurrentlyInZone_etsZoneAsActiveAndAlarmStateNone()
+    public async Task
+        SetAllowedNumberOfPersons_WhenStateIsPreAlarmAndNumberIsEqualToCurrentlyInZone_setsZoneAsActiveAndAlarmStateNone()
     {
         // Arrange
         var personAddedToHazardZoneEventTask =
@@ -469,6 +470,27 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         Assert.True(hazardZone.IsActive);
         Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPreAlarmTimerElapsed_WhenStateIsPreAlarm_SetsAlarmState()
+    {
+        var testPreAlarmDuration = TimeSpan.FromMilliseconds(10);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .WithPreAlarmDuration(testPreAlarmDuration)
+            .Build();
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+        Assert.NotNull(personAddedToHazardZoneEvent);
+
+        // Act
+        await Task.Delay(testPreAlarmDuration * 2);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
     }
 
     //------------------------------------------------------------------------------
