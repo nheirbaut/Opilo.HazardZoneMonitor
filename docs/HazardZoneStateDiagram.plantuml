@@ -23,6 +23,9 @@ Inactive --> Active : ActivateFromExternalSource(source ID)\n[source ID unknown]
 Active : IsActive = true
 Active : AlarmState = None
 
+Active --> Active : OnPersonAdded()\n[numberOfPersons <= allowedNumberOfPersons]
+Active --> Active : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons <= allowedNumberOfPersons]
+Active --> Active : DeactivateFromExternalSource(source ID)\n[source ID unknown]
 Active --> PreAlarm : OnPersonAdded()\n[numberOfPersons > allowedNumberOfPersons]
 Active --> PreAlarm : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons > allowedNumberOfPersons]
 Active --> Inactive : ManuallyDeactivate()
@@ -35,11 +38,14 @@ Active --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
 PreAlarm : IsActive = true
 PreAlarm : AlarmState = PreAlarm
 
+PreAlarm --> PreAlarm : RemovePerson()\n[numberOfPersons > allowedNumberOfPersons]
+PreAlarm --> PreAlarm : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons > allowedNumberOfPersons]
+PreAlarm --> PreAlarm : DeactivateFromExternalSource(source ID)\n[source ID unknown]
 PreAlarm --> Active : RemovePerson()\n[numberOfPersons <= allowedNumberOfPersons]
 PreAlarm --> Active : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons <= allowedNumberOfPersons]
 PreAlarm --> Alarm : OnPreAlarmTimerElapsed()
 PreAlarm --> Inactive : ManuallyDeactivate()
-PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
+PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
 
 '------------------------------------------------------------------------------
 ' Alarm (IsActive=true, AlarmState=Alarm)
@@ -48,9 +54,12 @@ PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unkn
 Alarm : IsActive = true
 Alarm : AlarmState = Alarm
 
+Alarm --> Alarm : RemovePerson()\n[numberOfPersons > allowedNumberOfPersons]
+Alarm --> Alarm : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons > allowedNumberOfPersons]
+Alarm --> Alarm : DeactivateFromExternalSource(source ID)\n[source ID unknown]
 Alarm --> Active : RemovePerson()\n[numberOfPersons <= allowedNumberOfPersons]
 Alarm --> Active : SetAllowedNumberOfPersons(allowedNumberOfPersons)\n[numberOfPersons <= allowedNumberOfPersons]
 Alarm --> Inactive : ManuallyDeactivate()
-Alarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID unknown]
+Alarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
 
 @enduml
