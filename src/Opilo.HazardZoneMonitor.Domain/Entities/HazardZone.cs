@@ -297,6 +297,9 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 
     protected override void OnPersonRemovedFromHazardZone()
     {
+        if (PersonsInZone.Count > AllowedNumberOfPersons)
+            return;
+
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }

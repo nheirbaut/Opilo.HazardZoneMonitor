@@ -476,7 +476,39 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public async Task RemovePerson_WhenStateIsPreAlarm_SetsZoneAsActiveAndAlarmStateNone()
+    public async Task RemovePerson_WhenStateIsPreAlarmAndMoreThanAllowedPersonInHazardZone_SetsZoneAsActiveAndAlarmStateNone()
+    {
+        // Arrange
+        var firstPersonAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+        var firstPersonAddedToHazardZoneEvent = await firstPersonAddedToHazardZoneEventTask;
+        Assert.NotNull(firstPersonAddedToHazardZoneEvent);
+        var secondPersonAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        DomainEvents.Raise(new PersonCreatedEvent(Guid.NewGuid(), new Location(2, 2)));
+        var secondsecondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
+        Assert.NotNull(secondsecondPersonAddedToHazardZoneEvent);
+        var firstPersonExpiredEvent = new PersonExpiredEvent(firstPersonAddedToHazardZoneEvent.PersonId);
+        var firstPersonRemovedFromHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(firstPersonExpiredEvent);
+        var personRemovedFromHazardZoneEvent = await firstPersonRemovedFromHazardZoneEventTask;
+
+        // Assert
+        Assert.NotNull(personRemovedFromHazardZoneEvent);
+        Assert.Equal(firstPersonExpiredEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+    }
+
+
+    [Fact]
+    public async Task RemovePerson_WhenStateIsPreAlarmAndLessThanAllowedPersonInHazardZone_SetsZoneAsActiveAndAlarmStateNone()
     {
         // Arrange
         var personAddedToHazardZoneEventTask =
