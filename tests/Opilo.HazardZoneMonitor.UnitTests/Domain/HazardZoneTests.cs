@@ -320,6 +320,30 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
+    public async Task AddPerson_WhenStateIsActiveAndThresholdIsNotZero_DoesNotChangeState()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithState(HazardZoneTestState.Active)
+            .Build();
+
+        var personId = Guid.NewGuid();
+        var initialLocation = new Location(2, 2);
+        var personCreatedEvent = new PersonCreatedEvent(personId, initialLocation);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(personCreatedEvent);
+        await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
     public async Task AddPerson_WhenStateIsActiveAndThresholdIsZero_SetsPreAlarm()
     {
         // Arrange
