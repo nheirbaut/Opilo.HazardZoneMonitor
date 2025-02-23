@@ -476,7 +476,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public async Task RemovePerson_WhenStateIsPreAlarmAndMoreThanAllowedPersonInHazardZone_SetsZoneAsActiveAndAlarmStateNone()
+    public async Task RemovePerson_WhenStateIsPreAlarmAndMoreThanAllowedPersonInHazardZone_DoesNotChangeState()
     {
         // Arrange
         var firstPersonAddedToHazardZoneEventTask =
