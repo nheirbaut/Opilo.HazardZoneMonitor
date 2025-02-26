@@ -271,6 +271,13 @@ internal sealed class ActiveHazardZoneState(
         HazardZone.TransitionTo(new PreAlarmHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }
+
+    protected override void OnAllowedNumberOfPersonsChanged()
+    {
+        if (PersonsInZone.Count > AllowedNumberOfPersons)
+            HazardZone.TransitionTo(new PreAlarmHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+                AllowedNumberOfPersons));
+    }
 }
 
 internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
