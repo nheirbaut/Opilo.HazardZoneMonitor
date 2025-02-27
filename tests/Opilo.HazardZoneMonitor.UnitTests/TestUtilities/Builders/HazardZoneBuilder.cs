@@ -82,9 +82,12 @@ internal sealed class HazardZoneBuilder
                     hazardZone.ManuallyDeactivate();
                 hazardZone.ManuallyActivate();
 
-                var personId = Guid.NewGuid();
-                var insideLocation = new Location(2, 2);
-                DomainEvents.Raise(new PersonCreatedEvent(personId, insideLocation));
+                foreach (var _ in Enumerable.Range(0, _allowedNumberOfPersons + 1))
+                {
+                    var personId = Guid.NewGuid();
+                    var insideLocation = new Location(2, 2);
+                    DomainEvents.Raise(new PersonCreatedEvent(personId, insideLocation));
+                }
                 break;
         }
 
