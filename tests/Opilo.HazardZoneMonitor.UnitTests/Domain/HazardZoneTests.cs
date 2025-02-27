@@ -159,7 +159,8 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(hazardZone);
+        var personLocationChangedEvent =
+            PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromMilliseconds(40));
 
@@ -178,7 +179,8 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var initialPersonLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
+        var initialPersonLocationChangedEvent =
+            PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
         DomainEvents.Raise(initialPersonLocationChangedEvent);
 
         var newPersonLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(
@@ -205,7 +207,8 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var initialPersonLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
+        var initialPersonLocationChangedEvent =
+            PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
 
         var initialPersonLocationChangedEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>();
@@ -478,15 +481,10 @@ public sealed class HazardZoneTests : IDisposable
     public async Task RemovePerson_WhenStateIsPreAlarmAndMoreThanAllowedPersonInHazardZone_DoesNotChangeState()
     {
         // Arrange
-        var firstPersonAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm);
 
-        using var hazardZone = HazardZoneBuilder.Create()
-            .WithState(HazardZoneTestState.PreAlarm)
-            .Build();
-
-        var firstPersonAddedToHazardZoneEvent = await firstPersonAddedToHazardZoneEventTask;
-        Assert.NotNull(firstPersonAddedToHazardZoneEvent);
+        using var hazardZone = hazardZoneBuilder.Build();
 
         var secondPersonAddedToHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
@@ -495,7 +493,7 @@ public sealed class HazardZoneTests : IDisposable
         var secondsecondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
         Assert.NotNull(secondsecondPersonAddedToHazardZoneEvent);
 
-        var firstPersonExpiredEvent = new PersonExpiredEvent(firstPersonAddedToHazardZoneEvent.PersonId);
+        var firstPersonExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
         var firstPersonRemovedFromHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
@@ -512,19 +510,16 @@ public sealed class HazardZoneTests : IDisposable
 
 
     [Fact]
-    public async Task RemovePerson_WhenStateIsPreAlarmAndLessThanAllowedPersonInHazardZone_SetsZoneAsActiveAndAlarmStateNone()
+    public async Task
+        RemovePerson_WhenStateIsPreAlarmAndLessThanAllowedPersonInHazardZone_SetsZoneAsActiveAndAlarmStateNone()
     {
         // Arrange
-        var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm);
 
-        using var hazardZone = HazardZoneBuilder.Create()
-            .WithState(HazardZoneTestState.PreAlarm)
-            .Build();
+        using var hazardZone = hazardZoneBuilder.Build();
 
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
-        Assert.NotNull(personAddedToHazardZoneEvent);
-        var personExpiredEvent = new PersonExpiredEvent(personAddedToHazardZoneEvent.PersonId);
+        var personExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
         var personRemovedFromHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
@@ -540,18 +535,13 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
+    public void
         SetAllowedNumberOfPersons_WhenStateIsPreAlarmAndNumberIsEqualToCurrentlyInZone_setsZoneAsActiveAndAlarmStateNone()
     {
         // Arrange
-        var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
-
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.PreAlarm)
             .Build();
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
-        Assert.NotNull(personAddedToHazardZoneEvent);
 
         // Act
         hazardZone.SetAllowedNumberOfPersons(1);
@@ -565,14 +555,11 @@ public sealed class HazardZoneTests : IDisposable
     public async Task OnPreAlarmTimerElapsed_WhenStateIsPreAlarm_SetsAlarmState()
     {
         var testPreAlarmDuration = TimeSpan.FromMilliseconds(10);
-        var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.PreAlarm)
             .WithPreAlarmDuration(testPreAlarmDuration)
             .Build();
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
-        Assert.NotNull(personAddedToHazardZoneEvent);
 
         // Act
         await Task.Delay(testPreAlarmDuration * 4);
