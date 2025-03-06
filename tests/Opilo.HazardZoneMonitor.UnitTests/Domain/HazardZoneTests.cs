@@ -508,6 +508,39 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
     }
 
+    [Fact]
+    public void
+        SetAllowedNumberOfPersonsLower_WhenStateIsPreAlarmAndMoreThanAllowedPersonInHazardZone_DoesNotChangeState()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(0);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_WhenStateIsPreAlarmAndSourceIdUnknown_DoesNotChangeState()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+
+        // Act
+        hazardZone.DeactivateFromExternalSource("ext-src");
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+    }
 
     [Fact]
     public async Task
