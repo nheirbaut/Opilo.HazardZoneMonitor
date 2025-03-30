@@ -11,7 +11,8 @@ internal enum HazardZoneTestState
 {
     Inactive,
     Active,
-    PreAlarm
+    PreAlarm,
+    Alarm
 }
 
 internal sealed class HazardZoneBuilder
@@ -64,6 +65,9 @@ internal sealed class HazardZoneBuilder
 
     public HazardZone Build()
     {
+        if (_desiredState == HazardZoneTestState.Alarm)
+            _preAlarmDuration = TimeSpan.Zero;
+
         var hazardZone = new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration);
         hazardZone.SetAllowedNumberOfPersons(_allowedNumberOfPersons);
 
@@ -81,6 +85,9 @@ internal sealed class HazardZoneBuilder
                 break;
             case HazardZoneTestState.PreAlarm:
                 ConfigurePreAlarmState(hazardZone);
+                break;
+            case HazardZoneTestState.Alarm:
+                ConfigureAlarmState(hazardZone);
                 break;
         }
 
@@ -111,6 +118,11 @@ internal sealed class HazardZoneBuilder
         }
 
         IdsOfPersonsAdded = waiter.Wait(TimeSpan.FromSeconds(5)).Select(e => e.PersonId).ToList();
+    }
+
+    private void ConfigureAlarmState(HazardZone hazardZone)
+    {
+        ConfigurePreAlarmState(hazardZone);
     }
 
     private HazardZoneBuilder()

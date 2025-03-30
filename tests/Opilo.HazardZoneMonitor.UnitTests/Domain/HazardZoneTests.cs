@@ -12,7 +12,7 @@ namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 public sealed class HazardZoneTests : IDisposable
 {
     [Fact]
-    public void Constructor_WhenNameIsNull_ThrowsArgumentNullException()
+    public void Constructor_NullName_ThrowsArgumentNullException()
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
@@ -21,7 +21,7 @@ public sealed class HazardZoneTests : IDisposable
 
     [Theory]
     [ClassData(typeof(InvalidNames))]
-    public void Constructor_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
+    public void Constructor_InvalidName_ThrowsArgumentException(string invalidName)
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() =>
@@ -29,14 +29,14 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_WhenOutlineIsNull_ThrowsArgumentNullException()
+    public void Constructor_NullOutline_ThrowsArgumentNullException()
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero));
     }
 
     [Fact]
-    public void Constructor_WhenValidNameAndOutlineGiven_CreatesInactiveInstance()
+    public void Constructor_ValidParameters_CreatesInactiveInstance()
     {
         // Act
         using var hazardZone =
@@ -50,7 +50,19 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_WhenPersonCreatedIsLocatedInHazardZone_RaisesPersonAddedToHazardZoneEvent()
+    public void Constructor_NegativePreAlarmDuration_HandlesAppropriately()
+    {
+        // Act
+        using var hazardZone = new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline,
+            TimeSpan.FromMilliseconds(-100));
+
+        // Assert
+        Assert.Equal(TimeSpan.FromMilliseconds(-100),
+            hazardZone.PreAlarmDuration);
+    }
+
+    [Fact]
+    public async Task OnPersonCreatedEvent_PersonInZone_RaisesPersonAddedEvent()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -70,8 +82,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
-        OnPersonCreatedEvent_WhenPersonCreatedIsNotLocatedInHazardZone_DoesNotRaisePersonAddedToHazardZoneEvent()
+    public async Task OnPersonCreatedEvent_PersonOutsideZone_DoesNotRaisePersonAddedEvent()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -90,7 +101,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonExpiredEvent_WhenPersonIsInZone_RaisesPersonRemovedFromHazardZoneEvent()
+    public async Task OnPersonExpiredEvent_PersonInZone_RaisesPersonRemovedEvent()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -111,7 +122,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonExpiredEvent_WhenPersonIsNotInZone_RaisesPersonRemovedFromHazardZoneEvent()
+    public async Task OnPersonExpiredEvent_PersonNotInZone_DoesNotRaisePersonRemovedEvent()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -132,8 +143,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
-        PersonLocationChangedEvent_WhenPersonNotKnownAndLocationUpdateInZone_RaisesPersonAddedToHazardZoneEvent()
+    public async Task OnPersonLocationChangedEvent_UnknownPersonInZone_RaisesPersonAddedEvent()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -153,8 +163,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
-        PersonLocationChangedEvent_WhenPersonNotKnownAndLocationUpdateNotInZone_DoesNotRaisePersonAddedToHazardZoneEvent()
+    public async Task OnPersonLocationChangedEvent_UnknownPersonOutsideZone_DoesNotRaisePersonAddedEvent()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -173,8 +182,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
-        PersonLocationChangedEvent_WhenPersonKnownAndLocationUpdateNotInZone_RaisesPersonRemovedFromHazardZoneEvent()
+    public async Task OnPersonLocationChangedEvent_KnownPersonMovesOutsideZone_RaisesPersonRemovedEvent()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -201,8 +209,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
-        PersonLocationChangedEvent_WhenPersonKnownAndLocationUpdateInZone_DoesNotRaisePersonAddedToHazardZoneEventOrPersonRemovedFromHazardZoneEvent()
+    public async Task OnPersonLocationChangedEvent_KnownPersonMovesWithinZone_DoesNotRaiseEvents()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -235,7 +242,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ActivateFromExternalSource_WhenNameNull_ThrowsArgumentNullException()
+    public void ActivateFromExternalSource_NullSourceId_ThrowsArgumentNullException()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -246,7 +253,7 @@ public sealed class HazardZoneTests : IDisposable
 
     [Theory]
     [ClassData(typeof(InvalidNames))]
-    public void ActivateFromExternalSource_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
+    public void ActivateFromExternalSource_InvalidSourceId_ThrowsArgumentException(string invalidName)
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -256,7 +263,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void DeactivateFromExternalSource_WhenNameNull_ThrowsArgumentNullException()
+    public void DeactivateFromExternalSource_NullSourceId_ThrowsArgumentNullException()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -267,7 +274,7 @@ public sealed class HazardZoneTests : IDisposable
 
     [Theory]
     [ClassData(typeof(InvalidNames))]
-    public void DeactivateFromExternalSource_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
+    public void DeactivateFromExternalSource_InvalidSourceId_ThrowsArgumentException(string invalidName)
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -281,7 +288,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public void ManuallyActivate_WhenStateIsInactive_ActivatesTheHazardZone()
+    public void ManuallyActivate_InactiveState_TransitionsToActive()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -295,7 +302,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ActivateFromExternalSource_WhenStateIsInactiveAndSourceIdUnknown_ActivatesTheHazardZone()
+    public void ActivateFromExternalSource_InactiveStateWithUnknownSource_TransitionsToActive()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -309,7 +316,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ActivateFromExternalSource_WhenStateIsInactiveAndSourceIdKnown_DoesNotActivateTheHazardZone()
+    public void ActivateFromExternalSource_InactiveStateWithKnownSource_DoesNotTransition()
     {
         // Arrange
         var sourceId = "ext-src";
@@ -325,12 +332,26 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Equal(AlarmState.None, hazardZone.AlarmState);
     }
 
+    [Fact]
+    public void ManuallyDeactivate_InactiveState_RemainsInactive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.BuildSimple();
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
     //------------------------------------------------------------------------------
     // Active (IsActive=true, AlarmState=None)
     //------------------------------------------------------------------------------
 
     [Fact]
-    public async Task AddPerson_WhenStateIsActiveAndThresholdIsNotZero_DoesNotChangeState()
+    public async Task OnPersonCreatedEvent_ActiveStateUnderThreshold_RemainsActive()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -352,7 +373,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task SetAllowedNumberOfPersons_WhenStateIsActiveAndAllowedIsOneMoreThanCurrentlyInZone_SetsPreAlarm()
+    public async Task SetAllowedNumberOfPersons_ActiveStateAboveThreshold_RemainsActive()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -374,9 +395,8 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Equal(AlarmState.None, hazardZone.AlarmState);
     }
 
-
     [Fact]
-    public async Task AddPerson_WhenStateIsActiveAndThresholdIsZero_SetsPreAlarm()
+    public async Task OnPersonCreatedEvent_ActiveStateOverThresholdWithPreAlarm_TransitionsToPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -397,7 +417,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task SetAllowedNumberOfPersons_WhenStateIsActiveAndAllowedIsOneLessThanCurrentlyInZone_SetsPreAlarm()
+    public async Task SetAllowedNumberOfPersons_ActiveStateBelowThresholdWithPreAlarm_TransitionsToPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -420,7 +440,53 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ManuallyDeactivate_WhenStateIsActive_DeactivatesTheHazardZone()
+    public async Task OnPersonCreatedEvent_ActiveStateOverThresholdWithZeroPreAlarm_TransitionsToAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithPreAlarmDuration(TimeSpan.Zero)
+            .Build();
+
+        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(personCreatedEvent);
+        await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task SetAllowedNumberOfPersons_ActiveStateBelowThresholdWithZeroPreAlarm_TransitionsToAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithAllowedNumberOfPersons(1)
+            .WithPreAlarmDuration(TimeSpan.Zero)
+            .Build();
+
+        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        DomainEvents.Raise(personCreatedEvent);
+        await personAddedToHazardZoneEventTask;
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(0);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void ManuallyDeactivate_ActiveState_TransitionsToInactive()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -436,7 +502,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void DeactivateFromExternalSource_WhenStateIsActiveAndSourceIdKnown_DeactivatesTheHazardZone()
+    public void DeactivateFromExternalSource_ActiveStateWithKnownSource_TransitionsToInactive()
     {
         // Arrange
         var sourceId = "ext-src";
@@ -454,7 +520,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void DeactivateFromExternalSource_WhenStateIsInactiveAndSourceIdUnknown_DoesNotDeactivateTheHazardZone()
+    public void DeactivateFromExternalSource_ActiveStateWithUnknownSource_RemainsActive()
     {
         // Arrange
         var sourceId1 = "ext-src1";
@@ -473,12 +539,72 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Equal(AlarmState.None, hazardZone.AlarmState);
     }
 
+    [Fact]
+    public void ActivateFromExternalSource_ActiveStateWithUnknownSource_AddsSourceAndRemainsActive()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .Build();
+
+        // Act
+        hazardZone.ActivateFromExternalSource(sourceId);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void ActivateFromExternalSource_ActiveStateWithKnownSource_RemainsActiveWithoutAddingSource()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithExternalActivationSource(sourceId)
+            .Build();
+
+        // Act
+        hazardZone.ActivateFromExternalSource(sourceId);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonLocationChangedEvent_ActiveStatePersonMovesOutsideUnderThreshold_RemainsActive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+        var personId = Guid.NewGuid();
+        var initialEvent = new PersonCreatedEvent(personId, new Location(2, 2));
+        DomainEvents.Raise(initialEvent);
+        await DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        var moveEvent = new PersonLocationChangedEvent(personId, new Location(20, 20));
+        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(moveEvent);
+        await removedEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
     //------------------------------------------------------------------------------
     // PreAlarm (IsActive=true, AlarmState=PreAlarm)
     //------------------------------------------------------------------------------
 
     [Fact]
-    public async Task RemovePerson_WhenStateIsPreAlarmAndMoreThanAllowedPersonInHazardZone_DoesNotChangeState()
+    public async Task OnPersonExpiredEvent_PreAlarmStateOverThreshold_RemainsInPreAlarm()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -490,8 +616,8 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
         DomainEvents.Raise(new PersonCreatedEvent(Guid.NewGuid(), new Location(2, 2)));
 
-        var secondsecondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
-        Assert.NotNull(secondsecondPersonAddedToHazardZoneEvent);
+        var secondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
+        Assert.NotNull(secondPersonAddedToHazardZoneEvent);
 
         var firstPersonExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
         var firstPersonRemovedFromHazardZoneEventTask =
@@ -509,8 +635,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void
-        SetAllowedNumberOfPersonsLower_WhenStateIsPreAlarmAndMoreThanAllowedPersonInHazardZone_DoesNotChangeState()
+    public void SetAllowedNumberOfPersons_PreAlarmStateBelowThreshold_RemainsInPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -527,7 +652,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void DeactivateFromExternalSource_WhenStateIsPreAlarmAndSourceIdUnknown_DoesNotChangeState()
+    public void DeactivateFromExternalSource_PreAlarmStateWithUnknownSource_DoesNotDeactivate()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -543,8 +668,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
-        RemovePerson_WhenStateIsPreAlarmAndLessThanAllowedPersonInHazardZone_SetsZoneAsActiveAndAlarmStateNone()
+    public async Task OnPersonExpiredEvent_PreAlarmStateUnderThreshold_TransitionsToActive()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -568,8 +692,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void
-        SetAllowedNumberOfPersons_WhenStateIsPreAlarmAndNumberIsEqualToCurrentlyInZone_setsZoneAsActiveAndAlarmStateNone()
+    public void SetAllowedNumberOfPersons_PreAlarmStateEqualToCount_TransitionsToActive()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -585,7 +708,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPreAlarmTimerElapsed_WhenStateIsPreAlarm_SetsAlarmState()
+    public async Task OnPreAlarmTimerElapsed_PreAlarmState_TransitionsToAlarm()
     {
         var testPreAlarmDuration = TimeSpan.FromMilliseconds(10);
 
@@ -602,9 +725,358 @@ public sealed class HazardZoneTests : IDisposable
         Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
     }
 
+    [Fact]
+    public void ManuallyDeactivate_PreAlarmState_TransitionsToInactive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_PreAlarmStateWithKnownSource_TransitionsToInactive()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .WithExternalActivationSource(sourceId)
+            .Build();
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonCreatedEvent_PreAlarmStateOverThreshold_RemainsInPreAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(personCreatedEvent);
+        await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonLocationChangedEvent_PreAlarmStatePersonMovesOutsideUnderThreshold_TransitionsToActive()
+    {
+        // Arrange
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .WithAllowedNumberOfPersons(1);
+        using var hazardZone = hazardZoneBuilder.Build();
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
+        var moveEvent = new PersonLocationChangedEvent(personId, new Location(20, 20));
+        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(moveEvent);
+        await removedEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonLocationChangedEvent_PreAlarmStatePersonMovesOutsideOverThreshold_RemainsInPreAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .WithAllowedNumberOfPersons(0)
+            .Build();
+        var additionalPersonId = Guid.NewGuid();
+        DomainEvents.Raise(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
+        await DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        var moveEvent = new PersonLocationChangedEvent(additionalPersonId, new Location(20, 20));
+        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(moveEvent);
+        await removedEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void ManuallyActivate_PreAlarmState_RemainsInPreAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+    }
+
     //------------------------------------------------------------------------------
     // Alarm (IsActive=true, AlarmState=Alarm)
     //------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task OnPersonExpiredEvent_AlarmStateOverThreshold_RemainsInAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        var newPersonId = Guid.NewGuid();
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+        DomainEvents.Raise(new PersonCreatedEvent(newPersonId, new Location(2, 2)));
+
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+        Assert.NotNull(personAddedToHazardZoneEvent);
+        Assert.Equal(newPersonId, personAddedToHazardZoneEvent.PersonId);
+
+        var personExpiredEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>();
+
+        // Act
+        DomainEvents.Raise(new PersonExpiredEvent(newPersonId));
+        await personExpiredEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void SetAllowedNumberOfPersons_AlarmStateBelowThreshold_RemainsInAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(0);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_AlarmStateWithUnknownSource_DoesNotDeactivate()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        // Act
+        hazardZone.DeactivateFromExternalSource("ext-src");
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonExpiredEvent_AlarmStateUnderThreshold_TransitionsToActive()
+    {
+        // Arrange
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm);
+
+        using var hazardZone = hazardZoneBuilder.Build();
+
+        var personExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var personRemovedFromHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(personExpiredEvent);
+        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
+
+        // Assert
+        Assert.NotNull(personRemovedFromHazardZoneEvent);
+        Assert.Equal(personExpiredEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void SetAllowedNumberOfPersons_AlarmStateEqualToCount_TransitionsToActive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(1);
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void ManuallyDeactivate_AlarmState_TransitionsToInactive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_AlarmStateWithKnownSource_TransitionsToInactive()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .WithExternalActivationSource(sourceId)
+            .Build();
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        Assert.False(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonCreatedEvent_AlarmStateOverThreshold_RemainsInAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var personAddedToHazardZoneEventTask =
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(personCreatedEvent);
+        await personAddedToHazardZoneEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonLocationChangedEvent_AlarmStatePersonMovesOutsideUnderThreshold_TransitionsToActive()
+    {
+        // Arrange
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .WithAllowedNumberOfPersons(1);
+        using var hazardZone = hazardZoneBuilder.Build();
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
+        var moveEvent = new PersonLocationChangedEvent(personId, new Location(20, 20));
+        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(moveEvent);
+        await removedEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public async Task OnPersonLocationChangedEvent_AlarmStatePersonMovesOutsideOverThreshold_RemainsInAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .WithAllowedNumberOfPersons(0)
+            .Build();
+        var additionalPersonId = Guid.NewGuid();
+        DomainEvents.Raise(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
+        await DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
+
+        var moveEvent = new PersonLocationChangedEvent(additionalPersonId, new Location(20, 20));
+        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
+
+        // Act
+        DomainEvents.Raise(moveEvent);
+        await removedEventTask;
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void ManuallyActivate_AlarmState_RemainsInAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        Assert.True(hazardZone.IsActive);
+        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+    }
+
+    [Fact]
+    public void SetAllowedNumberOfPersons_NegativeValue_IgnoresChange()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Active)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(-1);
+
+        // Assert
+        Assert.Equal(1, hazardZone.AllowedNumberOfPersons);
+    }
 
     public void Dispose()
     {
