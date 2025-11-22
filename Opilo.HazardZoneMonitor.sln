@@ -21,6 +21,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4E471A10-BEC3-40F4-91EA-320AC7614C31}"
 	ProjectSection(SolutionItems) = preProject
 		docs\HazardZoneStateDiagram.plantuml = docs\HazardZoneStateDiagram.plantuml
+		docs\TODO.md = docs\TODO.md
 	EndProjectSection
 EndProject
 Global
