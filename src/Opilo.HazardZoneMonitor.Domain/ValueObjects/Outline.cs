@@ -13,7 +13,7 @@ public sealed class Outline
         Guard.Against.Null(vertices);
 
         if (vertices.Count < 3)
-            throw new ArgumentException("Outline must have at least 3 vertices.");
+            throw new ArgumentException("Outline must have at least 3 vertices.", nameof(vertices));
 
         Vertices = vertices;
     }

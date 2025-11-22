@@ -38,7 +38,7 @@ internal static class PersonHelper
         }
 
         if (count == 0)
-            throw new ArgumentException("The collection of locations cannot be empty.");
+            throw new ArgumentException("The collection of locations cannot be empty.", nameof(locations));
 
         return new Location(sumX / count, sumY / count);
     }
@@ -48,7 +48,7 @@ internal static class PersonHelper
         ArgumentNullException.ThrowIfNull(locations);
 
         if (locations.Count == 0)
-            throw new ArgumentException("The collection of locations cannot be empty.");
+            throw new ArgumentException("The collection of locations cannot be empty.", nameof(locations));
 
         var centroid = locations.GetCentroid();
 
