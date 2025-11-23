@@ -1,0 +1,45 @@
+﻿using Opilo.HazardZoneMonitor.Enums;
+
+namespace Opilo.HazardZoneMonitor.Entities.HazardZoneState;
+
+internal sealed class AlarmHazardZoneState(
+    HazardZone hazardZone,
+    HashSet<Guid> personsInZone,
+    HashSet<string> registeredActivationSourceIds,
+    int allowedNumberOfPersons)
+    : HazardZoneStateBase(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
+{
+    public override bool IsActive => true;
+    public override AlarmState AlarmState => AlarmState.Alarm;
+
+    public override void ManuallyDeactivate()
+    {
+        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
+    }
+
+    public override void DeactivateFromExternalSource(string sourceId)
+    {
+        if (!RegisteredActivationSourceIds.Remove(sourceId))
+            return;
+
+        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
+    }
+
+    protected override void OnPersonRemovedFromHazardZone()
+    {
+        if (PersonsInZone.Count > AllowedNumberOfPersons)
+            return;
+
+        HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
+    }
+
+    protected override void OnAllowedNumberOfPersonsChanged()
+    {
+        if (PersonsInZone.Count <= AllowedNumberOfPersons)
+            HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+                AllowedNumberOfPersons));
+    }
+}

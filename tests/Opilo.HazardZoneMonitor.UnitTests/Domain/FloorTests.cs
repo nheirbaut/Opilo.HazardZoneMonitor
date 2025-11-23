@@ -1,9 +1,9 @@
-﻿using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events.FloorEvents;
-using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Domain.Services;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+﻿using Opilo.HazardZoneMonitor.Entities;
+using Opilo.HazardZoneMonitor.Events.PersonEvents;
+using Opilo.HazardZoneMonitor.Events.FloorEvents;
+using Opilo.HazardZoneMonitor.Services;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+using Opilo.HazardZoneMonitor.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 

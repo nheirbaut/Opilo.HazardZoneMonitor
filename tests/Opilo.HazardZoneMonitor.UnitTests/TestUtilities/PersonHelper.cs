@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Opilo.HazardZoneMonitor.Entities;
+using Opilo.HazardZoneMonitor.Events.PersonEvents;
+using Opilo.HazardZoneMonitor.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 

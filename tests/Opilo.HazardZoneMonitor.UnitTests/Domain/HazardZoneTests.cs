@@ -1,11 +1,11 @@
-﻿using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Enums;
-using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
-using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Domain.Services;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+﻿using Opilo.HazardZoneMonitor.Entities;
+using Opilo.HazardZoneMonitor.Events.HazardZoneEvents;
+using Opilo.HazardZoneMonitor.Enums;
+using Opilo.HazardZoneMonitor.Events.PersonEvents;
+using Opilo.HazardZoneMonitor.Services;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
+using Opilo.HazardZoneMonitor.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 

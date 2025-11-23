@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E45269D4-D9D4-45AF-9726-4D4CFD1F83F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor.Domain", "src\Opilo.HazardZoneMonitor.Domain\Opilo.HazardZoneMonitor.Domain.csproj", "{A9B38203-02C4-4B6D-8DC8-6F6A7C40AE26}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor", "src\Opilo.HazardZoneMonitor\Opilo.HazardZoneMonitor.csproj", "{A9B38203-02C4-4B6D-8DC8-6F6A7C40AE26}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F80165AB-816F-4E8F-95D1-3560331A0D95}"
 EndProject

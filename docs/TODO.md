@@ -17,3 +17,7 @@ An overview of tasks and features to be implemented.
 ### Root
 
 - [ ] Implement an API Root Resource response.
+
+## Tests
+
+- [ ] Move to xUnit v3.

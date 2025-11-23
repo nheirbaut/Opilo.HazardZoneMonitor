@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Opilo.HazardZoneMonitor.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
