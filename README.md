@@ -4,6 +4,53 @@
 - **Primary Goal:** Enhance safety by providing real-time monitoring and alerts for unauthorized or dangerous zone entries.
 - **Learning Objective:** To explore and learn modern web technologies including Blazor, React, and Microsoft Aspire, Kubernetes and KubeEdge.
 
+## Architecture
+
+This project implements a **Vertical Slice Architecture**, organizing code by features rather than technical layers. Each feature is self-contained with its own domain models, events, and business logic.
+
+### Structure
+
+```
+src/Opilo.HazardZoneMonitor/
+├── Features/
+│   ├── PersonTracking/          # Person lifecycle and location tracking
+│   │   ├── Domain/
+│   │   │   └── Person.cs
+│   │   └── Events/
+│   │       ├── PersonCreatedEvent.cs
+│   │       ├── PersonExpiredEvent.cs
+│   │       └── PersonLocationChangedEvent.cs
+│   ├── FloorManagement/         # Floor occupancy management
+│   │   ├── Domain/
+│   │   │   └── Floor.cs
+│   │   └── Events/
+│   │       ├── PersonAddedToFloorEvent.cs
+│   │       └── PersonRemovedFromFloorEvent.cs
+│   └── HazardZoneManagement/    # Hazard zone monitoring with alarm states
+│       ├── Domain/
+│       │   ├── HazardZone.cs
+│       │   └── States/         # State pattern for alarm management
+│       └── Events/
+└── Shared/                      # Shared primitives and infrastructure
+    ├── Abstractions/
+    ├── Events/
+    └── Primitives/
+```
+
+### Key Architectural Principles
+
+- **Feature Cohesion:** All code for a feature lives together
+- **Independent Evolution:** Features can evolve independently
+- **Clear Boundaries:** Features communicate through well-defined events
+- **Domain-Driven Design:** Rich domain models with behavior
+- **Event-Driven:** Features coordinate through domain events
+
+### Feature Interactions
+
+- **PersonTracking** → Raises person lifecycle events (created, expired, location changed)
+- **FloorManagement** → Listens to PersonTracking, manages floor occupancy
+- **HazardZoneManagement** → Listens to PersonTracking, manages hazard zones with complex state machine (Inactive → Active → PreAlarm → Alarm)
+
 ## Getting Started
 
 ### Prerequisites
