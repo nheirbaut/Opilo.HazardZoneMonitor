@@ -1,8 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
-[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Test utility; instantiated by tests.")]
 internal sealed class FakeTimer : Shared.Abstractions.ITimer
 {
     private readonly FakeClock _clock;
