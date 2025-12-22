@@ -6,7 +6,7 @@ internal sealed class FakeTimer : Shared.Abstractions.ITimer
     private readonly Lock _lock = new();
 
     private DateTime? _nextDueAtUtc;
-    private bool _disposed;
+    private volatile bool _disposed;
 
     public TimeSpan Interval { get; set; }
     public bool AutoReset { get; set; }
@@ -75,6 +75,9 @@ internal sealed class FakeTimer : Shared.Abstractions.ITimer
 
         lock (_lock)
         {
+            if (_disposed)
+                return;
+
             if (!Enabled)
                 return;
 
@@ -91,6 +94,9 @@ internal sealed class FakeTimer : Shared.Abstractions.ITimer
                 _nextDueAtUtc = null;
             }
         }
+
+        if (_disposed)
+            return;
 
         handler?.Invoke(this, EventArgs.Empty);
     }
