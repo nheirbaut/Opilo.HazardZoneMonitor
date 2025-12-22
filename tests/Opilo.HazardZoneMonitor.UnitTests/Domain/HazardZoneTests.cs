@@ -14,7 +14,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
         // Act & Assert
-        var act = () => new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
+        var act = () => new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero, new PersonEvents());
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -23,7 +23,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
         // Act & Assert
-        var act = () => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
+        var act = () => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero, new PersonEvents());
         act.Should().Throw<ArgumentException>();
     }
 
@@ -31,7 +31,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
-        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero);
+        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero, new PersonEvents());
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -40,7 +40,7 @@ public sealed class HazardZoneTests : IDisposable
     {
         // Act
         using var hazardZone =
-            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
+            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero, new PersonEvents());
 
         // Assert
         hazardZone.Name.Should().Be(HazardZoneBuilder.DefaultName);
@@ -54,7 +54,7 @@ public sealed class HazardZoneTests : IDisposable
     {
         // Act
         using var hazardZone = new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline,
-            TimeSpan.FromMilliseconds(-100));
+            TimeSpan.FromMilliseconds(-100), new PersonEvents());
 
         // Assert
         hazardZone.PreAlarmDuration.Should().Be(TimeSpan.FromMilliseconds(-100));

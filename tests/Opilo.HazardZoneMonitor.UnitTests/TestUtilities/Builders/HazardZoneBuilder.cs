@@ -28,7 +28,7 @@ internal sealed class HazardZoneBuilder
 
     public static readonly TimeSpan DefaultPreAlarmDuration = TimeSpan.FromSeconds(5);
 
-    public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline, DefaultPreAlarmDuration);
+    public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline, DefaultPreAlarmDuration, new PersonEvents());
 
     public IReadOnlyCollection<Guid> IdsOfPersonsAdded { get; private set; } = [];
 
@@ -70,9 +70,11 @@ internal sealed class HazardZoneBuilder
         if (_desiredState == HazardZoneTestState.Alarm)
             _preAlarmDuration = TimeSpan.Zero;
 
+        var personEvents = new PersonEvents();
+
         var hazardZone = (_clock is not null && _timerFactory is not null)
-            ? new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration, _clock, _timerFactory)
-            : new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration);
+            ? new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration, _clock, _timerFactory, personEvents)
+            : new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration, personEvents);
         hazardZone.SetAllowedNumberOfPersons(_allowedNumberOfPersons);
 
         foreach (var sourceId in _externalActivationSourceIds)

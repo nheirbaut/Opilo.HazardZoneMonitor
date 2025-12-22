@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Events;
@@ -18,6 +17,7 @@ public sealed class HazardZone : IDisposable
     private HazardZoneStateBase _currentState;
     private readonly IClock _clock;
     private readonly ITimerFactory _timerFactory;
+    private readonly IPersonEvents _personEvents;
 
     public string Name { get; }
     public Outline Outline { get; }
@@ -32,15 +32,19 @@ public sealed class HazardZone : IDisposable
     internal IClock Clock => _clock;
     internal ITimerFactory TimerFactory => _timerFactory;
 
-    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration)
-        : this(name, outline, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
+    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration, IPersonEvents personEvents)
+        : this(name, outline, preAlarmDuration, new SystemClock(), new SystemTimerFactory(), personEvents)
     {
     }
 
-    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
+    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory,
+        IPersonEvents personEvents)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(timerFactory);
+        ArgumentNullException.ThrowIfNull(personEvents);
 
         Name = name;
         Outline = outline;
@@ -48,12 +52,13 @@ public sealed class HazardZone : IDisposable
 
         _clock = clock;
         _timerFactory = timerFactory;
+        _personEvents = personEvents;
 
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
 
-        Person.Created += OnPersonCreatedEvent;
-        Person.Expired += OnPersonExpiredEvent;
-        Person.LocationChanged += OnPersonLocationChangedEvent;
+        _personEvents.Created += OnPersonCreatedEvent;
+        _personEvents.Expired += OnPersonExpiredEvent;
+        _personEvents.LocationChanged += OnPersonLocationChangedEvent;
     }
 
     public void Handle(PersonCreatedEvent personCreatedEvent)
@@ -172,9 +177,9 @@ public sealed class HazardZone : IDisposable
 
     public void Dispose()
     {
-        Person.Created -= OnPersonCreatedEvent;
-        Person.Expired -= OnPersonExpiredEvent;
-        Person.LocationChanged -= OnPersonLocationChangedEvent;
+        _personEvents.Created -= OnPersonCreatedEvent;
+        _personEvents.Expired -= OnPersonExpiredEvent;
+        _personEvents.LocationChanged -= OnPersonLocationChangedEvent;
 
         _currentState.Dispose();
     }

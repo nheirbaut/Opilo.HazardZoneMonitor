@@ -17,9 +17,10 @@ public sealed class PersonTests : IDisposable
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(1);
+        var personEvents = new PersonEvents();
 
         // Act
-        _testPerson = Person.Create(personId, location, timeout);
+        _testPerson = Person.Create(personId, location, timeout, personEvents);
 
         // Assert
         _testPerson.Should().NotBeNull();
@@ -34,14 +35,15 @@ public sealed class PersonTests : IDisposable
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(1);
+        var personEvents = new PersonEvents();
         var receivedEvents = new List<PersonCreatedEvent>();
         EventHandler<DomainEventArgs<PersonCreatedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
-        Person.Created += handler;
+        personEvents.Created += handler;
 
         try
         {
             // Act
-            _testPerson = Person.Create(personId, location, timeout);
+            _testPerson = Person.Create(personId, location, timeout, personEvents);
             var personCreatedEvent = receivedEvents.Single();
 
             // Assert
@@ -51,7 +53,7 @@ public sealed class PersonTests : IDisposable
         }
         finally
         {
-            Person.Created -= handler;
+            personEvents.Created -= handler;
         }
     }
 
@@ -63,13 +65,14 @@ public sealed class PersonTests : IDisposable
         var initialLocation = new Location(0, 0);
         var newLocation = new Location(1, 1);
         var timeout = TimeSpan.FromSeconds(1);
+        var personEvents = new PersonEvents();
         var receivedEvents = new List<PersonLocationChangedEvent>();
         EventHandler<DomainEventArgs<PersonLocationChangedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
-        Person.LocationChanged += handler;
+        personEvents.LocationChanged += handler;
 
         try
         {
-            _testPerson = Person.Create(personId, initialLocation, timeout);
+            _testPerson = Person.Create(personId, initialLocation, timeout, personEvents);
 
             // Act
             _testPerson.UpdateLocation(newLocation);
@@ -82,7 +85,7 @@ public sealed class PersonTests : IDisposable
         }
         finally
         {
-            Person.LocationChanged -= handler;
+            personEvents.LocationChanged -= handler;
         }
     }
 
@@ -93,14 +96,15 @@ public sealed class PersonTests : IDisposable
         var personId = Guid.NewGuid();
         var testLocation = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(1);
+        var personEvents = new PersonEvents();
 
         var receivedEvents = new List<PersonLocationChangedEvent>();
         EventHandler<DomainEventArgs<PersonLocationChangedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
-        Person.LocationChanged += handler;
+        personEvents.LocationChanged += handler;
 
         try
         {
-            _testPerson = Person.Create(personId, testLocation, timeout);
+            _testPerson = Person.Create(personId, testLocation, timeout, personEvents);
 
             // Act
             _testPerson.UpdateLocation(testLocation);
@@ -111,7 +115,7 @@ public sealed class PersonTests : IDisposable
         }
         finally
         {
-            Person.LocationChanged -= handler;
+            personEvents.LocationChanged -= handler;
         }
     }
 
@@ -125,14 +129,15 @@ public sealed class PersonTests : IDisposable
 
         var clock = new FakeClock(DateTime.UnixEpoch);
         var timerFactory = new FakeTimerFactory(clock);
+        var personEvents = new PersonEvents();
 
         var expiredEvents = new List<PersonExpiredEvent>();
         EventHandler<DomainEventArgs<PersonExpiredEvent>> handler = (_, e) => expiredEvents.Add(e.DomainEvent);
-        Person.Expired += handler;
+        personEvents.Expired += handler;
 
         try
         {
-            _testPerson = Person.Create(personId, testLocation, timeout, clock, timerFactory);
+            _testPerson = Person.Create(personId, testLocation, timeout, clock, timerFactory, personEvents);
             clock.AdvanceBy(TimeSpan.FromMilliseconds(75));
 
             // Act
@@ -149,7 +154,7 @@ public sealed class PersonTests : IDisposable
         }
         finally
         {
-            Person.Expired -= handler;
+            personEvents.Expired -= handler;
         }
     }
 
@@ -163,14 +168,15 @@ public sealed class PersonTests : IDisposable
 
         var clock = new FakeClock(DateTime.UnixEpoch);
         var timerFactory = new FakeTimerFactory(clock);
+        var personEvents = new PersonEvents();
 
         var expiredEvents = new List<PersonExpiredEvent>();
         EventHandler<DomainEventArgs<PersonExpiredEvent>> handler = (_, e) => expiredEvents.Add(e.DomainEvent);
-        Person.Expired += handler;
+        personEvents.Expired += handler;
 
         try
         {
-            _testPerson = Person.Create(personId, location, lifespanTimeout, clock, timerFactory);
+            _testPerson = Person.Create(personId, location, lifespanTimeout, clock, timerFactory, personEvents);
 
             // Act
             clock.AdvanceBy(lifespanTimeout);
@@ -182,7 +188,7 @@ public sealed class PersonTests : IDisposable
         }
         finally
         {
-            Person.Expired -= handler;
+            personEvents.Expired -= handler;
         }
     }
 

@@ -19,6 +19,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
 {
     private readonly Floor _floor;
     private readonly HazardZone _hazardZone;
+    private readonly PersonEvents _personEvents;
 
     public PersonTrackingWorkflowTests()
     {
@@ -31,8 +32,9 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
             new Location(0, 10)
         }));
 
-        _floor = new Floor("Test Floor", testOutline);
-        _hazardZone = new HazardZone("Test Zone", testOutline, TimeSpan.FromMilliseconds(50));
+        _personEvents = new PersonEvents();
+        _floor = new Floor("Test Floor", testOutline, _personEvents);
+        _hazardZone = new HazardZone("Test Zone", testOutline, TimeSpan.FromMilliseconds(50), _personEvents);
         _hazardZone.ManuallyActivate();
     }
 
@@ -118,8 +120,8 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
             h => _hazardZone.PersonRemovedFromHazardZone -= h,
             TimeSpan.FromSeconds(1));
         var personExpiredTask = WaitForEvent<PersonExpiredEvent>(
-            h => Person.Expired += h,
-            h => Person.Expired -= h,
+            h => _personEvents.Expired += h,
+            h => _personEvents.Expired -= h,
             TimeSpan.FromSeconds(1));
 
         await Task.Delay(250);

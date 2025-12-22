@@ -12,6 +12,7 @@ public sealed class Floor : IDisposable
 {
     private readonly Dictionary<Guid, TrackedPerson> _personsOnFloor = [];
     private readonly TimeSpan _personLifespan;
+    private readonly IPersonEvents _personEvents;
     private volatile bool _disposed;
     private readonly Lock _personsOnFloorLock = new();
 
@@ -23,16 +24,18 @@ public sealed class Floor : IDisposable
     public event EventHandler<DomainEventArgs<PersonAddedToFloorEvent>>? PersonAddedToFloor;
     public event EventHandler<DomainEventArgs<PersonRemovedFromFloorEvent>>? PersonRemovedFromFloor;
 
-    public Floor(string name, Outline outline, TimeSpan? personLifespan = null)
+    public Floor(string name, Outline outline, IPersonEvents personEvents, TimeSpan? personLifespan = null)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
+        ArgumentNullException.ThrowIfNull(personEvents);
 
         Name = name;
         Outline = outline;
+        _personEvents = personEvents;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
 
-        Person.Expired += OnPersonExpired;
+        _personEvents.Expired += OnPersonExpired;
     }
 
     private void OnPersonExpired(object? _, DomainEventArgs<PersonExpiredEvent> args)
@@ -64,7 +67,8 @@ public sealed class Floor : IDisposable
 
             _personsOnFloor.Add(
                 personLocationUpdate.PersonId,
-                TrackedPerson.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan));
+                TrackedPerson.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
+                    _personEvents));
         }
 
         var addedHandlers = PersonAddedToFloor;
@@ -94,7 +98,7 @@ public sealed class Floor : IDisposable
 
         _disposed = true;
 
-        Person.Expired -= OnPersonExpired;
+        _personEvents.Expired -= OnPersonExpired;
 
         foreach (var (_, person) in _personsOnFloor)
             person.Dispose();
