@@ -1,14 +1,12 @@
-﻿﻿﻿﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
-using Opilo.HazardZoneMonitor.Entities.HazardZoneState;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Entities;
+namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 
-#pragma warning disable S1133 // Deprecated code should be removed eventually
-[Obsolete("Use Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.HazardZone instead")]
 [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
 public sealed class HazardZone : IDisposable
 {
@@ -110,4 +108,4 @@ public sealed class HazardZone : IDisposable
         _currentState.Dispose();
     }
 }
-#pragma warning restore S1133
+

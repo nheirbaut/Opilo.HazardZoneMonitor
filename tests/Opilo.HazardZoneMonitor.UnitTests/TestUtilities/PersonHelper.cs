@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.Entities;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;

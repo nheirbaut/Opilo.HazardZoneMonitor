@@ -1,12 +1,8 @@
-﻿using System.Timers;
+using System.Timers;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Timer = System.Timers.Timer;
 
-namespace Opilo.HazardZoneMonitor.Entities.HazardZoneState;
-
-#pragma warning disable S1133
-#pragma warning disable CS0618
-[Obsolete("Use Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States.PreAlarmHazardZoneState instead")]
+namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
 internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 {
@@ -87,6 +83,3 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         base.Dispose(disposing);
     }
 }
-
-#pragma warning restore CS0618
-#pragma warning restore S1133

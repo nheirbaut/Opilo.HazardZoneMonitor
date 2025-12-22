@@ -1,12 +1,8 @@
-﻿using Opilo.HazardZoneMonitor.Events.HazardZoneEvents;
+﻿using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Entities.HazardZoneState;
-
-#pragma warning disable S1133
-#pragma warning disable CS0618
-[Obsolete("Use Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States.HazardZoneStateBase instead")]
+namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
 internal abstract class HazardZoneStateBase(
     HazardZone hazardZone,
@@ -103,6 +99,3 @@ internal abstract class HazardZoneStateBase(
     }
 }
 
-
-#pragma warning restore CS0618
-#pragma warning restore S1133

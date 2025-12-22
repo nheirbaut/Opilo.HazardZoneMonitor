@@ -1,10 +1,6 @@
-﻿using Opilo.HazardZoneMonitor.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Entities.HazardZoneState;
-
-#pragma warning disable S1133
-#pragma warning disable CS0618
-[Obsolete("Use Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States.InactiveHazardZoneState instead")]
+namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
 internal sealed class InactiveHazardZoneState(
     HazardZone hazardZone,
@@ -31,6 +27,3 @@ internal sealed class InactiveHazardZoneState(
             AllowedNumberOfPersons));
     }
 }
-
-#pragma warning restore CS0618
-#pragma warning restore S1133
