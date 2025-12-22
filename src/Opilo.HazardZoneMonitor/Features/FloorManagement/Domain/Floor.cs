@@ -1,14 +1,12 @@
-﻿﻿﻿﻿using Ardalis.GuardClauses;
-using Opilo.HazardZoneMonitor.Events.FloorEvents;
+﻿using Ardalis.GuardClauses;
+using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using TrackedPerson = Opilo.HazardZoneMonitor.Features.PersonTracking.Domain.Person;
 
-namespace Opilo.HazardZoneMonitor.Entities;
+namespace Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 
-#pragma warning disable S1133 // Deprecated code should be removed eventually
-[Obsolete("Use Opilo.HazardZoneMonitor.Features.FloorManagement.Domain.Floor instead")]
 public sealed class Floor : IDisposable
 {
     private readonly Dictionary<Guid, TrackedPerson> _personsOnFloor = [];
@@ -93,4 +91,4 @@ public sealed class Floor : IDisposable
         _personsOnFloor.Clear();
     }
 }
-#pragma warning restore S1133
+
