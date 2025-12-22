@@ -1,7 +1,7 @@
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
-using Opilo.HazardZoneMonitor.Shared.Events;
-using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Shared.Events;
+using Shared.Abstractions;
 
 internal static class DomainEventsExtensions
 {

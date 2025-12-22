@@ -1,5 +1,4 @@
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;

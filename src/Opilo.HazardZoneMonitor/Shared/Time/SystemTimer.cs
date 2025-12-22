@@ -1,10 +1,8 @@
-using Opilo.HazardZoneMonitor.Shared.Abstractions;
-
 using TimersTimer = System.Timers.Timer;
 
 namespace Opilo.HazardZoneMonitor.Shared.Time;
 
-public sealed class SystemTimer : Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer
+public sealed class SystemTimer : Abstractions.ITimer
 {
     private readonly TimersTimer _timer;
 

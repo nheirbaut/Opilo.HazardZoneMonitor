@@ -1,6 +1,5 @@
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
@@ -38,11 +37,6 @@ public sealed class Floor : IDisposable
         _personEvents.Expired += OnPersonExpired;
     }
 
-    private void OnPersonExpired(object? _, DomainEventArgs<PersonExpiredEvent> args)
-    {
-        RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(args.DomainEvent.PersonId);
-    }
-
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
     {
         Guard.Against.Null(personLocationUpdate);
@@ -54,7 +48,7 @@ public sealed class Floor : IDisposable
             if (!locationIsOnFloor)
             {
                 if (_personsOnFloor.ContainsKey(personLocationUpdate.PersonId))
-                    RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(personLocationUpdate.PersonId);
+                    RemovePersonFromFloor(personLocationUpdate.PersonId);
 
                 return false;
             }
@@ -78,7 +72,12 @@ public sealed class Floor : IDisposable
         return true;
     }
 
-    private void RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(Guid personId)
+    private void OnPersonExpired(object? _, DomainEventArgs<PersonExpiredEvent> args)
+    {
+        RemovePersonFromFloor(args.DomainEvent.PersonId);
+    }
+
+    private void RemovePersonFromFloor(Guid personId)
     {
         lock (_personsOnFloorLock)
         {
@@ -106,4 +105,3 @@ public sealed class Floor : IDisposable
         _personsOnFloor.Clear();
     }
 }
-

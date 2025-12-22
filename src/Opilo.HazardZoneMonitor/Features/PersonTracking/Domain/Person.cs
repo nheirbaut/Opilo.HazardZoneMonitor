@@ -8,7 +8,7 @@ namespace Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 public sealed class Person : IDisposable
 {
     private readonly IClock _clock;
-    private readonly Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer _expiryTimer;
+    private readonly Shared.Abstractions.ITimer _expiryTimer;
     private readonly IPersonEvents _events;
     private DateTime _lastHeartbeatUtc;
 

@@ -15,8 +15,6 @@ public sealed class HazardZone : IDisposable
 {
     private readonly Lock _zoneStateLock = new();
     private HazardZoneStateBase _currentState;
-    private readonly IClock _clock;
-    private readonly ITimerFactory _timerFactory;
     private readonly IPersonEvents _personEvents;
 
     public string Name { get; }
@@ -29,8 +27,9 @@ public sealed class HazardZone : IDisposable
     public event EventHandler<DomainEventArgs<PersonAddedToHazardZoneEvent>>? PersonAddedToHazardZone;
     public event EventHandler<DomainEventArgs<PersonRemovedFromHazardZoneEvent>>? PersonRemovedFromHazardZone;
 
-    internal IClock Clock => _clock;
-    internal ITimerFactory TimerFactory => _timerFactory;
+    internal IClock Clock { get; }
+
+    internal ITimerFactory TimerFactory { get; }
 
     public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration, IPersonEvents personEvents)
         : this(name, outline, preAlarmDuration, new SystemClock(), new SystemTimerFactory(), personEvents)
@@ -50,8 +49,8 @@ public sealed class HazardZone : IDisposable
         Outline = outline;
         PreAlarmDuration = preAlarmDuration;
 
-        _clock = clock;
-        _timerFactory = timerFactory;
+        Clock = clock;
+        TimerFactory = timerFactory;
         _personEvents = personEvents;
 
         _currentState = new InactiveHazardZoneState(this, [], [], 0);

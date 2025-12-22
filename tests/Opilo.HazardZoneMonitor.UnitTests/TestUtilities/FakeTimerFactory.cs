@@ -13,6 +13,6 @@ internal sealed class FakeTimerFactory : ITimerFactory
         _clock = clock;
     }
 
-    public Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer Create(TimeSpan interval, bool autoReset = false)
+    public Shared.Abstractions.ITimer Create(TimeSpan interval, bool autoReset = false)
         => new FakeTimer(_clock, interval, autoReset);
 }

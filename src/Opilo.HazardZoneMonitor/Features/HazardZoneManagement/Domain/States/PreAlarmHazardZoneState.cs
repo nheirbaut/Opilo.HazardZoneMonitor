@@ -1,5 +1,4 @@
 using Opilo.HazardZoneMonitor.Shared.Primitives;
-using Opilo.HazardZoneMonitor.Shared.Abstractions;
 
 namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
