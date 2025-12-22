@@ -20,7 +20,7 @@ public sealed class Floor : IDisposable
     public string Name { get; }
     public Outline Outline { get; }
 
-    public event EventHandler<DomainEventArgs<PersonAddedToFloorEvent>>? PersonAddedToFloor;
+    public event EventHandler<PersonAddedToFloorEventArgs>? PersonAddedToFloor;
     public event EventHandler<DomainEventArgs<PersonRemovedFromFloorEvent>>? PersonRemovedFromFloor;
 
     public Floor(string name, Outline outline, IPersonEvents personEvents, TimeSpan? personLifespan = null)
@@ -66,8 +66,8 @@ public sealed class Floor : IDisposable
         }
 
         var addedHandlers = PersonAddedToFloor;
-        addedHandlers?.Invoke(this, new DomainEventArgs<PersonAddedToFloorEvent>(
-            new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location)));
+        addedHandlers?.Invoke(this,
+            new PersonAddedToFloorEventArgs(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
 
         return true;
     }

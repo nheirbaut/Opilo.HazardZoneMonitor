@@ -63,7 +63,7 @@ internal static class DomainEventsExtensions
         catch (TimeoutException)
         {
             unsubscribe(handler);
-            return default;
+            return null;
         }
     }
 }

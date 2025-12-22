@@ -44,10 +44,11 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var location = new Location(5, 5); // Inside the test outline
         var personLocationUpdate = new PersonLocationUpdate(personId, location);
 
-        var personAddedToFloorTask = WaitForEvent<PersonAddedToFloorEvent>(
+        var personAddedToFloorTask = WaitForEvent2<PersonAddedToFloorEventArgs>(
             h => _floor.PersonAddedToFloor += h,
             h => _floor.PersonAddedToFloor -= h,
             TimeSpan.FromSeconds(1));
+
         var personAddedToHazardZoneTask = WaitForEvent<PersonAddedToHazardZoneEvent>(
             h => _hazardZone.PersonAddedToHazardZone += h,
             h => _hazardZone.PersonAddedToHazardZone -= h,
@@ -212,7 +213,38 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         catch (TimeoutException)
         {
             unsubscribe(handler);
-            return default;
+            return null;
+        }
+    }
+
+    private static async Task<TDomainEvent?> WaitForEvent2<TDomainEvent>(
+        Action<EventHandler<TDomainEvent>> subscribe,
+        Action<EventHandler<TDomainEvent>> unsubscribe,
+        TimeSpan timeout)
+        where TDomainEvent : class
+    {
+        ArgumentNullException.ThrowIfNull(subscribe);
+        ArgumentNullException.ThrowIfNull(unsubscribe);
+
+        var tcs = new TaskCompletionSource<TDomainEvent?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        EventHandler<TDomainEvent> handler = null!;
+        handler = (_, evt) =>
+        {
+            unsubscribe(handler);
+            tcs.TrySetResult(evt);
+        };
+
+        subscribe(handler);
+
+        try
+        {
+            return await tcs.Task.WaitAsync(timeout);
+        }
+        catch (TimeoutException)
+        {
+            unsubscribe(handler);
+            return null;
         }
     }
 
