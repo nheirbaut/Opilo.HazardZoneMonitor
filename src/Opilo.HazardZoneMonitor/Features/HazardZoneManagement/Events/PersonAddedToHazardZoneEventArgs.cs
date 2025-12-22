@@ -1,5 +1,3 @@
-using Opilo.HazardZoneMonitor.Shared.Abstractions;
-
 namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 
 public sealed class PersonAddedToHazardZoneEventArgs(Guid personId, string hazardZoneName) : EventArgs
