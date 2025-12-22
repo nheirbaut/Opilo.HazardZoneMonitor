@@ -132,7 +132,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var initialState = _hazardZone.AlarmState;
 
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(person2Id, location2));
-        await Task.Delay(100); // Wait for pre-alarm timer to potentially elapse
+        await WaitUntilAsync(() => _hazardZone.AlarmState != AlarmState.None, TimeSpan.FromSeconds(2));
 
         initialState.Should().Be(AlarmState.None); // Was Active (no alarm)
         _hazardZone.AlarmState.Should().NotBe(AlarmState.None); // Now in alarm state
@@ -150,6 +150,16 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
 
         result1.Should().BeTrue(); // First location added successfully
         result2.Should().BeTrue(); // Second location updated successfully
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)
+    {
+        using var cts = new CancellationTokenSource(timeout);
+
+        while (!condition())
+        {
+            await Task.Delay(10, cts.Token);
+        }
     }
 
     private async Task<T?> WaitForEvent<T>(TimeSpan timeout) where T : IDomainEvent
