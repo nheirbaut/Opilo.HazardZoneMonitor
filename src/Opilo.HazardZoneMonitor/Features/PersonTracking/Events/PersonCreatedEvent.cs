@@ -3,5 +3,5 @@ using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 
-public record PersonCreatedEvent(Guid PersonId, Location Location) : IDomainEvent;
+public sealed record PersonCreatedEvent(Guid PersonId, Location Location) : IDomainEvent;
 

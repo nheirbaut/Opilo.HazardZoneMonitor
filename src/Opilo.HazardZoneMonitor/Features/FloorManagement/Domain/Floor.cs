@@ -11,6 +11,7 @@ public sealed class Floor : IDisposable
 {
     private readonly Dictionary<Guid, TrackedPerson> _personsOnFloor = [];
     private readonly TimeSpan _personLifespan;
+    private readonly IPersonEvents _personEvents;
     private volatile bool _disposed;
     private readonly Lock _personsOnFloorLock = new();
 
@@ -19,21 +20,21 @@ public sealed class Floor : IDisposable
     public string Name { get; }
     public Outline Outline { get; }
 
-    public Floor(string name, Outline outline, TimeSpan? personLifespan = null)
+    public event EventHandler<DomainEventArgs<PersonAddedToFloorEvent>>? PersonAddedToFloor;
+    public event EventHandler<DomainEventArgs<PersonRemovedFromFloorEvent>>? PersonRemovedFromFloor;
+
+    public Floor(string name, Outline outline, IPersonEvents personEvents, TimeSpan? personLifespan = null)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
+        ArgumentNullException.ThrowIfNull(personEvents);
 
         Name = name;
         Outline = outline;
+        _personEvents = personEvents;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
 
-        DomainEventDispatcher.Register<PersonExpiredEvent>(OnPersonExpired);
-    }
-
-    private void OnPersonExpired(PersonExpiredEvent personExpiredEvent)
-    {
-        RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(personExpiredEvent.PersonId);
+        _personEvents.Expired += OnPersonExpired;
     }
 
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
@@ -47,7 +48,7 @@ public sealed class Floor : IDisposable
             if (!locationIsOnFloor)
             {
                 if (_personsOnFloor.ContainsKey(personLocationUpdate.PersonId))
-                    RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(personLocationUpdate.PersonId);
+                    RemovePersonFromFloor(personLocationUpdate.PersonId);
 
                 return false;
             }
@@ -60,21 +61,32 @@ public sealed class Floor : IDisposable
 
             _personsOnFloor.Add(
                 personLocationUpdate.PersonId,
-                TrackedPerson.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan));
+                TrackedPerson.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
+                    _personEvents));
         }
 
-        DomainEventDispatcher.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId,
-            personLocationUpdate.Location));
+        var addedHandlers = PersonAddedToFloor;
+        addedHandlers?.Invoke(this, new DomainEventArgs<PersonAddedToFloorEvent>(
+            new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location)));
 
         return true;
     }
 
-    private void RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(Guid personId)
+    private void OnPersonExpired(object? _, DomainEventArgs<PersonExpiredEvent> args)
+    {
+        RemovePersonFromFloor(args.DomainEvent.PersonId);
+    }
+
+    private void RemovePersonFromFloor(Guid personId)
     {
         lock (_personsOnFloorLock)
         {
             if (_personsOnFloor.Remove(personId, out _))
-                DomainEventDispatcher.Raise(new PersonRemovedFromFloorEvent(Name, personId));
+            {
+                var removedHandlers = PersonRemovedFromFloor;
+                removedHandlers?.Invoke(this,
+                    new DomainEventArgs<PersonRemovedFromFloorEvent>(new PersonRemovedFromFloorEvent(Name, personId)));
+            }
         }
     }
 
@@ -85,10 +97,11 @@ public sealed class Floor : IDisposable
 
         _disposed = true;
 
+        _personEvents.Expired -= OnPersonExpired;
+
         foreach (var (_, person) in _personsOnFloor)
             person.Dispose();
 
         _personsOnFloor.Clear();
     }
 }
-

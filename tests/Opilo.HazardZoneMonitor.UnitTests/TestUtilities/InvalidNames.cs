@@ -2,8 +2,8 @@ using System.Collections;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1515:AvoidUnnecessaryUsing")]
-public class InvalidNames : IEnumerable<object[]>
+#pragma warning disable CA1812 // Avoid uninstantiated internal classes (instantiated by xUnit via [ClassData])
+internal sealed class InvalidNames : IEnumerable<object[]>
 {
     public IEnumerator<object[]> GetEnumerator()
     {
@@ -23,3 +23,5 @@ public class InvalidNames : IEnumerable<object[]>
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 }
+
+#pragma warning restore CA1812

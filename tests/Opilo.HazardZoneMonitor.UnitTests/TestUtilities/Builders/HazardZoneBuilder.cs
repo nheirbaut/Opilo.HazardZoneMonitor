@@ -1,9 +1,6 @@
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
-using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
-using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
-using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
@@ -14,6 +11,8 @@ internal sealed class HazardZoneBuilder
     private readonly List<string> _externalActivationSourceIds = new();
     private int _allowedNumberOfPersons;
     private TimeSpan _preAlarmDuration = DefaultPreAlarmDuration;
+    private IClock? _clock;
+    private ITimerFactory? _timerFactory;
 
     public const string DefaultName = "HazardZone";
 
@@ -26,7 +25,7 @@ internal sealed class HazardZoneBuilder
 
     public static readonly TimeSpan DefaultPreAlarmDuration = TimeSpan.FromSeconds(5);
 
-    public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline, DefaultPreAlarmDuration);
+    public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline, DefaultPreAlarmDuration, new PersonEvents());
 
     public IReadOnlyCollection<Guid> IdsOfPersonsAdded { get; private set; } = [];
 
@@ -56,12 +55,23 @@ internal sealed class HazardZoneBuilder
         return this;
     }
 
+    public HazardZoneBuilder WithTime(IClock clock, ITimerFactory timerFactory)
+    {
+        _clock = clock;
+        _timerFactory = timerFactory;
+        return this;
+    }
+
     public HazardZone Build()
     {
         if (_desiredState == HazardZoneTestState.Alarm)
             _preAlarmDuration = TimeSpan.Zero;
 
-        var hazardZone = new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration);
+        var personEvents = new PersonEvents();
+
+        var hazardZone = (_clock is not null && _timerFactory is not null)
+            ? new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration, _clock, _timerFactory, personEvents)
+            : new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration, personEvents);
         hazardZone.SetAllowedNumberOfPersons(_allowedNumberOfPersons);
 
         foreach (var sourceId in _externalActivationSourceIds)
@@ -101,13 +111,13 @@ internal sealed class HazardZoneBuilder
         var personsToAdd = _allowedNumberOfPersons + 1;
         var waiter = new EventCountWaiter(personsToAdd);
 
-        DomainEventDispatcher.Register<PersonAddedToHazardZoneEvent>(e => waiter.Signal(e));
+        hazardZone.PersonAddedToHazardZone += (_, e) => waiter.Signal(e.DomainEvent);
 
         foreach (var _ in Enumerable.Range(0, personsToAdd))
         {
             var personId = Guid.NewGuid();
             var insideLocation = new Location(2, 2);
-            DomainEventDispatcher.Raise(new PersonCreatedEvent(personId, insideLocation));
+            hazardZone.Handle(new PersonCreatedEvent(personId, insideLocation));
         }
 
         IdsOfPersonsAdded = waiter.Wait(TimeSpan.FromSeconds(5)).Select(e => e.PersonId).ToList();

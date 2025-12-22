@@ -18,6 +18,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
 {
     private readonly Floor _floor;
     private readonly HazardZone _hazardZone;
+    private readonly PersonEvents _personEvents;
 
     public PersonTrackingWorkflowTests()
     {
@@ -30,8 +31,9 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
             new Location(0, 10)
         }));
 
-        _floor = new Floor("Test Floor", testOutline);
-        _hazardZone = new HazardZone("Test Zone", testOutline, TimeSpan.FromMilliseconds(50));
+        _personEvents = new PersonEvents();
+        _floor = new Floor("Test Floor", testOutline, _personEvents);
+        _hazardZone = new HazardZone("Test Zone", testOutline, TimeSpan.FromMilliseconds(50), _personEvents);
         _hazardZone.ManuallyActivate();
     }
 
@@ -42,8 +44,14 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var location = new Location(5, 5); // Inside the test outline
         var personLocationUpdate = new PersonLocationUpdate(personId, location);
 
-        var personAddedToFloorTask = WaitForEvent<PersonAddedToFloorEvent>(TimeSpan.FromSeconds(1));
-        var personAddedToHazardZoneTask = WaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromSeconds(1));
+        var personAddedToFloorTask = WaitForEvent<PersonAddedToFloorEvent>(
+            h => _floor.PersonAddedToFloor += h,
+            h => _floor.PersonAddedToFloor -= h,
+            TimeSpan.FromSeconds(1));
+        var personAddedToHazardZoneTask = WaitForEvent<PersonAddedToHazardZoneEvent>(
+            h => _hazardZone.PersonAddedToHazardZone += h,
+            h => _hazardZone.PersonAddedToHazardZone -= h,
+            TimeSpan.FromSeconds(1));
 
         _floor.TryAddPersonLocationUpdate(personLocationUpdate);
 
@@ -70,8 +78,14 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, insideLocation));
         await Task.Delay(50); // Let events propagate
 
-        var personRemovedFromFloorTask = WaitForEvent<PersonRemovedFromFloorEvent>(TimeSpan.FromSeconds(1));
-        var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(TimeSpan.FromSeconds(1));
+        var personRemovedFromFloorTask = WaitForEvent<PersonRemovedFromFloorEvent>(
+            h => _floor.PersonRemovedFromFloor += h,
+            h => _floor.PersonRemovedFromFloor -= h,
+            TimeSpan.FromSeconds(1));
+        var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            h => _hazardZone.PersonRemovedFromHazardZone += h,
+            h => _hazardZone.PersonRemovedFromHazardZone -= h,
+            TimeSpan.FromSeconds(1));
 
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, outsideLocation));
 
@@ -96,9 +110,18 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location));
         await Task.Delay(50); // Let initial events propagate
 
-        var personRemovedFromFloorTask = WaitForEvent<PersonRemovedFromFloorEvent>(TimeSpan.FromSeconds(1));
-        var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(TimeSpan.FromSeconds(1));
-        var personExpiredTask = WaitForEvent<PersonExpiredEvent>(TimeSpan.FromSeconds(1));
+        var personRemovedFromFloorTask = WaitForEvent<PersonRemovedFromFloorEvent>(
+            h => _floor.PersonRemovedFromFloor += h,
+            h => _floor.PersonRemovedFromFloor -= h,
+            TimeSpan.FromSeconds(1));
+        var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            h => _hazardZone.PersonRemovedFromHazardZone += h,
+            h => _hazardZone.PersonRemovedFromHazardZone -= h,
+            TimeSpan.FromSeconds(1));
+        var personExpiredTask = WaitForEvent<PersonExpiredEvent>(
+            h => _personEvents.Expired += h,
+            h => _personEvents.Expired -= h,
+            TimeSpan.FromSeconds(1));
 
         await Task.Delay(250);
 
@@ -132,7 +155,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var initialState = _hazardZone.AlarmState;
 
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(person2Id, location2));
-        await Task.Delay(100); // Wait for pre-alarm timer to potentially elapse
+        await WaitUntilAsync(() => _hazardZone.AlarmState != AlarmState.None, TimeSpan.FromSeconds(2));
 
         initialState.Should().Be(AlarmState.None); // Was Active (no alarm)
         _hazardZone.AlarmState.Should().NotBe(AlarmState.None); // Now in alarm state
@@ -152,32 +175,51 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         result2.Should().BeTrue(); // Second location updated successfully
     }
 
-    private async Task<T?> WaitForEvent<T>(TimeSpan timeout) where T : IDomainEvent
+    private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)
     {
-        var tcs = new TaskCompletionSource<T?>();
-
         using var cts = new CancellationTokenSource(timeout);
 
-        void Handler(T evt)
+        while (!condition())
         {
-            tcs.TrySetResult(evt);
+            await Task.Delay(10, cts.Token);
         }
+    }
 
-        DomainEventDispatcher.Register<T>(Handler);
+    private static async Task<TDomainEvent?> WaitForEvent<TDomainEvent>(
+        Action<EventHandler<DomainEventArgs<TDomainEvent>>> subscribe,
+        Action<EventHandler<DomainEventArgs<TDomainEvent>>> unsubscribe,
+        TimeSpan timeout)
+        where TDomainEvent : class, IDomainEvent
+    {
+        ArgumentNullException.ThrowIfNull(subscribe);
+        ArgumentNullException.ThrowIfNull(unsubscribe);
 
-        cts.Token.Register(() =>
+        var tcs = new TaskCompletionSource<TDomainEvent?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        EventHandler<DomainEventArgs<TDomainEvent>> handler = null!;
+        handler = (_, evt) =>
         {
-            tcs.TrySetResult(default);
-        });
+            unsubscribe(handler);
+            tcs.TrySetResult(evt.DomainEvent);
+        };
 
-        return await tcs.Task;
+        subscribe(handler);
+
+        try
+        {
+            return await tcs.Task.WaitAsync(timeout);
+        }
+        catch (TimeoutException)
+        {
+            unsubscribe(handler);
+            return default;
+        }
     }
 
     public void Dispose()
     {
         _floor.Dispose();
         _hazardZone.Dispose();
-        DomainEventDispatcher.Dispose();
     }
 }
 
