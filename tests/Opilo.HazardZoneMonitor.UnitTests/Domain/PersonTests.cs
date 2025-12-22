@@ -28,17 +28,18 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task Create_ShouldRaisePersonCreatedEvent_WhenParametersAreValid()
+    public void Create_ShouldRaisePersonCreatedEvent_WhenParametersAreValid()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(1);
-        var personCreatedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonCreatedEvent>();
+        var receivedEvents = new List<PersonCreatedEvent>();
+        DomainEventDispatcher.Register<PersonCreatedEvent>(e => receivedEvents.Add(e));
 
         // Act
         _testPerson = Person.Create(personId, location, timeout);
-        var personCreatedEvent = await personCreatedEventTask;
+        var personCreatedEvent = receivedEvents.Single();
 
         // Assert
         personCreatedEvent.Should().NotBeNull();
@@ -47,19 +48,21 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateLocation_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
+    public void UpdateLocation_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var initialLocation = new Location(0, 0);
         var newLocation = new Location(1, 1);
         var timeout = TimeSpan.FromSeconds(1);
-        var personLocationChangedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>();
+        var receivedEvents = new List<PersonLocationChangedEvent>();
+        DomainEventDispatcher.Register<PersonLocationChangedEvent>(e => receivedEvents.Add(e));
+
         _testPerson = Person.Create(personId, initialLocation, timeout);
 
         // Act
         _testPerson.UpdateLocation(newLocation);
-        var personLocationChangedEvent = await personLocationChangedEventTask;
+        var personLocationChangedEvent = receivedEvents.Single();
 
         // Assert
         personLocationChangedEvent.Should().NotBeNull();
@@ -68,58 +71,74 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateLocation_ShouldNotRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToSameValue()
+    public void UpdateLocation_ShouldNotRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var testLocation = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(1);
 
-        var personLocationChangedEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>(TimeSpan.FromMilliseconds(20));
+        var receivedEvents = new List<PersonLocationChangedEvent>();
+        DomainEventDispatcher.Register<PersonLocationChangedEvent>(e => receivedEvents.Add(e));
         _testPerson = Person.Create(personId, testLocation, timeout);
 
         // Act
         _testPerson.UpdateLocation(testLocation);
-        var personLocationChangedEvent = await personLocationChangedEventTask;
+        var personLocationChangedEvent = receivedEvents.SingleOrDefault();
 
         // Assert
         personLocationChangedEvent.Should().BeNull();
     }
 
     [Fact]
-    public async Task UpdateLocation_ShouldResetExpiration_WhenLocationIsUpdatedToSameValue()
+    public void UpdateLocation_ShouldResetExpiration_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var testLocation = new Location(0, 0);
         var timeout = TimeSpan.FromMilliseconds(100);
 
-        var personExpiredEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>(TimeSpan.FromMilliseconds(150));
-        _testPerson = Person.Create(personId, testLocation, timeout);
-        await Task.Delay(75);
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+
+        var expiredEvents = new List<PersonExpiredEvent>();
+        DomainEventDispatcher.Register<PersonExpiredEvent>(e => expiredEvents.Add(e));
+
+        _testPerson = Person.Create(personId, testLocation, timeout, clock, timerFactory);
+        clock.AdvanceBy(TimeSpan.FromMilliseconds(75));
 
         // Act
         _testPerson.UpdateLocation(testLocation);
-        var personExpiredEvent = await personExpiredEventTask;
+        clock.AdvanceBy(TimeSpan.FromMilliseconds(75)); // total 150ms from create
 
         // Assert
-        personExpiredEvent.Should().BeNull();
+        expiredEvents.Should().BeEmpty();
+
+        // And after enough time, it expires exactly once
+        clock.AdvanceBy(TimeSpan.FromMilliseconds(30)); // total 180ms (> 175ms expected)
+        expiredEvents.Should().ContainSingle();
+        expiredEvents.Single().PersonId.Should().Be(personId);
     }
 
     [Fact]
-    public async Task ExpirePerson_ShouldRaisePersonExpiredEvent_WhenTimeExpires()
+    public void ExpirePerson_ShouldRaisePersonExpiredEvent_WhenTimeExpires()
     {
         // Arrange
         var lifespanTimeout = TimeSpan.FromMilliseconds(10);
         var personId = Guid.NewGuid();
         var location = new Location(0, 0);
-        var personExpiredEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>();
-        _testPerson = Person.Create(personId, location, lifespanTimeout);
+
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+
+        var expiredEvents = new List<PersonExpiredEvent>();
+        DomainEventDispatcher.Register<PersonExpiredEvent>(e => expiredEvents.Add(e));
+
+        _testPerson = Person.Create(personId, location, lifespanTimeout, clock, timerFactory);
 
         // Act
-        var personExpiredEvent = await personExpiredEventTask;
+        clock.AdvanceBy(lifespanTimeout);
+        var personExpiredEvent = expiredEvents.Single();
 
         // Assert
         personExpiredEvent.Should().NotBeNull();

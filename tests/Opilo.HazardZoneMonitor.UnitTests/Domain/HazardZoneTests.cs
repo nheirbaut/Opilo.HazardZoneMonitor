@@ -712,17 +712,21 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task PreAlarmTimer_ShouldTransitionToAlarm_WhenInPreAlarmStateAndTimerElapses()
+    public void PreAlarmTimer_ShouldTransitionToAlarm_WhenInPreAlarmStateAndTimerElapses()
     {
         var testPreAlarmDuration = TimeSpan.FromMilliseconds(10);
+
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
 
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.PreAlarm)
             .WithPreAlarmDuration(testPreAlarmDuration)
+            .WithTime(clock, timerFactory)
             .Build();
 
         // Act
-        await Task.Delay(testPreAlarmDuration * 4);
+        clock.AdvanceBy(testPreAlarmDuration);
 
         // Assert
         hazardZone.IsActive.Should().BeTrue();

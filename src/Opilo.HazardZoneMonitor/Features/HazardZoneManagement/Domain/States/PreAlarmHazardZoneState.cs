@@ -1,12 +1,12 @@
-using System.Timers;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
-using Timer = System.Timers.Timer;
+using Opilo.HazardZoneMonitor.Shared.Abstractions;
 
 namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
 internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 {
-    private readonly Timer? _preAlarmTimer;
+    private readonly Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer? _preAlarmTimer;
+    private readonly DateTime _enteredPreAlarmAtUtc;
 
     public PreAlarmHazardZoneState(
         HazardZone hazardZone,
@@ -21,7 +21,9 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
             return;
         }
 
-        _preAlarmTimer = new Timer(HazardZone.PreAlarmDuration);
+        _enteredPreAlarmAtUtc = HazardZone.Clock.UtcNow;
+
+        _preAlarmTimer = HazardZone.TimerFactory.Create(HazardZone.PreAlarmDuration);
         _preAlarmTimer.Elapsed += OnPreAlarmTimerElapsed;
         _preAlarmTimer.Start();
     }
@@ -66,8 +68,11 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
                 AllowedNumberOfPersons));
     }
 
-    private void OnPreAlarmTimerElapsed(object? _, ElapsedEventArgs __)
+    private void OnPreAlarmTimerElapsed(object? _, EventArgs __)
     {
+        if (HazardZone.Clock.UtcNow < _enteredPreAlarmAtUtc.Add(HazardZone.PreAlarmDuration))
+            return;
+
         HazardZone.OnPreAlarmTimerElapsed();
     }
 

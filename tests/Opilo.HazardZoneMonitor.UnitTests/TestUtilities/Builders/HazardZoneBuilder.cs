@@ -3,6 +3,7 @@ using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
+using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
@@ -14,6 +15,8 @@ internal sealed class HazardZoneBuilder
     private readonly List<string> _externalActivationSourceIds = new();
     private int _allowedNumberOfPersons;
     private TimeSpan _preAlarmDuration = DefaultPreAlarmDuration;
+    private IClock? _clock;
+    private ITimerFactory? _timerFactory;
 
     public const string DefaultName = "HazardZone";
 
@@ -56,12 +59,21 @@ internal sealed class HazardZoneBuilder
         return this;
     }
 
+    public HazardZoneBuilder WithTime(IClock clock, ITimerFactory timerFactory)
+    {
+        _clock = clock;
+        _timerFactory = timerFactory;
+        return this;
+    }
+
     public HazardZone Build()
     {
         if (_desiredState == HazardZoneTestState.Alarm)
             _preAlarmDuration = TimeSpan.Zero;
 
-        var hazardZone = new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration);
+        var hazardZone = (_clock is not null && _timerFactory is not null)
+            ? new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration, _clock, _timerFactory)
+            : new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration);
         hazardZone.SetAllowedNumberOfPersons(_allowedNumberOfPersons);
 
         foreach (var sourceId in _externalActivationSourceIds)

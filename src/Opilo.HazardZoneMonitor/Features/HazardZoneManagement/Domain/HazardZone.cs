@@ -2,8 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
+using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Shared.Time;
 
 namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 
@@ -12,6 +14,8 @@ public sealed class HazardZone : IDisposable
 {
     private readonly Lock _zoneStateLock = new();
     private HazardZoneStateBase _currentState;
+    private readonly IClock _clock;
+    private readonly ITimerFactory _timerFactory;
 
     public string Name { get; }
     public Outline Outline { get; }
@@ -20,7 +24,15 @@ public sealed class HazardZone : IDisposable
     public AlarmState AlarmState => _currentState.AlarmState;
     public int AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
 
+    internal IClock Clock => _clock;
+    internal ITimerFactory TimerFactory => _timerFactory;
+
     public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration)
+        : this(name, outline, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
+    {
+    }
+
+    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
@@ -28,6 +40,9 @@ public sealed class HazardZone : IDisposable
         Name = name;
         Outline = outline;
         PreAlarmDuration = preAlarmDuration;
+
+        _clock = clock;
+        _timerFactory = timerFactory;
 
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
 
