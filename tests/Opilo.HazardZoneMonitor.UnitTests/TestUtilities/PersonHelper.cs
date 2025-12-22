@@ -7,10 +7,10 @@ namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
 internal static class PersonHelper
 {
-    public static PersonCreatedEvent CreatePersonCreatedEventLocatedInHazardZone(HazardZone hazardZone)
+    public static PersonCreatedEventArgs CreatePersonCreatedEventLocatedInHazardZone(HazardZone hazardZone)
         => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetCentroid());
 
-    public static PersonCreatedEvent CreatePersonCreatedEventLocatedOutsideHazardZone(HazardZone hazardZone)
+    public static PersonCreatedEventArgs CreatePersonCreatedEventLocatedOutsideHazardZone(HazardZone hazardZone)
         => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetPointOutside());
 
     public static PersonLocationChangedEvent CreatePersonLocationChangedEventLocatedInHazardZone(HazardZone hazardZone)

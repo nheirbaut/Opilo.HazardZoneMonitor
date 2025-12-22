@@ -60,7 +60,7 @@ public sealed class HazardZone : IDisposable
         _personEvents.LocationChanged += OnPersonLocationChangedEvent;
     }
 
-    public void Handle(PersonCreatedEvent personCreatedEvent)
+    public void Handle(PersonCreatedEventArgs personCreatedEvent)
     {
         ArgumentNullException.ThrowIfNull(personCreatedEvent);
         HandlePersonCreatedEvent(personCreatedEvent);
@@ -122,9 +122,9 @@ public sealed class HazardZone : IDisposable
         lock (_zoneStateLock) _currentState.OnPreAlarmTimerElapsed();
     }
 
-    private void OnPersonCreatedEvent(object? _, DomainEventArgs<PersonCreatedEvent> args)
+    private void OnPersonCreatedEvent(object? _, PersonCreatedEventArgs args)
     {
-        HandlePersonCreatedEvent(args.DomainEvent);
+        HandlePersonCreatedEvent(args);
     }
 
     private void OnPersonExpiredEvent(object? _, DomainEventArgs<PersonExpiredEvent> args)
@@ -137,7 +137,7 @@ public sealed class HazardZone : IDisposable
         HandlePersonLocationChangedEvent(args.DomainEvent);
     }
 
-    private void HandlePersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
+    private void HandlePersonCreatedEvent(PersonCreatedEventArgs personCreatedEvent)
     {
         lock (_zoneStateLock)
         {

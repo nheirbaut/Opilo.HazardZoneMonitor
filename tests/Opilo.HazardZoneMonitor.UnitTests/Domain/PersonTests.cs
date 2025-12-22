@@ -36,8 +36,8 @@ public sealed class PersonTests : IDisposable
         var location = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(1);
         var personEvents = new PersonEvents();
-        var receivedEvents = new List<PersonCreatedEvent>();
-        EventHandler<DomainEventArgs<PersonCreatedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
+        var receivedEvents = new List<PersonCreatedEventArgs>();
+        EventHandler<PersonCreatedEventArgs> handler = (_, e) => receivedEvents.Add(e);
         personEvents.Created += handler;
 
         try

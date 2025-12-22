@@ -117,7 +117,7 @@ internal sealed class HazardZoneBuilder
         {
             var personId = Guid.NewGuid();
             var insideLocation = new Location(2, 2);
-            hazardZone.Handle(new PersonCreatedEvent(personId, insideLocation));
+            hazardZone.Handle(new PersonCreatedEventArgs(personId, insideLocation));
         }
 
         IdsOfPersonsAdded = waiter.Wait(TimeSpan.FromSeconds(5)).Select(e => e.PersonId).ToList();

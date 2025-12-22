@@ -20,7 +20,7 @@ public sealed class Person : IDisposable
         ArgumentNullException.ThrowIfNull(events);
 
         var person = new Person(id, location, lifespanTimeout, new SystemClock(), new SystemTimerFactory(), events);
-        events.Raise(new PersonCreatedEvent(id, location));
+        events.Raise(new PersonCreatedEventArgs(id, location));
         return person;
     }
 
@@ -32,7 +32,7 @@ public sealed class Person : IDisposable
         ArgumentNullException.ThrowIfNull(events);
 
         var person = new Person(id, location, lifespanTimeout, clock, timerFactory, events);
-        events.Raise(new PersonCreatedEvent(id, location));
+        events.Raise(new PersonCreatedEventArgs(id, location));
         return person;
     }
 
