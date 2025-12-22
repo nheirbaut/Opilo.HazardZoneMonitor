@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
