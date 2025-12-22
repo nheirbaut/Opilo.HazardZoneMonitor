@@ -1,14 +1,15 @@
-﻿﻿using Ardalis.GuardClauses;
+﻿﻿﻿using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Events.FloorEvents;
-using Opilo.HazardZoneMonitor.Events.PersonEvents;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
+using TrackedPerson = Opilo.HazardZoneMonitor.Features.PersonTracking.Domain.Person;
 
 namespace Opilo.HazardZoneMonitor.Entities;
 
 public sealed class Floor : IDisposable
 {
-    private readonly Dictionary<Guid, Person> _personsOnFloor = [];
+    private readonly Dictionary<Guid, TrackedPerson> _personsOnFloor = [];
     private readonly TimeSpan _personLifespan;
     private volatile bool _disposed;
     private readonly Lock _personsOnFloorLock = new();
@@ -59,7 +60,7 @@ public sealed class Floor : IDisposable
 
             _personsOnFloor.Add(
                 personLocationUpdate.PersonId,
-                Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan));
+                TrackedPerson.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan));
         }
 
         DomainEventDispatcher.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId,

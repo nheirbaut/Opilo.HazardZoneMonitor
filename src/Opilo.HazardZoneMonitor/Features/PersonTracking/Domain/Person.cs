@@ -1,13 +1,11 @@
-﻿﻿using System.Timers;
-using Opilo.HazardZoneMonitor.Events.PersonEvents;
+﻿using System.Timers;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Timer = System.Timers.Timer;
 
-namespace Opilo.HazardZoneMonitor.Entities;
+namespace Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 
-#pragma warning disable S1133 // Deprecated code should be removed eventually
-[Obsolete("Use Opilo.HazardZoneMonitor.Features.PersonTracking.Domain.Person instead")]
 public sealed class Person : IDisposable
 {
     private DateTime _initialTime;
@@ -60,4 +58,4 @@ public sealed class Person : IDisposable
         _expiryTimer.Dispose();
     }
 }
-#pragma warning restore S1133
+

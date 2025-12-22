@@ -1,7 +1,7 @@
-﻿﻿using System.Diagnostics.CodeAnalysis;
+﻿﻿﻿using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Entities.HazardZoneState;
-using Opilo.HazardZoneMonitor.Events.PersonEvents;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
