@@ -111,7 +111,7 @@ internal sealed class HazardZoneBuilder
         var personsToAdd = _allowedNumberOfPersons + 1;
         var waiter = new EventCountWaiter(personsToAdd);
 
-        hazardZone.PersonAddedToHazardZone += (_, e) => waiter.Signal(e.DomainEvent);
+        hazardZone.PersonAddedToHazardZone += (_, e) => waiter.Signal(e);
 
         foreach (var _ in Enumerable.Range(0, personsToAdd))
         {

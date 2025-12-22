@@ -24,7 +24,7 @@ public sealed class HazardZone : IDisposable
     public AlarmState AlarmState => _currentState.AlarmState;
     public int AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
 
-    public event EventHandler<DomainEventArgs<PersonAddedToHazardZoneEvent>>? PersonAddedToHazardZone;
+    public event EventHandler<PersonAddedToHazardZoneEventArgs>? PersonAddedToHazardZone;
     public event EventHandler<DomainEventArgs<PersonRemovedFromHazardZoneEvent>>? PersonRemovedFromHazardZone;
 
     internal IClock Clock { get; }
@@ -163,8 +163,7 @@ public sealed class HazardZone : IDisposable
     internal void RaisePersonAddedToHazardZone(Guid personId)
     {
         var handlers = PersonAddedToHazardZone;
-        handlers?.Invoke(this,
-            new DomainEventArgs<PersonAddedToHazardZoneEvent>(new PersonAddedToHazardZoneEvent(personId, Name)));
+        handlers?.Invoke(this, new PersonAddedToHazardZoneEventArgs(personId, Name));
     }
 
     internal void RaisePersonRemovedFromHazardZone(Guid personId)

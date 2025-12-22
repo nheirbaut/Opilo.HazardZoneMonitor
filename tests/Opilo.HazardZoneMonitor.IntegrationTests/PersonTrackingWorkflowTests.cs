@@ -49,7 +49,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
             h => _floor.PersonAddedToFloor -= h,
             TimeSpan.FromSeconds(1));
 
-        var personAddedToHazardZoneTask = WaitForEvent<PersonAddedToHazardZoneEvent>(
+        var personAddedToHazardZoneTask = WaitForEvent2<PersonAddedToHazardZoneEventArgs>(
             h => _hazardZone.PersonAddedToHazardZone += h,
             h => _hazardZone.PersonAddedToHazardZone -= h,
             TimeSpan.FromSeconds(1));
