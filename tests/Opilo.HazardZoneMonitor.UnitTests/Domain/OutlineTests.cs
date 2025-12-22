@@ -1,5 +1,5 @@
-﻿using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using System.Collections.ObjectModel;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -13,14 +13,15 @@ public sealed class OutlineTests
     ]);
 
     [Fact]
-    public void Constructor_WhenVerticesAreNull_ThrowsArgumentNullException()
+    public void Constructor_ShouldThrowArgumentNullException_WhenVerticesAreNull()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new Outline(null!));
+        var act = () => new Outline(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
-    public void Constructor_WhenVerticesAreLessThanThree_ThrowsArgumentException()
+    public void Constructor_ShouldThrowArgumentException_WhenVerticesAreLessThanThree()
     {
         // Arrange
         var vertices = new ReadOnlyCollection<Location>([
@@ -28,32 +29,34 @@ public sealed class OutlineTests
             new Location(1, 1)]);
 
         // Act & Assert
-        var ex = Assert.Throws<ArgumentException>(() => new Outline(vertices));
-        Assert.Equal("Outline must have at least 3 vertices.", ex.Message);
+        var act = () => new Outline(vertices);
+        act.Should().Throw<ArgumentException>()
+            .Where(ex => ex.Message.Contains("at least 3 vertices", StringComparison.Ordinal));
     }
 
     [Fact]
-    public void COnstructor_WhenVerticesAreValid_CreatesInstance()
+    public void Constructor_ShouldCreateInstance_WhenVerticesAreValid()
     {
         // Act
         var outline = new Outline(s_validVertices);
 
         // Assert
-        Assert.Equal(s_validVertices, outline.Vertices);
+        outline.Vertices.Should().Equal(s_validVertices);
     }
 
     [Fact]
-    public void IsLocationInside_WhenLocationIsNull_ThrowsArgumentNullException()
+    public void IsLocationInside_ShouldThrowArgumentNullException_WhenLocationIsNull()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => outline.IsLocationInside(null!));
+        var act = () => outline.IsLocationInside(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
-    public void IsLocationInside_WhenPointIsInsidePolygon_ReturnsTrue()
+    public void IsLocationInside_ShouldReturnTrue_WhenLocationIsInsidePolygon()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
@@ -63,11 +66,11 @@ public sealed class OutlineTests
         var result = outline.IsLocationInside(point);
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
     }
 
     [Fact]
-    public void IsLocationInside_WhenPointIsOutsidePolygon_ReturnsFalse()
+    public void IsLocationInside_ShouldReturnFalse_WhenLocationIsOutsidePolygon()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
@@ -77,11 +80,11 @@ public sealed class OutlineTests
         var result = outline.IsLocationInside(point);
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
-    public void IsLocationInside_WhenPointIsOnPolygonEdge_ReturnsTrue()
+    public void IsLocationInside_ShouldReturnTrue_WhenLocationIsOnPolygonEdge()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
@@ -91,11 +94,11 @@ public sealed class OutlineTests
         var result = outline.IsLocationInside(point);
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
     }
 
     [Fact]
-    public void IsLocationInside_ForConcavePolygons_ReturnsTrueForPointsInsideAndFalseForPointsOutside()
+    public void IsLocationInside_ShouldReturnTrueForInsidePointsAndFalseForOutsidePoints_WhenPolygonIsConcave()
     {
         // Arrange
         var vertices = new ReadOnlyCollection<Location>([
@@ -114,7 +117,7 @@ public sealed class OutlineTests
         var resultOutside = outline.IsLocationInside(pointOutside);
 
         // Assert
-        Assert.True(resultInside);
-        Assert.False(resultOutside);
+        resultInside.Should().BeTrue();
+        resultOutside.Should().BeFalse();
     }
 }

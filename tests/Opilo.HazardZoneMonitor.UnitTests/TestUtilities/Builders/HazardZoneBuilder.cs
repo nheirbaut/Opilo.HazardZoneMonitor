@@ -1,19 +1,12 @@
-﻿using System.Collections.Concurrent;
-using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events.HazardZoneEvents;
-using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Domain.Services;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
+using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
+using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
-
-internal enum HazardZoneTestState
-{
-    Inactive,
-    Active,
-    PreAlarm,
-    Alarm
-}
 
 internal sealed class HazardZoneBuilder
 {
@@ -108,13 +101,13 @@ internal sealed class HazardZoneBuilder
         var personsToAdd = _allowedNumberOfPersons + 1;
         var waiter = new EventCountWaiter(personsToAdd);
 
-        DomainEvents.Register<PersonAddedToHazardZoneEvent>(e => waiter.Signal(e));
+        DomainEventDispatcher.Register<PersonAddedToHazardZoneEvent>(e => waiter.Signal(e));
 
         foreach (var _ in Enumerable.Range(0, personsToAdd))
         {
             var personId = Guid.NewGuid();
             var insideLocation = new Location(2, 2);
-            DomainEvents.Raise(new PersonCreatedEvent(personId, insideLocation));
+            DomainEventDispatcher.Raise(new PersonCreatedEvent(personId, insideLocation));
         }
 
         IdsOfPersonsAdded = waiter.Wait(TimeSpan.FromSeconds(5)).Select(e => e.PersonId).ToList();
@@ -129,30 +122,3 @@ internal sealed class HazardZoneBuilder
     {
     }
 }
-
-internal sealed class EventCountWaiter(int expectedCount)
-{
-    private int _currentCount;
-    private readonly TaskCompletionSource<bool> _tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-    // ReSharper disable once CollectionNeverQueried.Global
-    // ReSharper disable once MemberCanBePrivate.Global
-    public ConcurrentBag<PersonAddedToHazardZoneEvent> ReceivedEvents { get;  } = [];
-
-    public void Signal(PersonAddedToHazardZoneEvent personAddedToHazardZoneEvent)
-    {
-        ReceivedEvents.Add(personAddedToHazardZoneEvent);
-        if (Interlocked.Increment(ref _currentCount) == expectedCount)
-            _tcs.TrySetResult(true);
-    }
-
-    public List<PersonAddedToHazardZoneEvent> Wait(TimeSpan timeout)
-    {
-        if (!_tcs.Task.Wait(timeout))
-            throw new TimeoutException(
-                $"Timed out waiting for {expectedCount} events. Only {_currentCount} events were received.");
-
-        return ReceivedEvents.ToList();
-    }
-}
-

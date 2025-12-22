@@ -1,9 +1,10 @@
-﻿using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events.FloorEvents;
-using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Domain.Services;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
+using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
+using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -22,50 +23,54 @@ public sealed class FloorTests : IDisposable
     private const string ValidFloorName = "TestFloor";
 
     [Fact]
-    public void Constructor_WhenNameIsNull_ThrowsArgumentNullException()
+    public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new Floor(null!, s_validOutline));
+        var act = () => new Floor(null!, s_validOutline);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Theory]
     [ClassData(typeof(InvalidNames))]
-    public void Constructor_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
+    public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => new Floor(invalidName, s_validOutline));
+        var act = () => new Floor(invalidName, s_validOutline);
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
-    public void Constructor_WhenOutlineIsNull_ThrowsArgumentNullException()
+    public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new Floor(ValidFloorName, null!));
+        var act = () => new Floor(ValidFloorName, null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
-    public void Constructor_WhenValidNameAndOutlineGiven_CreatesInstance()
+    public void Constructor_ShouldCreateInstance_WhenValidNameAndOutlineAreProvided()
     {
         // Act
         _testFloor = new Floor(ValidFloorName, s_validOutline);
 
         // Assert
-        Assert.Equal(ValidFloorName, _testFloor.Name);
-        Assert.Equal(s_validOutline, _testFloor.Outline);
+        _testFloor.Name.Should().Be(ValidFloorName);
+        _testFloor.Outline.Should().Be(s_validOutline);
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateIsNull_ThrowsArgumentNullException()
+    public void TryAddPersonLocationUpdate_ShouldThrowArgumentNullException_WhenPersonLocationUpdateIsNull()
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _testFloor.TryAddPersonLocationUpdate(null!));
+        var act = () => _testFloor.TryAddPersonLocationUpdate(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateNotOnFloor_ReturnsFalse()
+    public void TryAddPersonLocationUpdate_ShouldReturnFalse_WhenPersonLocationUpdateIsNotOnFloor()
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline);
@@ -75,11 +80,11 @@ public sealed class FloorTests : IDisposable
         var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloor_ReturnsTrue()
+    public void TryAddPersonLocationUpdate_ShouldReturnTrue_WhenPersonLocationUpdateIsOnFloor()
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline);
@@ -89,12 +94,12 @@ public sealed class FloorTests : IDisposable
         var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
     }
 
     [Fact]
     public async Task
-        TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndNewPerson_RaisesPersonAddedToFloorEvent()
+        TryAddPersonLocationUpdate_ShouldRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsNew()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -108,15 +113,15 @@ public sealed class FloorTests : IDisposable
         var personAddedToFloorEvent = await personAddedToFloorEventTask;
 
         // Assert
-        Assert.NotNull(personAddedToFloorEvent);
-        Assert.Equal(ValidFloorName, personAddedToFloorEvent.FloorName);
-        Assert.Equal(personId, personAddedToFloorEvent.PersonId);
-        Assert.Equal(location, personAddedToFloorEvent.Location);
+        personAddedToFloorEvent.Should().NotBeNull();
+        personAddedToFloorEvent.FloorName.Should().Be(ValidFloorName);
+        personAddedToFloorEvent.PersonId.Should().Be(personId);
+        personAddedToFloorEvent.Location.Should().Be(location);
     }
 
     [Fact]
     public async Task
-        TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndKnownPerson_DoesNotRaisePersonAddedToFloorEvent()
+        TryAddPersonLocationUpdate_ShouldNotRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsKnown()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -132,11 +137,11 @@ public sealed class FloorTests : IDisposable
         var personAddedToFloorEvent = await personAddedToFloorEventTask;
 
         // Assert
-        Assert.Null(personAddedToFloorEvent);
+        personAddedToFloorEvent.Should().BeNull();
     }
 
     [Fact]
-    public async Task TryAddPersonLocationUpdate_WhenPersonExpires_RaisesPersonRemovedFromFloorEvent()
+    public async Task TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonExpires()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -151,14 +156,14 @@ public sealed class FloorTests : IDisposable
         var personRemovedFromFloorEvent = await personRemovedFromFloorEventTask;
 
         // Assert
-        Assert.NotNull(personRemovedFromFloorEvent);
-        Assert.Equal(ValidFloorName, personRemovedFromFloorEvent.FloorName);
-        Assert.Equal(personId, personRemovedFromFloorEvent.PersonId);
+        personRemovedFromFloorEvent.Should().NotBeNull();
+        personRemovedFromFloorEvent.FloorName.Should().Be(ValidFloorName);
+        personRemovedFromFloorEvent.PersonId.Should().Be(personId);
     }
 
     [Fact]
     public async Task
-        TryAddPersonLocationUpdate_WhenPersonLocationUpdateOffFloorAndKnownPerson_RaisesPersonRemovedFromFloorEvent()
+        TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonMovesOffFloorAndPersonIsKnown()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -176,13 +181,13 @@ public sealed class FloorTests : IDisposable
         var personRemovedFromFloorEvent = await personRemovedFromFloorEventTask;
 
         // Assert
-        Assert.NotNull(personRemovedFromFloorEvent);
-        Assert.Equal(ValidFloorName, personRemovedFromFloorEvent.FloorName);
-        Assert.Equal(personId, personRemovedFromFloorEvent.PersonId);
+        personRemovedFromFloorEvent.Should().NotBeNull();
+        personRemovedFromFloorEvent.FloorName.Should().Be(ValidFloorName);
+        personRemovedFromFloorEvent.PersonId.Should().Be(personId);
     }
 
     [Fact]
-    public async Task Dispose_WhenPersonLocatedOnFloor_DoesNotRaisePersonExpiredEvent()
+    public async Task Dispose_ShouldNotRaisePersonExpiredEvent_WhenPersonIsLocatedOnFloor()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -199,12 +204,12 @@ public sealed class FloorTests : IDisposable
         var personExpiredEvent = await personExpiredEventTask;
 
         // Assert
-        Assert.Null(personExpiredEvent);
+        personExpiredEvent.Should().BeNull();
     }
 
     public void Dispose()
     {
-        DomainEvents.Dispose();
+        DomainEventDispatcher.Dispose();
         _testFloor?.Dispose();
     }
 }

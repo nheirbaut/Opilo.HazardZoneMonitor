@@ -1,8 +1,8 @@
-﻿using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Domain.Services;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
+using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -11,7 +11,7 @@ public sealed class PersonTests : IDisposable
     Person? _testPerson;
 
     [Fact]
-    public void Create_GivenValidParameters_CreatesValidPerson()
+    public void Create_ShouldCreateValidPerson_WhenParametersAreValid()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -22,13 +22,13 @@ public sealed class PersonTests : IDisposable
         _testPerson = Person.Create(personId, location, timeout);
 
         // Assert
-        Assert.NotNull(_testPerson);
-        Assert.Equal(personId, _testPerson.Id);
-        Assert.Equal(location, _testPerson.Location);
+        _testPerson.Should().NotBeNull();
+        _testPerson!.Id.Should().Be(personId);
+        _testPerson.Location.Should().Be(location);
     }
 
     [Fact]
-    public async Task Create_GivenValidParameters_RaisesPersonCreatedEvent()
+    public async Task Create_ShouldRaisePersonCreatedEvent_WhenParametersAreValid()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -41,13 +41,13 @@ public sealed class PersonTests : IDisposable
         var personCreatedEvent = await personCreatedEventTask;
 
         // Assert
-        Assert.NotNull(personCreatedEvent);
-        Assert.Equal(personId, personCreatedEvent.PersonId);
-        Assert.Equal(location, personCreatedEvent.Location);
+        personCreatedEvent.Should().NotBeNull();
+        personCreatedEvent.PersonId.Should().Be(personId);
+        personCreatedEvent.Location.Should().Be(location);
     }
 
     [Fact]
-    public async Task UpdateLocation_WithNewLocation_RaisesPersonLocationChangedEvent()
+    public async Task UpdateLocation_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -62,13 +62,13 @@ public sealed class PersonTests : IDisposable
         var personLocationChangedEvent = await personLocationChangedEventTask;
 
         // Assert
-        Assert.NotNull(personLocationChangedEvent);
-        Assert.Equal(personId, personLocationChangedEvent.PersonId);
-        Assert.Equal(newLocation, personLocationChangedEvent.CurrentLocation);
+        personLocationChangedEvent.Should().NotBeNull();
+        personLocationChangedEvent.PersonId.Should().Be(personId);
+        personLocationChangedEvent.CurrentLocation.Should().Be(newLocation);
     }
 
     [Fact]
-    public async Task UpdateLocation_WithSameLocation_DoesNotRaisePersonLocationChangedEvent()
+    public async Task UpdateLocation_ShouldNotRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -84,11 +84,11 @@ public sealed class PersonTests : IDisposable
         var personLocationChangedEvent = await personLocationChangedEventTask;
 
         // Assert
-        Assert.Null(personLocationChangedEvent);
+        personLocationChangedEvent.Should().BeNull();
     }
 
     [Fact]
-    public async Task UpdateLocation_WithSameLocation_ResetsExpiration()
+    public async Task UpdateLocation_ShouldResetExpiration_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -105,11 +105,11 @@ public sealed class PersonTests : IDisposable
         var personExpiredEvent = await personExpiredEventTask;
 
         // Assert
-        Assert.Null(personExpiredEvent);
+        personExpiredEvent.Should().BeNull();
     }
 
     [Fact]
-    public async Task ExpirePerson_WhenTimeExpires_RaisesPersonExpiredEvent()
+    public async Task ExpirePerson_ShouldRaisePersonExpiredEvent_WhenTimeExpires()
     {
         // Arrange
         var lifespanTimeout = TimeSpan.FromMilliseconds(10);
@@ -122,8 +122,8 @@ public sealed class PersonTests : IDisposable
         var personExpiredEvent = await personExpiredEventTask;
 
         // Assert
-        Assert.NotNull(personExpiredEvent);
-        Assert.Equal(personId, personExpiredEvent.PersonId);
+        personExpiredEvent.Should().NotBeNull();
+        personExpiredEvent.PersonId.Should().Be(personId);
     }
 
     public void Dispose()
@@ -131,6 +131,6 @@ public sealed class PersonTests : IDisposable
         _testPerson?.Dispose();
         _testPerson = null;
 
-        DomainEvents.Dispose();
+        DomainEventDispatcher.Dispose();
     }
 }

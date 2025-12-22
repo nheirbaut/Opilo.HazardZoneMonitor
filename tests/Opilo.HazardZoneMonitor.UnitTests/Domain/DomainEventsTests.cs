@@ -1,5 +1,5 @@
-﻿using Opilo.HazardZoneMonitor.Domain.Events;
-using Opilo.HazardZoneMonitor.Domain.Services;
+using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
@@ -7,30 +7,30 @@ namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 public sealed class DomainEventsTests : IDisposable
 {
     [Fact]
-    public async Task Raise_WhenHandlerIsRegistered_InvokesHandler()
+    public async Task Raise_ShouldInvokeHandler_WhenHandlerIsRegistered()
     {
         // Arrange
         var testDomainEvent = new TestDomainEvent();
         var testDomainEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<TestDomainEvent>();
 
         // Act
-        DomainEvents.Raise(testDomainEvent);
+        DomainEventDispatcher.Raise(testDomainEvent);
         var receivedDomainEvent = await testDomainEventTask;
 
         // Assert
-        Assert.NotNull(receivedDomainEvent);
-        Assert.Equal(testDomainEvent.Id, receivedDomainEvent.Id);
+        receivedDomainEvent.Should().NotBeNull();
+        receivedDomainEvent.Id.Should().Be(testDomainEvent.Id);
     }
 
     [Fact]
-    public void Raise_WhenNoHandlerRegistered_DoesNotThrow()
+    public void Raise_ShouldNotThrow_WhenNoHandlerIsRegistered()
     {
         // Arrange
         var testDomainEvent = new TestDomainEvent();
 
         // Act & Assert
-        var ex = Record.Exception(() => DomainEvents.Raise(testDomainEvent));
-        Assert.Null(ex);
+        var act = () => DomainEventDispatcher.Raise(testDomainEvent);
+        act.Should().NotThrow();
     }
 
     private sealed class TestDomainEvent : IDomainEvent
@@ -40,6 +40,6 @@ public sealed class DomainEventsTests : IDisposable
 
     public void Dispose()
     {
-        DomainEvents.Dispose();
+        DomainEventDispatcher.Dispose();
     }
 }

@@ -160,6 +160,10 @@ dotnet_diagnostic.CA1040.severity = none;
 # CA1030 : Consider making 'Raise' an event
 dotnet_diagnostic.CA1030.severity = none
 
+# CA1716 : Identifiers should not match keywords
+# This repo intentionally uses a `Shared` namespace segment; keep the signal but don't fail builds.
+dotnet_diagnostic.CA1716.severity = suggestion
+
 [tests/**.cs]
 
 # Error CA1707 : Remove the underscores from member name

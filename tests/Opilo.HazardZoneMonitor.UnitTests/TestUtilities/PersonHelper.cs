@@ -1,7 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.Domain.Entities;
-using Opilo.HazardZoneMonitor.Domain.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Domain.ValueObjects;
+using System.Collections.ObjectModel;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
+using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
@@ -38,7 +40,7 @@ internal static class PersonHelper
         }
 
         if (count == 0)
-            throw new ArgumentException("The collection of locations cannot be empty.");
+            throw new ArgumentException("The collection of locations cannot be empty.", nameof(locations));
 
         return new Location(sumX / count, sumY / count);
     }
@@ -48,7 +50,7 @@ internal static class PersonHelper
         ArgumentNullException.ThrowIfNull(locations);
 
         if (locations.Count == 0)
-            throw new ArgumentException("The collection of locations cannot be empty.");
+            throw new ArgumentException("The collection of locations cannot be empty.", nameof(locations));
 
         var centroid = locations.GetCentroid();
 
