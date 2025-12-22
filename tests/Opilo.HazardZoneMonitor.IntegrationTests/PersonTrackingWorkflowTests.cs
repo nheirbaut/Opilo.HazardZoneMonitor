@@ -79,10 +79,11 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, insideLocation));
         await Task.Delay(50); // Let events propagate
 
-        var personRemovedFromFloorTask = WaitForEvent<PersonRemovedFromFloorEvent>(
+        var personRemovedFromFloorTask = WaitForEvent2<PersonRemovedFromFloorEventArgs>(
             h => _floor.PersonRemovedFromFloor += h,
             h => _floor.PersonRemovedFromFloor -= h,
             TimeSpan.FromSeconds(1));
+
         var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(
             h => _hazardZone.PersonRemovedFromHazardZone += h,
             h => _hazardZone.PersonRemovedFromHazardZone -= h,
@@ -111,14 +112,16 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location));
         await Task.Delay(50); // Let initial events propagate
 
-        var personRemovedFromFloorTask = WaitForEvent<PersonRemovedFromFloorEvent>(
+        var personRemovedFromFloorTask = WaitForEvent2<PersonRemovedFromFloorEventArgs>(
             h => _floor.PersonRemovedFromFloor += h,
             h => _floor.PersonRemovedFromFloor -= h,
             TimeSpan.FromSeconds(1));
+
         var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(
             h => _hazardZone.PersonRemovedFromHazardZone += h,
             h => _hazardZone.PersonRemovedFromHazardZone -= h,
             TimeSpan.FromSeconds(1));
+
         var personExpiredTask = WaitForEvent<PersonExpiredEvent>(
             h => _personEvents.Expired += h,
             h => _personEvents.Expired -= h,

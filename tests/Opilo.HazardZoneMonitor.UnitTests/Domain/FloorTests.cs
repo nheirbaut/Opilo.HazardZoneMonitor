@@ -152,7 +152,7 @@ public sealed class FloorTests : IDisposable
         _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents(), TimeSpan.FromMilliseconds(10));
         var personMovement = new PersonLocationUpdate(personId, location);
 
-        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>(
+        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEventArgs>(
             h => _testFloor.PersonRemovedFromFloor += h,
             h => _testFloor.PersonRemovedFromFloor -= h);
 
@@ -179,7 +179,7 @@ public sealed class FloorTests : IDisposable
         var personMovementOffFloor = new PersonLocationUpdate(personId, locationOffFloor);
         _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
 
-        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>(
+        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEventArgs>(
             h => _testFloor.PersonRemovedFromFloor += h,
             h => _testFloor.PersonRemovedFromFloor -= h,
             TimeSpan.FromMilliseconds(10));

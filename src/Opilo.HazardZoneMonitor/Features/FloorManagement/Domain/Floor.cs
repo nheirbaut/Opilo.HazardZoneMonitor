@@ -21,7 +21,7 @@ public sealed class Floor : IDisposable
     public Outline Outline { get; }
 
     public event EventHandler<PersonAddedToFloorEventArgs>? PersonAddedToFloor;
-    public event EventHandler<DomainEventArgs<PersonRemovedFromFloorEvent>>? PersonRemovedFromFloor;
+    public event EventHandler<PersonRemovedFromFloorEventArgs>? PersonRemovedFromFloor;
 
     public Floor(string name, Outline outline, IPersonEvents personEvents, TimeSpan? personLifespan = null)
     {
@@ -85,7 +85,7 @@ public sealed class Floor : IDisposable
             {
                 var removedHandlers = PersonRemovedFromFloor;
                 removedHandlers?.Invoke(this,
-                    new DomainEventArgs<PersonRemovedFromFloorEvent>(new PersonRemovedFromFloorEvent(Name, personId)));
+                    new PersonRemovedFromFloorEventArgs(Name, personId));
             }
         }
     }
