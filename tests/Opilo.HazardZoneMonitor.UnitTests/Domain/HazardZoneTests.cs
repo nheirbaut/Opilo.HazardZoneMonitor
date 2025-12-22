@@ -15,8 +15,8 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_NullName_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() =>
-            new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero));
+        var act = () => new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Theory]
@@ -24,15 +24,16 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_InvalidName_ThrowsArgumentException(string invalidName)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() =>
-            new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero));
+        var act = () => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
     public void Constructor_NullOutline_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero));
+        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -43,10 +44,10 @@ public sealed class HazardZoneTests : IDisposable
             new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
 
         // Assert
-        Assert.Equal(HazardZoneBuilder.DefaultName, hazardZone.Name);
-        Assert.Equal(HazardZoneBuilder.DefaultOutline, hazardZone.Outline);
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.Name.Should().Be(HazardZoneBuilder.DefaultName);
+        hazardZone.Outline.Should().Be(HazardZoneBuilder.DefaultOutline);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -57,8 +58,7 @@ public sealed class HazardZoneTests : IDisposable
             TimeSpan.FromMilliseconds(-100));
 
         // Assert
-        Assert.Equal(TimeSpan.FromMilliseconds(-100),
-            hazardZone.PreAlarmDuration);
+        hazardZone.PreAlarmDuration.Should().Be(TimeSpan.FromMilliseconds(-100));
     }
 
     [Fact]
@@ -76,9 +76,9 @@ public sealed class HazardZoneTests : IDisposable
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.NotNull(personAddedToHazardZoneEvent);
-        Assert.Equal(personCreatedEvent.PersonId, personAddedToHazardZoneEvent.PersonId);
-        Assert.Equal(HazardZoneBuilder.DefaultName, personAddedToHazardZoneEvent.HazardZoneName);
+        personAddedToHazardZoneEvent.Should().NotBeNull();
+        personAddedToHazardZoneEvent.PersonId.Should().Be(personCreatedEvent.PersonId);
+        personAddedToHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public sealed class HazardZoneTests : IDisposable
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.Null(personAddedToHazardZoneEvent);
+        personAddedToHazardZoneEvent.Should().BeNull();
     }
 
     [Fact]
@@ -116,9 +116,9 @@ public sealed class HazardZoneTests : IDisposable
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        Assert.NotNull(personRemovedFromHazardZoneEvent);
-        Assert.Equal(personCreatedEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
-        Assert.Equal(HazardZoneBuilder.DefaultName, personRemovedFromHazardZoneEvent.HazardZoneName);
+        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personCreatedEvent.PersonId);
+        personRemovedFromHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class HazardZoneTests : IDisposable
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        Assert.Null(personRemovedFromHazardZoneEvent);
+        personRemovedFromHazardZoneEvent.Should().BeNull();
     }
 
     [Fact]
@@ -157,9 +157,9 @@ public sealed class HazardZoneTests : IDisposable
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.NotNull(personAddedToHazardZoneEvent);
-        Assert.Equal(personLocationChangedEvent.PersonId, personAddedToHazardZoneEvent.PersonId);
-        Assert.Equal(HazardZoneBuilder.DefaultName, personAddedToHazardZoneEvent.HazardZoneName);
+        personAddedToHazardZoneEvent.Should().NotBeNull();
+        personAddedToHazardZoneEvent.PersonId.Should().Be(personLocationChangedEvent.PersonId);
+        personAddedToHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public sealed class HazardZoneTests : IDisposable
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.Null(personAddedToHazardZoneEvent);
+        personAddedToHazardZoneEvent.Should().BeNull();
     }
 
     [Fact]
@@ -203,9 +203,9 @@ public sealed class HazardZoneTests : IDisposable
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        Assert.NotNull(personRemovedFromHazardZoneEvent);
-        Assert.Equal(initialPersonLocationChangedEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
-        Assert.Equal(HazardZoneBuilder.DefaultName, personRemovedFromHazardZoneEvent.HazardZoneName);
+        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(initialPersonLocationChangedEvent.PersonId);
+        personRemovedFromHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
@@ -237,8 +237,8 @@ public sealed class HazardZoneTests : IDisposable
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.Null(personRemovedFromHazardZoneEvent);
-        Assert.Null(personAddedToHazardZoneEvent);
+        personRemovedFromHazardZoneEvent.Should().BeNull();
+        personAddedToHazardZoneEvent.Should().BeNull();
     }
 
     [Fact]
@@ -248,7 +248,8 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => hazardZone.ActivateFromExternalSource(null!));
+        var act = () => hazardZone.ActivateFromExternalSource(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Theory]
@@ -259,7 +260,8 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => hazardZone.ActivateFromExternalSource(invalidName));
+        var act = () => hazardZone.ActivateFromExternalSource(invalidName);
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
@@ -269,7 +271,8 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => hazardZone.DeactivateFromExternalSource(null!));
+        var act = () => hazardZone.DeactivateFromExternalSource(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Theory]
@@ -280,7 +283,8 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => hazardZone.DeactivateFromExternalSource(invalidName));
+        var act = () => hazardZone.DeactivateFromExternalSource(invalidName);
+        act.Should().Throw<ArgumentException>();
     }
 
     //------------------------------------------------------------------------------
@@ -297,8 +301,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyActivate();
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -311,8 +315,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource("ext-src");
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -328,8 +332,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource(sourceId);
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -342,8 +346,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     //------------------------------------------------------------------------------
@@ -368,8 +372,8 @@ public sealed class HazardZoneTests : IDisposable
         await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -391,8 +395,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(2);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -412,8 +416,8 @@ public sealed class HazardZoneTests : IDisposable
         await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
@@ -435,8 +439,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
@@ -457,8 +461,8 @@ public sealed class HazardZoneTests : IDisposable
         await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -481,8 +485,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -497,8 +501,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -515,8 +519,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId);
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -535,8 +539,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId2);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -552,8 +556,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource(sourceId);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -570,8 +574,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource(sourceId);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -595,8 +599,8 @@ public sealed class HazardZoneTests : IDisposable
         await removedEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     //------------------------------------------------------------------------------
@@ -617,7 +621,7 @@ public sealed class HazardZoneTests : IDisposable
         DomainEventDispatcher.Raise(new PersonCreatedEvent(Guid.NewGuid(), new Location(2, 2)));
 
         var secondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
-        Assert.NotNull(secondPersonAddedToHazardZoneEvent);
+        secondPersonAddedToHazardZoneEvent.Should().NotBeNull();
 
         var firstPersonExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
         var firstPersonRemovedFromHazardZoneEventTask =
@@ -628,10 +632,10 @@ public sealed class HazardZoneTests : IDisposable
         var personRemovedFromHazardZoneEvent = await firstPersonRemovedFromHazardZoneEventTask;
 
         // Assert
-        Assert.NotNull(personRemovedFromHazardZoneEvent);
-        Assert.Equal(firstPersonExpiredEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(firstPersonExpiredEvent.PersonId);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
@@ -647,8 +651,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
@@ -663,8 +667,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource("ext-src");
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
@@ -685,10 +689,10 @@ public sealed class HazardZoneTests : IDisposable
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        Assert.NotNull(personRemovedFromHazardZoneEvent);
-        Assert.Equal(personExpiredEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -703,8 +707,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(1);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -721,8 +725,8 @@ public sealed class HazardZoneTests : IDisposable
         await Task.Delay(testPreAlarmDuration * 4);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -737,8 +741,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -755,8 +759,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId);
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -776,8 +780,8 @@ public sealed class HazardZoneTests : IDisposable
         await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
@@ -797,8 +801,8 @@ public sealed class HazardZoneTests : IDisposable
         await removedEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -821,8 +825,8 @@ public sealed class HazardZoneTests : IDisposable
         await removedEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
@@ -837,8 +841,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyActivate();
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.PreAlarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     //------------------------------------------------------------------------------
@@ -859,8 +863,8 @@ public sealed class HazardZoneTests : IDisposable
         DomainEventDispatcher.Raise(new PersonCreatedEvent(newPersonId, new Location(2, 2)));
 
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
-        Assert.NotNull(personAddedToHazardZoneEvent);
-        Assert.Equal(newPersonId, personAddedToHazardZoneEvent.PersonId);
+        personAddedToHazardZoneEvent.Should().NotBeNull();
+        personAddedToHazardZoneEvent.PersonId.Should().Be(newPersonId);
 
         var personExpiredEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>();
 
@@ -869,8 +873,8 @@ public sealed class HazardZoneTests : IDisposable
         await personExpiredEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -886,8 +890,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -902,8 +906,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource("ext-src");
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -924,10 +928,10 @@ public sealed class HazardZoneTests : IDisposable
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        Assert.NotNull(personRemovedFromHazardZoneEvent);
-        Assert.Equal(personExpiredEvent.PersonId, personRemovedFromHazardZoneEvent.PersonId);
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -942,8 +946,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(1);
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -958,8 +962,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -976,8 +980,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId);
 
         // Assert
-        Assert.False(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -997,8 +1001,8 @@ public sealed class HazardZoneTests : IDisposable
         await personAddedToHazardZoneEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -1018,8 +1022,8 @@ public sealed class HazardZoneTests : IDisposable
         await removedEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.None, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -1042,8 +1046,8 @@ public sealed class HazardZoneTests : IDisposable
         await removedEventTask;
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -1058,8 +1062,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyActivate();
 
         // Assert
-        Assert.True(hazardZone.IsActive);
-        Assert.Equal(AlarmState.Alarm, hazardZone.AlarmState);
+        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -1075,7 +1079,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(-1);
 
         // Assert
-        Assert.Equal(1, hazardZone.AllowedNumberOfPersons);
+        hazardZone.AllowedNumberOfPersons.Should().Be(1);
     }
 
     public void Dispose()

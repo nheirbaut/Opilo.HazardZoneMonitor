@@ -16,7 +16,8 @@ public sealed class OutlineTests
     public void Constructor_WhenVerticesAreNull_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new Outline(null!));
+        var act = () => new Outline(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -28,8 +29,9 @@ public sealed class OutlineTests
             new Location(1, 1)]);
 
         // Act & Assert
-        var ex = Assert.Throws<ArgumentException>(() => new Outline(vertices));
-        Assert.Contains("at least 3 vertices", ex.Message, StringComparison.Ordinal);
+        var act = () => new Outline(vertices);
+        act.Should().Throw<ArgumentException>()
+            .Where(ex => ex.Message.Contains("at least 3 vertices", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -39,7 +41,7 @@ public sealed class OutlineTests
         var outline = new Outline(s_validVertices);
 
         // Assert
-        Assert.Equal(s_validVertices, outline.Vertices);
+        outline.Vertices.Should().Equal(s_validVertices);
     }
 
     [Fact]
@@ -49,7 +51,8 @@ public sealed class OutlineTests
         var outline = new Outline(s_validVertices);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => outline.IsLocationInside(null!));
+        var act = () => outline.IsLocationInside(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -63,7 +66,7 @@ public sealed class OutlineTests
         var result = outline.IsLocationInside(point);
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
     }
 
     [Fact]
@@ -77,7 +80,7 @@ public sealed class OutlineTests
         var result = outline.IsLocationInside(point);
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -91,7 +94,7 @@ public sealed class OutlineTests
         var result = outline.IsLocationInside(point);
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
     }
 
     [Fact]
@@ -114,7 +117,7 @@ public sealed class OutlineTests
         var resultOutside = outline.IsLocationInside(pointOutside);
 
         // Assert
-        Assert.True(resultInside);
-        Assert.False(resultOutside);
+        resultInside.Should().BeTrue();
+        resultOutside.Should().BeFalse();
     }
 }

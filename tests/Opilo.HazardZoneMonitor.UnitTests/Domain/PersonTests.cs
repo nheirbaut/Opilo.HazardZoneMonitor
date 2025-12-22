@@ -22,9 +22,9 @@ public sealed class PersonTests : IDisposable
         _testPerson = Person.Create(personId, location, timeout);
 
         // Assert
-        Assert.NotNull(_testPerson);
-        Assert.Equal(personId, _testPerson.Id);
-        Assert.Equal(location, _testPerson.Location);
+        _testPerson.Should().NotBeNull();
+        _testPerson!.Id.Should().Be(personId);
+        _testPerson.Location.Should().Be(location);
     }
 
     [Fact]
@@ -41,9 +41,9 @@ public sealed class PersonTests : IDisposable
         var personCreatedEvent = await personCreatedEventTask;
 
         // Assert
-        Assert.NotNull(personCreatedEvent);
-        Assert.Equal(personId, personCreatedEvent.PersonId);
-        Assert.Equal(location, personCreatedEvent.Location);
+        personCreatedEvent.Should().NotBeNull();
+        personCreatedEvent.PersonId.Should().Be(personId);
+        personCreatedEvent.Location.Should().Be(location);
     }
 
     [Fact]
@@ -62,9 +62,9 @@ public sealed class PersonTests : IDisposable
         var personLocationChangedEvent = await personLocationChangedEventTask;
 
         // Assert
-        Assert.NotNull(personLocationChangedEvent);
-        Assert.Equal(personId, personLocationChangedEvent.PersonId);
-        Assert.Equal(newLocation, personLocationChangedEvent.CurrentLocation);
+        personLocationChangedEvent.Should().NotBeNull();
+        personLocationChangedEvent.PersonId.Should().Be(personId);
+        personLocationChangedEvent.CurrentLocation.Should().Be(newLocation);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public sealed class PersonTests : IDisposable
         var personLocationChangedEvent = await personLocationChangedEventTask;
 
         // Assert
-        Assert.Null(personLocationChangedEvent);
+        personLocationChangedEvent.Should().BeNull();
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public sealed class PersonTests : IDisposable
         var personExpiredEvent = await personExpiredEventTask;
 
         // Assert
-        Assert.Null(personExpiredEvent);
+        personExpiredEvent.Should().BeNull();
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public sealed class PersonTests : IDisposable
         var personExpiredEvent = await personExpiredEventTask;
 
         // Assert
-        Assert.NotNull(personExpiredEvent);
-        Assert.Equal(personId, personExpiredEvent.PersonId);
+        personExpiredEvent.Should().NotBeNull();
+        personExpiredEvent.PersonId.Should().Be(personId);
     }
 
     public void Dispose()

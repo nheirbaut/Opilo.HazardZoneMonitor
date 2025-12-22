@@ -50,14 +50,14 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var floorEvent = await personAddedToFloorTask;
         var zoneEvent = await personAddedToHazardZoneTask;
 
-        Assert.NotNull(floorEvent);
-        Assert.Equal("Test Floor", floorEvent.FloorName);
-        Assert.Equal(personId, floorEvent.PersonId);
-        Assert.Equal(location, floorEvent.Location);
+        floorEvent.Should().NotBeNull();
+        floorEvent!.FloorName.Should().Be("Test Floor");
+        floorEvent.PersonId.Should().Be(personId);
+        floorEvent.Location.Should().Be(location);
 
-        Assert.NotNull(zoneEvent);
-        Assert.Equal("Test Zone", zoneEvent.HazardZoneName);
-        Assert.Equal(personId, zoneEvent.PersonId);
+        zoneEvent.Should().NotBeNull();
+        zoneEvent!.HazardZoneName.Should().Be("Test Zone");
+        zoneEvent.PersonId.Should().Be(personId);
     }
 
     [Fact]
@@ -78,13 +78,13 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var floorEvent = await personRemovedFromFloorTask;
         var zoneEvent = await personRemovedFromZoneTask;
 
-        Assert.NotNull(floorEvent);
-        Assert.Equal("Test Floor", floorEvent.FloorName);
-        Assert.Equal(personId, floorEvent.PersonId);
+        floorEvent.Should().NotBeNull();
+        floorEvent!.FloorName.Should().Be("Test Floor");
+        floorEvent.PersonId.Should().Be(personId);
 
-        Assert.NotNull(zoneEvent);
-        Assert.Equal("Test Zone", zoneEvent.HazardZoneName);
-        Assert.Equal(personId, zoneEvent.PersonId);
+        zoneEvent.Should().NotBeNull();
+        zoneEvent!.HazardZoneName.Should().Be("Test Zone");
+        zoneEvent.PersonId.Should().Be(personId);
     }
 
     [Fact]
@@ -106,14 +106,14 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var floorEvent = await personRemovedFromFloorTask;
         var zoneEvent = await personRemovedFromZoneTask;
 
-        Assert.NotNull(expiredEvent);
-        Assert.Equal(personId, expiredEvent.PersonId);
+        expiredEvent.Should().NotBeNull();
+        expiredEvent!.PersonId.Should().Be(personId);
 
-        Assert.NotNull(floorEvent);
-        Assert.Equal(personId, floorEvent.PersonId);
+        floorEvent.Should().NotBeNull();
+        floorEvent!.PersonId.Should().Be(personId);
 
-        Assert.NotNull(zoneEvent);
-        Assert.Equal(personId, zoneEvent.PersonId);
+        zoneEvent.Should().NotBeNull();
+        zoneEvent!.PersonId.Should().Be(personId);
     }
 
     [Fact]
@@ -134,8 +134,8 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(person2Id, location2));
         await Task.Delay(100); // Wait for pre-alarm timer to potentially elapse
 
-        Assert.Equal(AlarmState.None, initialState); // Was Active (no alarm)
-        Assert.True(_hazardZone.AlarmState != AlarmState.None); // Now in alarm state
+        initialState.Should().Be(AlarmState.None); // Was Active (no alarm)
+        _hazardZone.AlarmState.Should().NotBe(AlarmState.None); // Now in alarm state
     }
 
     [Fact]
@@ -148,8 +148,8 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var result1 = _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location1));
         var result2 = _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location2));
 
-        Assert.True(result1); // First location added successfully
-        Assert.True(result2); // Second location updated successfully
+        result1.Should().BeTrue(); // First location added successfully
+        result2.Should().BeTrue(); // Second location updated successfully
     }
 
     private Task<T?> WaitForEvent<T>(TimeSpan timeout) where T : IDomainEvent

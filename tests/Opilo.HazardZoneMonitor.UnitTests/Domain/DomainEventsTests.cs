@@ -18,8 +18,8 @@ public sealed class DomainEventsTests : IDisposable
         var receivedDomainEvent = await testDomainEventTask;
 
         // Assert
-        Assert.NotNull(receivedDomainEvent);
-        Assert.Equal(testDomainEvent.Id, receivedDomainEvent.Id);
+        receivedDomainEvent.Should().NotBeNull();
+        receivedDomainEvent.Id.Should().Be(testDomainEvent.Id);
     }
 
     [Fact]
@@ -29,8 +29,8 @@ public sealed class DomainEventsTests : IDisposable
         var testDomainEvent = new TestDomainEvent();
 
         // Act & Assert
-        var ex = Record.Exception(() => DomainEventDispatcher.Raise(testDomainEvent));
-        Assert.Null(ex);
+        var act = () => DomainEventDispatcher.Raise(testDomainEvent);
+        act.Should().NotThrow();
     }
 
     private sealed class TestDomainEvent : IDomainEvent
