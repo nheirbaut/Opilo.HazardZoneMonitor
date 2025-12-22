@@ -4,7 +4,6 @@ using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
-using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
@@ -113,13 +112,13 @@ internal sealed class HazardZoneBuilder
         var personsToAdd = _allowedNumberOfPersons + 1;
         var waiter = new EventCountWaiter(personsToAdd);
 
-        DomainEventDispatcher.Register<PersonAddedToHazardZoneEvent>(e => waiter.Signal(e));
+        hazardZone.PersonAddedToHazardZone += (_, e) => waiter.Signal(e.DomainEvent);
 
         foreach (var _ in Enumerable.Range(0, personsToAdd))
         {
             var personId = Guid.NewGuid();
             var insideLocation = new Location(2, 2);
-            DomainEventDispatcher.Raise(new PersonCreatedEvent(personId, insideLocation));
+            hazardZone.Handle(new PersonCreatedEvent(personId, insideLocation));
         }
 
         IdsOfPersonsAdded = waiter.Wait(TimeSpan.FromSeconds(5)).Select(e => e.PersonId).ToList();

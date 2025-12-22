@@ -2,7 +2,6 @@ using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
-using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
@@ -106,7 +105,9 @@ public sealed class FloorTests : IDisposable
         var location = new Location(2, 2);
         _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
-        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEvent>();
+        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEvent>(
+            h => _testFloor.PersonAddedToFloor += h,
+            h => _testFloor.PersonAddedToFloor -= h);
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -130,7 +131,10 @@ public sealed class FloorTests : IDisposable
         var personMovement = new PersonLocationUpdate(personId, location);
         _testFloor.TryAddPersonLocationUpdate(personMovement);
 
-        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEvent>(TimeSpan.FromMilliseconds(50));
+        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEvent>(
+            h => _testFloor.PersonAddedToFloor += h,
+            h => _testFloor.PersonAddedToFloor -= h,
+            TimeSpan.FromMilliseconds(50));
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -149,7 +153,9 @@ public sealed class FloorTests : IDisposable
         _testFloor = new Floor(ValidFloorName, s_validOutline, TimeSpan.FromMilliseconds(10));
         var personMovement = new PersonLocationUpdate(personId, location);
 
-        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>();
+        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>(
+            h => _testFloor.PersonRemovedFromFloor += h,
+            h => _testFloor.PersonRemovedFromFloor -= h);
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -174,7 +180,10 @@ public sealed class FloorTests : IDisposable
         var personMovementOffFloor = new PersonLocationUpdate(personId, locationOffFloor);
         _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
 
-        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>(TimeSpan.FromMilliseconds(10));
+        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEvent>(
+            h => _testFloor.PersonRemovedFromFloor += h,
+            h => _testFloor.PersonRemovedFromFloor -= h,
+            TimeSpan.FromMilliseconds(10));
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovementOffFloor);
@@ -197,7 +206,10 @@ public sealed class FloorTests : IDisposable
         _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
 
         var personExpiredEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>(TimeSpan.FromMilliseconds(40));
+            DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>(
+                h => Person.Expired += h,
+                h => Person.Expired -= h,
+                TimeSpan.FromMilliseconds(40));
 
         // Act
         _testFloor.Dispose();
@@ -209,7 +221,6 @@ public sealed class FloorTests : IDisposable
 
     public void Dispose()
     {
-        DomainEventDispatcher.Dispose();
         _testFloor?.Dispose();
     }
 }

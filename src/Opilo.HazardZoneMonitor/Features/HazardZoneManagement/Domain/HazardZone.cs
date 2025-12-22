@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Events;
@@ -24,6 +26,9 @@ public sealed class HazardZone : IDisposable
     public AlarmState AlarmState => _currentState.AlarmState;
     public int AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
 
+    public event EventHandler<DomainEventArgs<PersonAddedToHazardZoneEvent>>? PersonAddedToHazardZone;
+    public event EventHandler<DomainEventArgs<PersonRemovedFromHazardZoneEvent>>? PersonRemovedFromHazardZone;
+
     internal IClock Clock => _clock;
     internal ITimerFactory TimerFactory => _timerFactory;
 
@@ -46,9 +51,27 @@ public sealed class HazardZone : IDisposable
 
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
 
-        DomainEventDispatcher.Register<PersonCreatedEvent>(OnPersonCreatedEvent);
-        DomainEventDispatcher.Register<PersonExpiredEvent>(OnPersonExpiredEvent);
-        DomainEventDispatcher.Register<PersonLocationChangedEvent>(OnPersonLocationChangedEvent);
+        Person.Created += OnPersonCreatedEvent;
+        Person.Expired += OnPersonExpiredEvent;
+        Person.LocationChanged += OnPersonLocationChangedEvent;
+    }
+
+    public void Handle(PersonCreatedEvent personCreatedEvent)
+    {
+        ArgumentNullException.ThrowIfNull(personCreatedEvent);
+        HandlePersonCreatedEvent(personCreatedEvent);
+    }
+
+    public void Handle(PersonExpiredEvent personExpiredEvent)
+    {
+        ArgumentNullException.ThrowIfNull(personExpiredEvent);
+        HandlePersonExpiredEvent(personExpiredEvent);
+    }
+
+    public void Handle(PersonLocationChangedEvent personLocationChangedEvent)
+    {
+        ArgumentNullException.ThrowIfNull(personLocationChangedEvent);
+        HandlePersonLocationChangedEvent(personLocationChangedEvent);
     }
 
     public void ManuallyActivate()
@@ -95,7 +118,22 @@ public sealed class HazardZone : IDisposable
         lock (_zoneStateLock) _currentState.OnPreAlarmTimerElapsed();
     }
 
-    private void OnPersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
+    private void OnPersonCreatedEvent(object? _, DomainEventArgs<PersonCreatedEvent> args)
+    {
+        HandlePersonCreatedEvent(args.DomainEvent);
+    }
+
+    private void OnPersonExpiredEvent(object? _, DomainEventArgs<PersonExpiredEvent> args)
+    {
+        HandlePersonExpiredEvent(args.DomainEvent);
+    }
+
+    private void OnPersonLocationChangedEvent(object? _, DomainEventArgs<PersonLocationChangedEvent> args)
+    {
+        HandlePersonLocationChangedEvent(args.DomainEvent);
+    }
+
+    private void HandlePersonCreatedEvent(PersonCreatedEvent personCreatedEvent)
     {
         lock (_zoneStateLock)
         {
@@ -106,20 +144,38 @@ public sealed class HazardZone : IDisposable
         }
     }
 
-    private void OnPersonExpiredEvent(PersonExpiredEvent personExpiredEvent)
+    private void HandlePersonExpiredEvent(PersonExpiredEvent personExpiredEvent)
     {
         lock (_zoneStateLock) _currentState.OnPersonRemovedFromHazardZone(personExpiredEvent.PersonId);
     }
 
-    private void OnPersonLocationChangedEvent(PersonLocationChangedEvent personLocationChangedEvent)
+    private void HandlePersonLocationChangedEvent(PersonLocationChangedEvent personLocationChangedEvent)
     {
         lock (_zoneStateLock)
             _currentState.OnPersonChangedLocation(personLocationChangedEvent.PersonId,
                 personLocationChangedEvent.CurrentLocation);
     }
 
+    internal void RaisePersonAddedToHazardZone(Guid personId)
+    {
+        var handlers = PersonAddedToHazardZone;
+        handlers?.Invoke(this,
+            new DomainEventArgs<PersonAddedToHazardZoneEvent>(new PersonAddedToHazardZoneEvent(personId, Name)));
+    }
+
+    internal void RaisePersonRemovedFromHazardZone(Guid personId)
+    {
+        var handlers = PersonRemovedFromHazardZone;
+        handlers?.Invoke(this,
+            new DomainEventArgs<PersonRemovedFromHazardZoneEvent>(new PersonRemovedFromHazardZoneEvent(personId, Name)));
+    }
+
     public void Dispose()
     {
+        Person.Created -= OnPersonCreatedEvent;
+        Person.Expired -= OnPersonExpiredEvent;
+        Person.LocationChanged -= OnPersonLocationChangedEvent;
+
         _currentState.Dispose();
     }
 }

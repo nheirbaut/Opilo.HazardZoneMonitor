@@ -1,13 +1,17 @@
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
-using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Time;
 
 namespace Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 
 public sealed class Person : IDisposable
 {
+    public static event EventHandler<DomainEventArgs<PersonCreatedEvent>>? Created;
+    public static event EventHandler<DomainEventArgs<PersonLocationChangedEvent>>? LocationChanged;
+    public static event EventHandler<DomainEventArgs<PersonExpiredEvent>>? Expired;
+
     private readonly IClock _clock;
     private readonly Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer _expiryTimer;
     private DateTime _lastHeartbeatUtc;
@@ -18,7 +22,7 @@ public sealed class Person : IDisposable
     public static Person Create(Guid id, Location location, TimeSpan lifespanTimeout)
     {
         var person = new Person(id, location, lifespanTimeout, new SystemClock(), new SystemTimerFactory());
-        DomainEventDispatcher.Raise(new PersonCreatedEvent(id, location));
+        OnCreated(new PersonCreatedEvent(id, location));
         return person;
     }
 
@@ -28,7 +32,7 @@ public sealed class Person : IDisposable
         ArgumentNullException.ThrowIfNull(timerFactory);
 
         var person = new Person(id, location, lifespanTimeout, clock, timerFactory);
-        DomainEventDispatcher.Raise(new PersonCreatedEvent(id, location));
+        OnCreated(new PersonCreatedEvent(id, location));
         return person;
     }
 
@@ -42,7 +46,7 @@ public sealed class Person : IDisposable
             return;
 
         Location = newLocation;
-        DomainEventDispatcher.Raise(new PersonLocationChangedEvent(Id, Location));
+        OnLocationChanged(new PersonLocationChangedEvent(Id, Location));
     }
 
     private Person(Guid id, Location initialLocation, TimeSpan timeout, IClock clock, ITimerFactory timerFactory)
@@ -62,13 +66,31 @@ public sealed class Person : IDisposable
         if (_clock.UtcNow < _lastHeartbeatUtc.Add(_expiryTimer.Interval))
             return;
 
-        DomainEventDispatcher.Raise(new PersonExpiredEvent(Id));
+        OnExpired(new PersonExpiredEvent(Id));
         _expiryTimer.Stop();
     }
 
     public void Dispose()
     {
         _expiryTimer.Dispose();
+    }
+
+    private static void OnCreated(PersonCreatedEvent e)
+    {
+        var handlers = Created;
+        handlers?.Invoke(null, new DomainEventArgs<PersonCreatedEvent>(e));
+    }
+
+    private static void OnLocationChanged(PersonLocationChangedEvent e)
+    {
+        var handlers = LocationChanged;
+        handlers?.Invoke(null, new DomainEventArgs<PersonLocationChangedEvent>(e));
+    }
+
+    private static void OnExpired(PersonExpiredEvent e)
+    {
+        var handlers = Expired;
+        handlers?.Invoke(null, new DomainEventArgs<PersonExpiredEvent>(e));
     }
 }
 

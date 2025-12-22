@@ -1,5 +1,6 @@
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
@@ -19,6 +20,9 @@ public sealed class Floor : IDisposable
     public string Name { get; }
     public Outline Outline { get; }
 
+    public event EventHandler<DomainEventArgs<PersonAddedToFloorEvent>>? PersonAddedToFloor;
+    public event EventHandler<DomainEventArgs<PersonRemovedFromFloorEvent>>? PersonRemovedFromFloor;
+
     public Floor(string name, Outline outline, TimeSpan? personLifespan = null)
     {
         Guard.Against.NullOrWhiteSpace(name);
@@ -28,12 +32,12 @@ public sealed class Floor : IDisposable
         Outline = outline;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
 
-        DomainEventDispatcher.Register<PersonExpiredEvent>(OnPersonExpired);
+        Person.Expired += OnPersonExpired;
     }
 
-    private void OnPersonExpired(PersonExpiredEvent personExpiredEvent)
+    private void OnPersonExpired(object? _, DomainEventArgs<PersonExpiredEvent> args)
     {
-        RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(personExpiredEvent.PersonId);
+        RemovePersonFromFloorAndRaisePersonRemovedFromFloorEvent(args.DomainEvent.PersonId);
     }
 
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
@@ -63,8 +67,9 @@ public sealed class Floor : IDisposable
                 TrackedPerson.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan));
         }
 
-        DomainEventDispatcher.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId,
-            personLocationUpdate.Location));
+        var addedHandlers = PersonAddedToFloor;
+        addedHandlers?.Invoke(this, new DomainEventArgs<PersonAddedToFloorEvent>(
+            new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId, personLocationUpdate.Location)));
 
         return true;
     }
@@ -74,7 +79,11 @@ public sealed class Floor : IDisposable
         lock (_personsOnFloorLock)
         {
             if (_personsOnFloor.Remove(personId, out _))
-                DomainEventDispatcher.Raise(new PersonRemovedFromFloorEvent(Name, personId));
+            {
+                var removedHandlers = PersonRemovedFromFloor;
+                removedHandlers?.Invoke(this,
+                    new DomainEventArgs<PersonRemovedFromFloorEvent>(new PersonRemovedFromFloorEvent(Name, personId)));
+            }
         }
     }
 
@@ -84,6 +93,8 @@ public sealed class Floor : IDisposable
             return;
 
         _disposed = true;
+
+        Person.Expired -= OnPersonExpired;
 
         foreach (var (_, person) in _personsOnFloor)
             person.Dispose();

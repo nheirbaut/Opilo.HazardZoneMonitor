@@ -1,8 +1,8 @@
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
-using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Shared.Events;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -35,16 +35,24 @@ public sealed class PersonTests : IDisposable
         var location = new Location(0, 0);
         var timeout = TimeSpan.FromSeconds(1);
         var receivedEvents = new List<PersonCreatedEvent>();
-        DomainEventDispatcher.Register<PersonCreatedEvent>(e => receivedEvents.Add(e));
+        EventHandler<DomainEventArgs<PersonCreatedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
+        Person.Created += handler;
 
-        // Act
-        _testPerson = Person.Create(personId, location, timeout);
-        var personCreatedEvent = receivedEvents.Single();
+        try
+        {
+            // Act
+            _testPerson = Person.Create(personId, location, timeout);
+            var personCreatedEvent = receivedEvents.Single();
 
-        // Assert
-        personCreatedEvent.Should().NotBeNull();
-        personCreatedEvent.PersonId.Should().Be(personId);
-        personCreatedEvent.Location.Should().Be(location);
+            // Assert
+            personCreatedEvent.Should().NotBeNull();
+            personCreatedEvent.PersonId.Should().Be(personId);
+            personCreatedEvent.Location.Should().Be(location);
+        }
+        finally
+        {
+            Person.Created -= handler;
+        }
     }
 
     [Fact]
@@ -56,18 +64,26 @@ public sealed class PersonTests : IDisposable
         var newLocation = new Location(1, 1);
         var timeout = TimeSpan.FromSeconds(1);
         var receivedEvents = new List<PersonLocationChangedEvent>();
-        DomainEventDispatcher.Register<PersonLocationChangedEvent>(e => receivedEvents.Add(e));
+        EventHandler<DomainEventArgs<PersonLocationChangedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
+        Person.LocationChanged += handler;
 
-        _testPerson = Person.Create(personId, initialLocation, timeout);
+        try
+        {
+            _testPerson = Person.Create(personId, initialLocation, timeout);
 
-        // Act
-        _testPerson.UpdateLocation(newLocation);
-        var personLocationChangedEvent = receivedEvents.Single();
+            // Act
+            _testPerson.UpdateLocation(newLocation);
+            var personLocationChangedEvent = receivedEvents.Single();
 
-        // Assert
-        personLocationChangedEvent.Should().NotBeNull();
-        personLocationChangedEvent.PersonId.Should().Be(personId);
-        personLocationChangedEvent.CurrentLocation.Should().Be(newLocation);
+            // Assert
+            personLocationChangedEvent.Should().NotBeNull();
+            personLocationChangedEvent.PersonId.Should().Be(personId);
+            personLocationChangedEvent.CurrentLocation.Should().Be(newLocation);
+        }
+        finally
+        {
+            Person.LocationChanged -= handler;
+        }
     }
 
     [Fact]
@@ -79,15 +95,24 @@ public sealed class PersonTests : IDisposable
         var timeout = TimeSpan.FromSeconds(1);
 
         var receivedEvents = new List<PersonLocationChangedEvent>();
-        DomainEventDispatcher.Register<PersonLocationChangedEvent>(e => receivedEvents.Add(e));
-        _testPerson = Person.Create(personId, testLocation, timeout);
+        EventHandler<DomainEventArgs<PersonLocationChangedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
+        Person.LocationChanged += handler;
 
-        // Act
-        _testPerson.UpdateLocation(testLocation);
-        var personLocationChangedEvent = receivedEvents.SingleOrDefault();
+        try
+        {
+            _testPerson = Person.Create(personId, testLocation, timeout);
 
-        // Assert
-        personLocationChangedEvent.Should().BeNull();
+            // Act
+            _testPerson.UpdateLocation(testLocation);
+            var personLocationChangedEvent = receivedEvents.SingleOrDefault();
+
+            // Assert
+            personLocationChangedEvent.Should().BeNull();
+        }
+        finally
+        {
+            Person.LocationChanged -= handler;
+        }
     }
 
     [Fact]
@@ -102,22 +127,30 @@ public sealed class PersonTests : IDisposable
         var timerFactory = new FakeTimerFactory(clock);
 
         var expiredEvents = new List<PersonExpiredEvent>();
-        DomainEventDispatcher.Register<PersonExpiredEvent>(e => expiredEvents.Add(e));
+        EventHandler<DomainEventArgs<PersonExpiredEvent>> handler = (_, e) => expiredEvents.Add(e.DomainEvent);
+        Person.Expired += handler;
 
-        _testPerson = Person.Create(personId, testLocation, timeout, clock, timerFactory);
-        clock.AdvanceBy(TimeSpan.FromMilliseconds(75));
+        try
+        {
+            _testPerson = Person.Create(personId, testLocation, timeout, clock, timerFactory);
+            clock.AdvanceBy(TimeSpan.FromMilliseconds(75));
 
-        // Act
-        _testPerson.UpdateLocation(testLocation);
-        clock.AdvanceBy(TimeSpan.FromMilliseconds(75)); // total 150ms from create
+            // Act
+            _testPerson.UpdateLocation(testLocation);
+            clock.AdvanceBy(TimeSpan.FromMilliseconds(75)); // total 150ms from create
 
-        // Assert
-        expiredEvents.Should().BeEmpty();
+            // Assert
+            expiredEvents.Should().BeEmpty();
 
-        // And after enough time, it expires exactly once
-        clock.AdvanceBy(TimeSpan.FromMilliseconds(30)); // total 180ms (> 175ms expected)
-        expiredEvents.Should().ContainSingle();
-        expiredEvents.Single().PersonId.Should().Be(personId);
+            // And after enough time, it expires exactly once
+            clock.AdvanceBy(TimeSpan.FromMilliseconds(30)); // total 180ms (> 175ms expected)
+            expiredEvents.Should().ContainSingle();
+            expiredEvents.Single().PersonId.Should().Be(personId);
+        }
+        finally
+        {
+            Person.Expired -= handler;
+        }
     }
 
     [Fact]
@@ -132,24 +165,30 @@ public sealed class PersonTests : IDisposable
         var timerFactory = new FakeTimerFactory(clock);
 
         var expiredEvents = new List<PersonExpiredEvent>();
-        DomainEventDispatcher.Register<PersonExpiredEvent>(e => expiredEvents.Add(e));
+        EventHandler<DomainEventArgs<PersonExpiredEvent>> handler = (_, e) => expiredEvents.Add(e.DomainEvent);
+        Person.Expired += handler;
 
-        _testPerson = Person.Create(personId, location, lifespanTimeout, clock, timerFactory);
+        try
+        {
+            _testPerson = Person.Create(personId, location, lifespanTimeout, clock, timerFactory);
 
-        // Act
-        clock.AdvanceBy(lifespanTimeout);
-        var personExpiredEvent = expiredEvents.Single();
+            // Act
+            clock.AdvanceBy(lifespanTimeout);
+            var personExpiredEvent = expiredEvents.Single();
 
-        // Assert
-        personExpiredEvent.Should().NotBeNull();
-        personExpiredEvent.PersonId.Should().Be(personId);
+            // Assert
+            personExpiredEvent.Should().NotBeNull();
+            personExpiredEvent.PersonId.Should().Be(personId);
+        }
+        finally
+        {
+            Person.Expired -= handler;
+        }
     }
 
     public void Dispose()
     {
         _testPerson?.Dispose();
         _testPerson = null;
-
-        DomainEventDispatcher.Dispose();
     }
 }
