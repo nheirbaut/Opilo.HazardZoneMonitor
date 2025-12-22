@@ -1,4 +1,4 @@
-﻿using Opilo.HazardZoneMonitor.Enums;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Entities.HazardZoneState;
 

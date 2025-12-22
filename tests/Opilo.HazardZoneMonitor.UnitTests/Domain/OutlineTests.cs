@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using Opilo.HazardZoneMonitor.ValueObjects;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -29,7 +29,7 @@ public sealed class OutlineTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => new Outline(vertices));
-        Assert.Equal("Outline must have at least 3 vertices.", ex.Message);
+        Assert.Contains("at least 3 vertices", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]

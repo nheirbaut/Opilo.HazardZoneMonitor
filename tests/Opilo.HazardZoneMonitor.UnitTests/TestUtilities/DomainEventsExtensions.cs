@@ -1,5 +1,5 @@
-﻿using Opilo.HazardZoneMonitor.Events;
-using Opilo.HazardZoneMonitor.Services;
+using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Shared.Events;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
@@ -9,7 +9,7 @@ internal static class DomainEventsExtensions
         where TDomainEvent : IDomainEvent
     {
         var tcs = new TaskCompletionSource<TDomainEvent>();
-        DomainEvents.Register<TDomainEvent>(domainEvent => tcs.TrySetResult(domainEvent));
+        DomainEventDispatcher.Register<TDomainEvent>(domainEvent => tcs.TrySetResult(domainEvent));
 
         try
         {

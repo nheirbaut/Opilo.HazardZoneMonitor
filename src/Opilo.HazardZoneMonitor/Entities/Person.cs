@@ -1,7 +1,7 @@
 ﻿using System.Timers;
 using Opilo.HazardZoneMonitor.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Services;
-using Opilo.HazardZoneMonitor.ValueObjects;
+using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Timer = System.Timers.Timer;
 
 namespace Opilo.HazardZoneMonitor.Entities;
@@ -17,7 +17,7 @@ public sealed class Person : IDisposable
     public static Person Create(Guid id, Location location, TimeSpan lifespanTimeout)
     {
         var person = new Person(id, location, lifespanTimeout);
-        DomainEvents.Raise(new PersonCreatedEvent(id, location));
+        DomainEventDispatcher.Raise(new PersonCreatedEvent(id, location));
         return person;
     }
 
@@ -31,7 +31,7 @@ public sealed class Person : IDisposable
             return;
 
         Location = newLocation;
-        DomainEvents.Raise(new PersonLocationChangedEvent(Id, Location));
+        DomainEventDispatcher.Raise(new PersonLocationChangedEvent(Id, Location));
     }
 
     private Person(Guid id, Location initialLocation, TimeSpan timeout)
@@ -49,7 +49,7 @@ public sealed class Person : IDisposable
         if (DateTime.UtcNow < _initialTime.AddMilliseconds(_expiryTimer.Interval))
             return;
 
-        DomainEvents.Raise(new PersonExpiredEvent(Id));
+        DomainEventDispatcher.Raise(new PersonExpiredEvent(Id));
         _expiryTimer.Stop();
     }
 

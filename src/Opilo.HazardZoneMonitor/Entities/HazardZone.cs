@@ -1,10 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿﻿using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Entities.HazardZoneState;
-using Opilo.HazardZoneMonitor.Enums;
 using Opilo.HazardZoneMonitor.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Services;
-using Opilo.HazardZoneMonitor.ValueObjects;
+using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Entities;
 
@@ -32,9 +31,9 @@ public sealed class HazardZone : IDisposable
 
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
 
-        DomainEvents.Register<PersonCreatedEvent>(OnPersonCreatedEvent);
-        DomainEvents.Register<PersonExpiredEvent>(OnPersonExpiredEvent);
-        DomainEvents.Register<PersonLocationChangedEvent>(OnPersonLocationChangedEvent);
+        DomainEventDispatcher.Register<PersonCreatedEvent>(OnPersonCreatedEvent);
+        DomainEventDispatcher.Register<PersonExpiredEvent>(OnPersonExpiredEvent);
+        DomainEventDispatcher.Register<PersonLocationChangedEvent>(OnPersonLocationChangedEvent);
     }
 
     public void ManuallyActivate()

@@ -1,24 +1,25 @@
-﻿using Opilo.HazardZoneMonitor.Events;
+﻿﻿using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Shared.Events;
 
 namespace Opilo.HazardZoneMonitor.Services;
 
+#pragma warning disable S1133 // Deprecated code should be removed eventually
+[Obsolete("Use DomainEventDispatcher from Opilo.HazardZoneMonitor.Shared.Events instead")]
 public static class DomainEvents
 {
-    private static DomainEventsImplementation? s_instance = new();
-
     public static void Register<T>(Action<T> handler) where T : IDomainEvent
     {
-        s_instance?.Register(handler);
+        DomainEventDispatcher.Register(handler);
     }
 
     public static void Raise<T>(T domainEvent) where T : IDomainEvent
     {
-        s_instance?.Raise(domainEvent);
+        DomainEventDispatcher.Raise(domainEvent);
     }
 
     public static void Dispose()
     {
-        s_instance?.Dispose();
-        s_instance = new DomainEventsImplementation();
+        DomainEventDispatcher.Dispose();
     }
 }
+#pragma warning restore S1133

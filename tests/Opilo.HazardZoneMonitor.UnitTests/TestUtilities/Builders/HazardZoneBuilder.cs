@@ -1,8 +1,8 @@
-﻿using Opilo.HazardZoneMonitor.Entities;
+using Opilo.HazardZoneMonitor.Entities;
 using Opilo.HazardZoneMonitor.Events.HazardZoneEvents;
 using Opilo.HazardZoneMonitor.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Services;
-using Opilo.HazardZoneMonitor.ValueObjects;
+using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
 
@@ -99,13 +99,13 @@ internal sealed class HazardZoneBuilder
         var personsToAdd = _allowedNumberOfPersons + 1;
         var waiter = new EventCountWaiter(personsToAdd);
 
-        DomainEvents.Register<PersonAddedToHazardZoneEvent>(e => waiter.Signal(e));
+        DomainEventDispatcher.Register<PersonAddedToHazardZoneEvent>(e => waiter.Signal(e));
 
         foreach (var _ in Enumerable.Range(0, personsToAdd))
         {
             var personId = Guid.NewGuid();
             var insideLocation = new Location(2, 2);
-            DomainEvents.Raise(new PersonCreatedEvent(personId, insideLocation));
+            DomainEventDispatcher.Raise(new PersonCreatedEvent(personId, insideLocation));
         }
 
         IdsOfPersonsAdded = waiter.Wait(TimeSpan.FromSeconds(5)).Select(e => e.PersonId).ToList();

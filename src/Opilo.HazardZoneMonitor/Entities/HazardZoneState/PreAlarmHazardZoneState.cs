@@ -1,5 +1,5 @@
-﻿using System.Timers;
-using Opilo.HazardZoneMonitor.Enums;
+using System.Timers;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Timer = System.Timers.Timer;
 
 namespace Opilo.HazardZoneMonitor.Entities.HazardZoneState;

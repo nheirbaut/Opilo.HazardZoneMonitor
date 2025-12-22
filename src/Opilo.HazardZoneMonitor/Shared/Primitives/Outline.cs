@@ -1,7 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿﻿using System.Collections.ObjectModel;
 using Ardalis.GuardClauses;
 
-namespace Opilo.HazardZoneMonitor.ValueObjects;
+#pragma warning disable CA1716 // Identifiers should not match keywords - "Shared" is intentional for architecture
+
+namespace Opilo.HazardZoneMonitor.Shared.Primitives;
 
 public sealed class Outline
 {
@@ -60,3 +62,4 @@ public sealed class Outline
     private static double IsLeft(Location v1, Location v2, Location point)
         => (v2.X - v1.X) * (point.Y - v1.Y) - (point.X - v1.X) * (v2.Y - v1.Y);
 }
+

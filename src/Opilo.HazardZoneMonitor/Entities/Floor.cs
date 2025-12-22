@@ -1,8 +1,8 @@
-﻿using Ardalis.GuardClauses;
+﻿﻿using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Events.FloorEvents;
 using Opilo.HazardZoneMonitor.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Services;
-using Opilo.HazardZoneMonitor.ValueObjects;
+using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Entities;
 
@@ -27,7 +27,7 @@ public sealed class Floor : IDisposable
         Outline = outline;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
 
-        DomainEvents.Register<PersonExpiredEvent>(OnPersonExpired);
+        DomainEventDispatcher.Register<PersonExpiredEvent>(OnPersonExpired);
     }
 
     private void OnPersonExpired(PersonExpiredEvent personExpiredEvent)
@@ -62,7 +62,7 @@ public sealed class Floor : IDisposable
                 Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan));
         }
 
-        DomainEvents.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId,
+        DomainEventDispatcher.Raise(new PersonAddedToFloorEvent(Name, personLocationUpdate.PersonId,
             personLocationUpdate.Location));
 
         return true;
@@ -73,7 +73,7 @@ public sealed class Floor : IDisposable
         lock (_personsOnFloorLock)
         {
             if (_personsOnFloor.Remove(personId, out _))
-                DomainEvents.Raise(new PersonRemovedFromFloorEvent(Name, personId));
+                DomainEventDispatcher.Raise(new PersonRemovedFromFloorEvent(Name, personId));
         }
     }
 

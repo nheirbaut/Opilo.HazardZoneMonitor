@@ -1,5 +1,5 @@
-﻿using Opilo.HazardZoneMonitor.Events;
-using Opilo.HazardZoneMonitor.Services;
+﻿using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
@@ -14,7 +14,7 @@ public sealed class DomainEventsTests : IDisposable
         var testDomainEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<TestDomainEvent>();
 
         // Act
-        DomainEvents.Raise(testDomainEvent);
+        DomainEventDispatcher.Raise(testDomainEvent);
         var receivedDomainEvent = await testDomainEventTask;
 
         // Assert
@@ -29,7 +29,7 @@ public sealed class DomainEventsTests : IDisposable
         var testDomainEvent = new TestDomainEvent();
 
         // Act & Assert
-        var ex = Record.Exception(() => DomainEvents.Raise(testDomainEvent));
+        var ex = Record.Exception(() => DomainEventDispatcher.Raise(testDomainEvent));
         Assert.Null(ex);
     }
 
@@ -40,6 +40,6 @@ public sealed class DomainEventsTests : IDisposable
 
     public void Dispose()
     {
-        DomainEvents.Dispose();
+        DomainEventDispatcher.Dispose();
     }
 }

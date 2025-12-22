@@ -1,7 +1,6 @@
-﻿using Opilo.HazardZoneMonitor.Enums;
-using Opilo.HazardZoneMonitor.Events.HazardZoneEvents;
-using Opilo.HazardZoneMonitor.Services;
-using Opilo.HazardZoneMonitor.ValueObjects;
+﻿﻿using Opilo.HazardZoneMonitor.Events.HazardZoneEvents;
+using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Entities.HazardZoneState;
 
@@ -28,7 +27,7 @@ internal abstract class HazardZoneStateBase(
     public void OnPersonAddedToHazardZone(Guid personId)
     {
         if (PersonsInZone.Add(personId))
-            DomainEvents.Raise(new PersonAddedToHazardZoneEvent(personId, HazardZone.Name));
+            DomainEventDispatcher.Raise(new PersonAddedToHazardZoneEvent(personId, HazardZone.Name));
 
         OnPersonAddedToHazardZone();
     }
@@ -36,7 +35,7 @@ internal abstract class HazardZoneStateBase(
     public void OnPersonRemovedFromHazardZone(Guid personId)
     {
         if (PersonsInZone.Remove(personId))
-            DomainEvents.Raise(new PersonRemovedFromHazardZoneEvent(personId, HazardZone.Name));
+            DomainEventDispatcher.Raise(new PersonRemovedFromHazardZoneEvent(personId, HazardZone.Name));
 
         OnPersonRemovedFromHazardZone();
     }

@@ -1,9 +1,9 @@
-﻿using Opilo.HazardZoneMonitor.Entities;
+using Opilo.HazardZoneMonitor.Entities;
 using Opilo.HazardZoneMonitor.Events.PersonEvents;
 using Opilo.HazardZoneMonitor.Events.FloorEvents;
-using Opilo.HazardZoneMonitor.Services;
+using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
-using Opilo.HazardZoneMonitor.ValueObjects;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -204,7 +204,7 @@ public sealed class FloorTests : IDisposable
 
     public void Dispose()
     {
-        DomainEvents.Dispose();
+        DomainEventDispatcher.Dispose();
         _testFloor?.Dispose();
     }
 }

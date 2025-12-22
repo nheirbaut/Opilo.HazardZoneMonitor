@@ -1,51 +1,31 @@
-﻿using System.Collections.Concurrent;
-using Opilo.HazardZoneMonitor.Events;
+﻿﻿using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Shared.Events;
 
 namespace Opilo.HazardZoneMonitor.Services;
 
+#pragma warning disable S1133 // Deprecated code should be removed eventually
+#pragma warning disable S2325 // Make methods static - Cannot be static as this is a wrapper for backward compatibility
+#pragma warning disable CA1812 // Internal class is instantiated via reflection
+[Obsolete("Use DomainEventDispatcherImplementation from Opilo.HazardZoneMonitor.Shared.Events instead")]
 internal sealed class DomainEventsImplementation : IDisposable
 {
-    private readonly ConcurrentDictionary<Type, List<Delegate>> _handlers = new();
-    private readonly BlockingCollection<IDomainEvent> _domainEvents = [];
-    private readonly TaskCompletionSource<bool> _consumerStarted = new();
-    private volatile bool _disposed;
+    private readonly DomainEventDispatcherImplementation _implementation = new();
 
     public void Register<T>(Action<T> domainEventHandler) where T : IDomainEvent
     {
-        if (_disposed)
-            return;
-
-        var eventType = typeof(T);
-        var handlersForType = _handlers.GetOrAdd(eventType, _ => []);
-        handlersForType.Add(domainEventHandler);
+        DomainEventDispatcher.Register(domainEventHandler);
     }
 
     public void Raise<T>(T domainEvent) where T : IDomainEvent
     {
-        if (_disposed)
-            return;
-
-        // Ensure the background thread is actually ready
-        _consumerStarted.Task.GetAwaiter().GetResult();
-
-        _domainEvents.Add(domainEvent);
+        DomainEventDispatcher.Raise(domainEvent);
     }
 
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-
-        _handlers.Clear();
-        ClearDomainEvents();
-        _domainEvents.Dispose();
-    }
-
-    private void ClearDomainEvents()
-    {
-        while (_domainEvents.TryTake(out _))
-        {
-            // Discard
-        }
+        _implementation.Dispose();
     }
 }
+#pragma warning restore CA1812
+#pragma warning restore S2325
+#pragma warning restore S1133

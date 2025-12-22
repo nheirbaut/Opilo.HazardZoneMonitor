@@ -1,8 +1,8 @@
-﻿using Opilo.HazardZoneMonitor.Entities;
+using Opilo.HazardZoneMonitor.Entities;
 using Opilo.HazardZoneMonitor.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Services;
+using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
-using Opilo.HazardZoneMonitor.ValueObjects;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -131,6 +131,6 @@ public sealed class PersonTests : IDisposable
         _testPerson?.Dispose();
         _testPerson = null;
 
-        DomainEvents.Dispose();
+        DomainEventDispatcher.Dispose();
     }
 }

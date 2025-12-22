@@ -1,11 +1,10 @@
 ﻿using Opilo.HazardZoneMonitor.Entities;
 using Opilo.HazardZoneMonitor.Events.HazardZoneEvents;
-using Opilo.HazardZoneMonitor.Enums;
 using Opilo.HazardZoneMonitor.Events.PersonEvents;
-using Opilo.HazardZoneMonitor.Services;
+using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
-using Opilo.HazardZoneMonitor.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
@@ -72,7 +71,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -93,7 +92,7 @@ public sealed class HazardZoneTests : IDisposable
                 .RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromMilliseconds(50));
 
         // Act
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -107,12 +106,12 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         var personRemovedFromHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(new PersonExpiredEvent(personCreatedEvent.PersonId));
+        DomainEventDispatcher.Raise(new PersonExpiredEvent(personCreatedEvent.PersonId));
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -128,14 +127,14 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedOutsideHazardZone(hazardZone);
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
 
         var personRemovedFromHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
                 TimeSpan.FromMilliseconds(40));
 
         // Act
-        DomainEvents.Raise(new PersonExpiredEvent(personCreatedEvent.PersonId));
+        DomainEventDispatcher.Raise(new PersonExpiredEvent(personCreatedEvent.PersonId));
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -153,7 +152,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personLocationChangedEvent);
+        DomainEventDispatcher.Raise(personLocationChangedEvent);
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -174,7 +173,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromMilliseconds(40));
 
         // Act
-        DomainEvents.Raise(personLocationChangedEvent);
+        DomainEventDispatcher.Raise(personLocationChangedEvent);
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -189,7 +188,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var initialPersonLocationChangedEvent =
             PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
-        DomainEvents.Raise(initialPersonLocationChangedEvent);
+        DomainEventDispatcher.Raise(initialPersonLocationChangedEvent);
 
         var newPersonLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(
             hazardZone,
@@ -199,7 +198,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(newPersonLocationChangedEvent);
+        DomainEventDispatcher.Raise(newPersonLocationChangedEvent);
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -220,7 +219,7 @@ public sealed class HazardZoneTests : IDisposable
         var initialPersonLocationChangedEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonLocationChangedEvent>();
 
-        DomainEvents.Raise(initialPersonLocationChangedEvent);
+        DomainEventDispatcher.Raise(initialPersonLocationChangedEvent);
         await initialPersonLocationChangedEventTask;
 
         var newLocation = new Location(3, 3);
@@ -232,7 +231,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromMilliseconds(40));
 
         // Act
-        DomainEvents.Raise(new PersonLocationChangedEvent(initialPersonLocationChangedEvent.PersonId, newLocation));
+        DomainEventDispatcher.Raise(new PersonLocationChangedEvent(initialPersonLocationChangedEvent.PersonId, newLocation));
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
@@ -364,7 +363,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -384,7 +383,7 @@ public sealed class HazardZoneTests : IDisposable
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Act
@@ -408,7 +407,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -428,7 +427,7 @@ public sealed class HazardZoneTests : IDisposable
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Act
@@ -453,7 +452,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -474,7 +473,7 @@ public sealed class HazardZoneTests : IDisposable
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Act
@@ -584,14 +583,14 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
         var personId = Guid.NewGuid();
         var initialEvent = new PersonCreatedEvent(personId, new Location(2, 2));
-        DomainEvents.Raise(initialEvent);
+        DomainEventDispatcher.Raise(initialEvent);
         await DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         var moveEvent = new PersonLocationChangedEvent(personId, new Location(20, 20));
         var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(moveEvent);
+        DomainEventDispatcher.Raise(moveEvent);
         await removedEventTask;
 
         // Assert
@@ -614,7 +613,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var secondPersonAddedToHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
-        DomainEvents.Raise(new PersonCreatedEvent(Guid.NewGuid(), new Location(2, 2)));
+        DomainEventDispatcher.Raise(new PersonCreatedEvent(Guid.NewGuid(), new Location(2, 2)));
 
         var secondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
         Assert.NotNull(secondPersonAddedToHazardZoneEvent);
@@ -624,7 +623,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(firstPersonExpiredEvent);
+        DomainEventDispatcher.Raise(firstPersonExpiredEvent);
         var personRemovedFromHazardZoneEvent = await firstPersonRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -681,7 +680,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personExpiredEvent);
+        DomainEventDispatcher.Raise(personExpiredEvent);
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -772,7 +771,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -793,7 +792,7 @@ public sealed class HazardZoneTests : IDisposable
         var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(moveEvent);
+        DomainEventDispatcher.Raise(moveEvent);
         await removedEventTask;
 
         // Assert
@@ -810,14 +809,14 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(0)
             .Build();
         var additionalPersonId = Guid.NewGuid();
-        DomainEvents.Raise(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
+        DomainEventDispatcher.Raise(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
         await DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         var moveEvent = new PersonLocationChangedEvent(additionalPersonId, new Location(20, 20));
         var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(moveEvent);
+        DomainEventDispatcher.Raise(moveEvent);
         await removedEventTask;
 
         // Assert
@@ -856,7 +855,7 @@ public sealed class HazardZoneTests : IDisposable
         var newPersonId = Guid.NewGuid();
         var personAddedToHazardZoneEventTask =
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
-        DomainEvents.Raise(new PersonCreatedEvent(newPersonId, new Location(2, 2)));
+        DomainEventDispatcher.Raise(new PersonCreatedEvent(newPersonId, new Location(2, 2)));
 
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
         Assert.NotNull(personAddedToHazardZoneEvent);
@@ -865,7 +864,7 @@ public sealed class HazardZoneTests : IDisposable
         var personExpiredEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>();
 
         // Act
-        DomainEvents.Raise(new PersonExpiredEvent(newPersonId));
+        DomainEventDispatcher.Raise(new PersonExpiredEvent(newPersonId));
         await personExpiredEventTask;
 
         // Assert
@@ -920,7 +919,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personExpiredEvent);
+        DomainEventDispatcher.Raise(personExpiredEvent);
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -993,7 +992,7 @@ public sealed class HazardZoneTests : IDisposable
             DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(personCreatedEvent);
+        DomainEventDispatcher.Raise(personCreatedEvent);
         await personAddedToHazardZoneEventTask;
 
         // Assert
@@ -1014,7 +1013,7 @@ public sealed class HazardZoneTests : IDisposable
         var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(moveEvent);
+        DomainEventDispatcher.Raise(moveEvent);
         await removedEventTask;
 
         // Assert
@@ -1031,14 +1030,14 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(0)
             .Build();
         var additionalPersonId = Guid.NewGuid();
-        DomainEvents.Raise(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
+        DomainEventDispatcher.Raise(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
         await DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>();
 
         var moveEvent = new PersonLocationChangedEvent(additionalPersonId, new Location(20, 20));
         var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>();
 
         // Act
-        DomainEvents.Raise(moveEvent);
+        DomainEventDispatcher.Raise(moveEvent);
         await removedEventTask;
 
         // Assert
@@ -1080,6 +1079,6 @@ public sealed class HazardZoneTests : IDisposable
 
     public void Dispose()
     {
-        DomainEvents.Dispose();
+        DomainEventDispatcher.Dispose();
     }
 }
