@@ -11,7 +11,7 @@ public sealed class PersonTests : IDisposable
     Person? _testPerson;
 
     [Fact]
-    public void Create_GivenValidParameters_CreatesValidPerson()
+    public void Create_ShouldCreateValidPerson_WhenParametersAreValid()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -28,7 +28,7 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task Create_GivenValidParameters_RaisesPersonCreatedEvent()
+    public async Task Create_ShouldRaisePersonCreatedEvent_WhenParametersAreValid()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -47,7 +47,7 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateLocation_WithNewLocation_RaisesPersonLocationChangedEvent()
+    public async Task UpdateLocation_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -68,7 +68,7 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateLocation_WithSameLocation_DoesNotRaisePersonLocationChangedEvent()
+    public async Task UpdateLocation_ShouldNotRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -88,7 +88,7 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateLocation_WithSameLocation_ResetsExpiration()
+    public async Task UpdateLocation_ShouldResetExpiration_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -109,7 +109,7 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public async Task ExpirePerson_WhenTimeExpires_RaisesPersonExpiredEvent()
+    public async Task ExpirePerson_ShouldRaisePersonExpiredEvent_WhenTimeExpires()
     {
         // Arrange
         var lifespanTimeout = TimeSpan.FromMilliseconds(10);

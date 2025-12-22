@@ -13,7 +13,7 @@ public sealed class OutlineTests
     ]);
 
     [Fact]
-    public void Constructor_WhenVerticesAreNull_ThrowsArgumentNullException()
+    public void Constructor_ShouldThrowArgumentNullException_WhenVerticesAreNull()
     {
         // Act & Assert
         var act = () => new Outline(null!);
@@ -21,7 +21,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void Constructor_WhenVerticesAreLessThanThree_ThrowsArgumentException()
+    public void Constructor_ShouldThrowArgumentException_WhenVerticesAreLessThanThree()
     {
         // Arrange
         var vertices = new ReadOnlyCollection<Location>([
@@ -35,7 +35,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void COnstructor_WhenVerticesAreValid_CreatesInstance()
+    public void Constructor_ShouldCreateInstance_WhenVerticesAreValid()
     {
         // Act
         var outline = new Outline(s_validVertices);
@@ -45,7 +45,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_WhenLocationIsNull_ThrowsArgumentNullException()
+    public void IsLocationInside_ShouldThrowArgumentNullException_WhenLocationIsNull()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
@@ -56,7 +56,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_WhenPointIsInsidePolygon_ReturnsTrue()
+    public void IsLocationInside_ShouldReturnTrue_WhenLocationIsInsidePolygon()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
@@ -70,7 +70,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_WhenPointIsOutsidePolygon_ReturnsFalse()
+    public void IsLocationInside_ShouldReturnFalse_WhenLocationIsOutsidePolygon()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
@@ -84,7 +84,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_WhenPointIsOnPolygonEdge_ReturnsTrue()
+    public void IsLocationInside_ShouldReturnTrue_WhenLocationIsOnPolygonEdge()
     {
         // Arrange
         var outline = new Outline(s_validVertices);
@@ -98,7 +98,7 @@ public sealed class OutlineTests
     }
 
     [Fact]
-    public void IsLocationInside_ForConcavePolygons_ReturnsTrueForPointsInsideAndFalseForPointsOutside()
+    public void IsLocationInside_ShouldReturnTrueForInsidePointsAndFalseForOutsidePoints_WhenPolygonIsConcave()
     {
         // Arrange
         var vertices = new ReadOnlyCollection<Location>([

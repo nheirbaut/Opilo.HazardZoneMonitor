@@ -23,7 +23,7 @@ public sealed class FloorTests : IDisposable
     private const string ValidFloorName = "TestFloor";
 
     [Fact]
-    public void Constructor_WhenNameIsNull_ThrowsArgumentNullException()
+    public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
         // Act & Assert
         var act = () => new Floor(null!, s_validOutline);
@@ -32,7 +32,7 @@ public sealed class FloorTests : IDisposable
 
     [Theory]
     [ClassData(typeof(InvalidNames))]
-    public void Constructor_WhenNameIsInvalid_ThrowsArgumentException(string invalidName)
+    public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
         // Act & Assert
         var act = () => new Floor(invalidName, s_validOutline);
@@ -40,7 +40,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_WhenOutlineIsNull_ThrowsArgumentNullException()
+    public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
         var act = () => new Floor(ValidFloorName, null!);
@@ -48,7 +48,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_WhenValidNameAndOutlineGiven_CreatesInstance()
+    public void Constructor_ShouldCreateInstance_WhenValidNameAndOutlineAreProvided()
     {
         // Act
         _testFloor = new Floor(ValidFloorName, s_validOutline);
@@ -59,7 +59,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateIsNull_ThrowsArgumentNullException()
+    public void TryAddPersonLocationUpdate_ShouldThrowArgumentNullException_WhenPersonLocationUpdateIsNull()
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline);
@@ -70,7 +70,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateNotOnFloor_ReturnsFalse()
+    public void TryAddPersonLocationUpdate_ShouldReturnFalse_WhenPersonLocationUpdateIsNotOnFloor()
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline);
@@ -84,7 +84,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public void TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloor_ReturnsTrue()
+    public void TryAddPersonLocationUpdate_ShouldReturnTrue_WhenPersonLocationUpdateIsOnFloor()
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline);
@@ -99,7 +99,7 @@ public sealed class FloorTests : IDisposable
 
     [Fact]
     public async Task
-        TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndNewPerson_RaisesPersonAddedToFloorEvent()
+        TryAddPersonLocationUpdate_ShouldRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsNew()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -121,7 +121,7 @@ public sealed class FloorTests : IDisposable
 
     [Fact]
     public async Task
-        TryAddPersonLocationUpdate_WhenPersonLocationUpdateOnFloorAndKnownPerson_DoesNotRaisePersonAddedToFloorEvent()
+        TryAddPersonLocationUpdate_ShouldNotRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsKnown()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -141,7 +141,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public async Task TryAddPersonLocationUpdate_WhenPersonExpires_RaisesPersonRemovedFromFloorEvent()
+    public async Task TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonExpires()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -163,7 +163,7 @@ public sealed class FloorTests : IDisposable
 
     [Fact]
     public async Task
-        TryAddPersonLocationUpdate_WhenPersonLocationUpdateOffFloorAndKnownPerson_RaisesPersonRemovedFromFloorEvent()
+        TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonMovesOffFloorAndPersonIsKnown()
     {
         // Arrange
         var personId = Guid.NewGuid();
@@ -187,7 +187,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public async Task Dispose_WhenPersonLocatedOnFloor_DoesNotRaisePersonExpiredEvent()
+    public async Task Dispose_ShouldNotRaisePersonExpiredEvent_WhenPersonIsLocatedOnFloor()
     {
         // Arrange
         var personId = Guid.NewGuid();

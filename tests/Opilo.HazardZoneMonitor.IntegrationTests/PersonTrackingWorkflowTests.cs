@@ -36,7 +36,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     }
 
     [Fact]
-    public async Task PersonEntersFloor_ShouldTriggerFloorAndHazardZoneEvents()
+    public async Task PersonTrackingWorkflow_ShouldTriggerFloorAndHazardZoneEvents_WhenPersonEntersFloor()
     {
         var personId = Guid.NewGuid();
         var location = new Location(5, 5); // Inside the test outline
@@ -61,7 +61,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     }
 
     [Fact]
-    public async Task PersonLeavesFloor_ShouldTriggerRemovalEvents()
+    public async Task PersonTrackingWorkflow_ShouldTriggerRemovalEvents_WhenPersonLeavesFloor()
     {
         var personId = Guid.NewGuid();
         var insideLocation = new Location(5, 5);
@@ -88,7 +88,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     }
 
     [Fact]
-    public async Task PersonExpires_ShouldRemoveFromFloorAndHazardZone()
+    public async Task PersonTrackingWorkflow_ShouldRemoveFromFloorAndHazardZone_WhenPersonExpires()
     {
         var personId = Guid.NewGuid();
         var location = new Location(5, 5);
@@ -117,7 +117,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     }
 
     [Fact]
-    public async Task MultiplePersonsEnterHazardZone_ShouldTriggerAlarmWhenLimitExceeded()
+    public async Task PersonTrackingWorkflow_ShouldTriggerAlarm_WhenMultiplePersonsEnterHazardZoneAndLimitIsExceeded()
     {
         _hazardZone.SetAllowedNumberOfPersons(1); // Only allow 1 person
 
@@ -139,7 +139,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     }
 
     [Fact]
-    public void PersonMovesWithinFloor_ShouldUpdateLocationWithoutRemoval()
+    public void PersonTrackingWorkflow_ShouldUpdateLocationWithoutRemoval_WhenPersonMovesWithinFloor()
     {
         var personId = Guid.NewGuid();
         var location1 = new Location(2, 2);

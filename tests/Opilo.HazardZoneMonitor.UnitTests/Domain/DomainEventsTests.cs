@@ -7,7 +7,7 @@ namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 public sealed class DomainEventsTests : IDisposable
 {
     [Fact]
-    public async Task Raise_WhenHandlerIsRegistered_InvokesHandler()
+    public async Task Raise_ShouldInvokeHandler_WhenHandlerIsRegistered()
     {
         // Arrange
         var testDomainEvent = new TestDomainEvent();
@@ -23,7 +23,7 @@ public sealed class DomainEventsTests : IDisposable
     }
 
     [Fact]
-    public void Raise_WhenNoHandlerRegistered_DoesNotThrow()
+    public void Raise_ShouldNotThrow_WhenNoHandlerIsRegistered()
     {
         // Arrange
         var testDomainEvent = new TestDomainEvent();
