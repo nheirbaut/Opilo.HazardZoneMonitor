@@ -1,13 +1,12 @@
-﻿using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
+﻿using System.Collections.ObjectModel;
+using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
-using System.Collections.ObjectModel;
 
 namespace Opilo.HazardZoneMonitor.IntegrationTests;
 
@@ -19,12 +18,11 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
 {
     private readonly Floor _floor;
     private readonly HazardZone _hazardZone;
-    private readonly Outline _testOutline;
 
     public PersonTrackingWorkflowTests()
     {
-        // Create a test outline that both floor and hazard zone share
-        _testOutline = new Outline(new ReadOnlyCollection<Location>(new[]
+        Outline testOutline =
+            new(new ReadOnlyCollection<Location>(new[]
         {
             new Location(0, 0),
             new Location(10, 0),
@@ -32,15 +30,14 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
             new Location(0, 10)
         }));
 
-        _floor = new Floor("Test Floor", _testOutline);
-        _hazardZone = new HazardZone("Test Zone", _testOutline, TimeSpan.FromMilliseconds(50));
+        _floor = new Floor("Test Floor", testOutline);
+        _hazardZone = new HazardZone("Test Zone", testOutline, TimeSpan.FromMilliseconds(50));
         _hazardZone.ManuallyActivate();
     }
 
     [Fact]
     public async Task PersonEntersFloor_ShouldTriggerFloorAndHazardZoneEvents()
     {
-        // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(5, 5); // Inside the test outline
         var personLocationUpdate = new PersonLocationUpdate(personId, location);
@@ -48,10 +45,8 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var personAddedToFloorTask = WaitForEvent<PersonAddedToFloorEvent>(TimeSpan.FromSeconds(1));
         var personAddedToHazardZoneTask = WaitForEvent<PersonAddedToHazardZoneEvent>(TimeSpan.FromSeconds(1));
 
-        // Act
         _floor.TryAddPersonLocationUpdate(personLocationUpdate);
 
-        // Assert
         var floorEvent = await personAddedToFloorTask;
         var zoneEvent = await personAddedToHazardZoneTask;
 
@@ -68,22 +63,18 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     [Fact]
     public async Task PersonLeavesFloor_ShouldTriggerRemovalEvents()
     {
-        // Arrange
         var personId = Guid.NewGuid();
         var insideLocation = new Location(5, 5);
         var outsideLocation = new Location(50, 50); // Outside the test outline
 
-        // First add the person
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, insideLocation));
         await Task.Delay(50); // Let events propagate
 
         var personRemovedFromFloorTask = WaitForEvent<PersonRemovedFromFloorEvent>(TimeSpan.FromSeconds(1));
         var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(TimeSpan.FromSeconds(1));
 
-        // Act - Move person outside
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, outsideLocation));
 
-        // Assert
         var floorEvent = await personRemovedFromFloorTask;
         var zoneEvent = await personRemovedFromZoneTask;
 
@@ -99,11 +90,9 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     [Fact]
     public async Task PersonExpires_ShouldRemoveFromFloorAndHazardZone()
     {
-        // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(5, 5);
 
-        // Add person to floor (which creates a Person internally)
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location));
         await Task.Delay(50); // Let initial events propagate
 
@@ -111,10 +100,8 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(TimeSpan.FromSeconds(1));
         var personExpiredTask = WaitForEvent<PersonExpiredEvent>(TimeSpan.FromSeconds(1));
 
-        // Act - Wait for person to expire (Floor default timeout is 200ms)
         await Task.Delay(250);
 
-        // Assert
         var expiredEvent = await personExpiredTask;
         var floorEvent = await personRemovedFromFloorTask;
         var zoneEvent = await personRemovedFromZoneTask;
@@ -132,7 +119,6 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     [Fact]
     public async Task MultiplePersonsEnterHazardZone_ShouldTriggerAlarmWhenLimitExceeded()
     {
-        // Arrange
         _hazardZone.SetAllowedNumberOfPersons(1); // Only allow 1 person
 
         var person1Id = Guid.NewGuid();
@@ -140,17 +126,14 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var location1 = new Location(2, 2);
         var location2 = new Location(7, 7);
 
-        // Act - Add first person (should be OK)
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(person1Id, location1));
         await Task.Delay(50);
 
         var initialState = _hazardZone.AlarmState;
 
-        // Add second person (should trigger pre-alarm)
         _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(person2Id, location2));
         await Task.Delay(100); // Wait for pre-alarm timer to potentially elapse
 
-        // Assert
         Assert.Equal(AlarmState.None, initialState); // Was Active (no alarm)
         Assert.True(_hazardZone.AlarmState != AlarmState.None); // Now in alarm state
     }
@@ -158,16 +141,13 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
     [Fact]
     public void PersonMovesWithinFloor_ShouldUpdateLocationWithoutRemoval()
     {
-        // Arrange
         var personId = Guid.NewGuid();
         var location1 = new Location(2, 2);
         var location2 = new Location(8, 8);
 
-        // Act
         var result1 = _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location1));
         var result2 = _floor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location2));
 
-        // Assert
         Assert.True(result1); // First location added successfully
         Assert.True(result2); // Second location updated successfully
     }
