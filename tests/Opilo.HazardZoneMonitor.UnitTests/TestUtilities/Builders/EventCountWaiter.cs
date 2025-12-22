@@ -1,4 +1,4 @@
-﻿﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;

@@ -1,4 +1,4 @@
-﻿using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Shared.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 

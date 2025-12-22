@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
