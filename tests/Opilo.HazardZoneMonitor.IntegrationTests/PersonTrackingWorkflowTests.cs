@@ -84,7 +84,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
             h => _floor.PersonRemovedFromFloor -= h,
             TimeSpan.FromSeconds(1));
 
-        var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(
+        var personRemovedFromZoneTask = WaitForEvent2<PersonRemovedFromHazardZoneEventArgs>(
             h => _hazardZone.PersonRemovedFromHazardZone += h,
             h => _hazardZone.PersonRemovedFromHazardZone -= h,
             TimeSpan.FromSeconds(1));
@@ -117,7 +117,7 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
             h => _floor.PersonRemovedFromFloor -= h,
             TimeSpan.FromSeconds(1));
 
-        var personRemovedFromZoneTask = WaitForEvent<PersonRemovedFromHazardZoneEvent>(
+        var personRemovedFromZoneTask = WaitForEvent2<PersonRemovedFromHazardZoneEventArgs>(
             h => _hazardZone.PersonRemovedFromHazardZone += h,
             h => _hazardZone.PersonRemovedFromHazardZone -= h,
             TimeSpan.FromSeconds(1));
