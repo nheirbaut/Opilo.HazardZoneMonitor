@@ -1,4 +1,4 @@
-﻿# Development Items
+# Development Items
 
 An overview of tasks and features to be implemented.
 
