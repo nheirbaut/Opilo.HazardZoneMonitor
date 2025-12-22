@@ -51,12 +51,12 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var zoneEvent = await personAddedToHazardZoneTask;
 
         floorEvent.Should().NotBeNull();
-        floorEvent!.FloorName.Should().Be("Test Floor");
+        floorEvent.FloorName.Should().Be("Test Floor");
         floorEvent.PersonId.Should().Be(personId);
         floorEvent.Location.Should().Be(location);
 
         zoneEvent.Should().NotBeNull();
-        zoneEvent!.HazardZoneName.Should().Be("Test Zone");
+        zoneEvent.HazardZoneName.Should().Be("Test Zone");
         zoneEvent.PersonId.Should().Be(personId);
     }
 
@@ -79,11 +79,11 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var zoneEvent = await personRemovedFromZoneTask;
 
         floorEvent.Should().NotBeNull();
-        floorEvent!.FloorName.Should().Be("Test Floor");
+        floorEvent.FloorName.Should().Be("Test Floor");
         floorEvent.PersonId.Should().Be(personId);
 
         zoneEvent.Should().NotBeNull();
-        zoneEvent!.HazardZoneName.Should().Be("Test Zone");
+        zoneEvent.HazardZoneName.Should().Be("Test Zone");
         zoneEvent.PersonId.Should().Be(personId);
     }
 
@@ -107,13 +107,13 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         var zoneEvent = await personRemovedFromZoneTask;
 
         expiredEvent.Should().NotBeNull();
-        expiredEvent!.PersonId.Should().Be(personId);
+        expiredEvent.PersonId.Should().Be(personId);
 
         floorEvent.Should().NotBeNull();
-        floorEvent!.PersonId.Should().Be(personId);
+        floorEvent.PersonId.Should().Be(personId);
 
         zoneEvent.Should().NotBeNull();
-        zoneEvent!.PersonId.Should().Be(personId);
+        zoneEvent.PersonId.Should().Be(personId);
     }
 
     [Fact]
@@ -152,18 +152,15 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         result2.Should().BeTrue(); // Second location updated successfully
     }
 
-    private Task<T?> WaitForEvent<T>(TimeSpan timeout) where T : IDomainEvent
+    private async Task<T?> WaitForEvent<T>(TimeSpan timeout) where T : IDomainEvent
     {
         var tcs = new TaskCompletionSource<T?>();
 
-        #pragma warning disable CA2000 // Dispose objects before losing scope - disposed in callbacks
-        var cts = new CancellationTokenSource(timeout);
-        #pragma warning restore CA2000
+        using var cts = new CancellationTokenSource(timeout);
 
         void Handler(T evt)
         {
             tcs.TrySetResult(evt);
-            cts.Dispose();
         }
 
         DomainEventDispatcher.Register<T>(Handler);
@@ -171,10 +168,9 @@ public sealed class PersonTrackingWorkflowTests : IDisposable
         cts.Token.Register(() =>
         {
             tcs.TrySetResult(default);
-            cts.Dispose();
         });
 
-        return tcs.Task;
+        return await tcs.Task;
     }
 
     public void Dispose()
