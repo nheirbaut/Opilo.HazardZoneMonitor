@@ -1,4 +1,4 @@
-namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities.Builders;
 
 internal enum HazardZoneTestState
 {

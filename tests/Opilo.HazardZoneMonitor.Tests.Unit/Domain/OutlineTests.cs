@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.Domain;
 
 public sealed class OutlineTests
 {

@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F80165AB-816F-4E8F-95D1-3560331A0D95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor.UnitTests", "tests\Opilo.HazardZoneMonitor.UnitTests\Opilo.HazardZoneMonitor.UnitTests.csproj", "{35AC8E98-97CB-4AD4-BD3F-BE6BE57DF298}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor.Tests.Unit", "tests\Opilo.HazardZoneMonitor.Tests.Unit\Opilo.HazardZoneMonitor.Tests.Unit.csproj", "{35AC8E98-97CB-4AD4-BD3F-BE6BE57DF298}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{52035B31-0E66-415E-A260-B78E537066AB}"
 	ProjectSection(SolutionItems) = preProject

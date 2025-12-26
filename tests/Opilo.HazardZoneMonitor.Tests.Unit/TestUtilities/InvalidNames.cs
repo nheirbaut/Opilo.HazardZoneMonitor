@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
 
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes (instantiated by xUnit via [ClassData])
 internal sealed class InvalidNames : IEnumerable<object[]>

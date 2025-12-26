@@ -1,4 +1,4 @@
-namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
 
 internal static class EventsExtensions
 {

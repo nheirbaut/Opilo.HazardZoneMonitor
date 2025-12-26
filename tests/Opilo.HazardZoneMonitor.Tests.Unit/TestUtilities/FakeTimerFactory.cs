@@ -1,6 +1,6 @@
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 
-namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
 
 internal sealed class FakeTimerFactory : ITimerFactory
 {
