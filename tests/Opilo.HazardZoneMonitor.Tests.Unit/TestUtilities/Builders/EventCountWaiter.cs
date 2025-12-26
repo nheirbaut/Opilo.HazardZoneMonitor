@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 
-namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities.Builders;
 
 internal sealed class EventCountWaiter(int expectedCount)
 {

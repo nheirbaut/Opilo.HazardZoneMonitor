@@ -2,10 +2,10 @@ using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
-using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
-using Opilo.HazardZoneMonitor.UnitTests.TestUtilities.Builders;
+using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
+using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities.Builders;
 
-namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.Domain;
 
 public sealed class HazardZoneTests : IDisposable
 {

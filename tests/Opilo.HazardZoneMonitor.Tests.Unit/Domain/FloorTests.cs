@@ -1,9 +1,9 @@
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
-using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
+using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
+namespace Opilo.HazardZoneMonitor.Tests.Unit.Domain;
 
 public sealed class FloorTests : IDisposable
 {
