@@ -1,5 +1,4 @@
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
@@ -17,14 +16,22 @@ public sealed class FloorTests : IDisposable
         ]));
 
     private Floor? _testFloor;
+    private readonly FakeClock _clock;
+    private readonly FakeTimerFactory _timerFactory;
 
     private const string ValidFloorName = "TestFloor";
+
+    public FloorTests()
+    {
+        _clock = new FakeClock();
+        _timerFactory = new FakeTimerFactory(_clock);
+    }
 
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
         // Act & Assert
-        var act = () => new Floor(null!, s_validOutline, new PersonEvents());
+        var act = () => new Floor(null!, s_validOutline);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -33,7 +40,7 @@ public sealed class FloorTests : IDisposable
     public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
         // Act & Assert
-        var act = () => new Floor(invalidName, s_validOutline, new PersonEvents());
+        var act = () => new Floor(invalidName, s_validOutline);
         act.Should().Throw<ArgumentException>();
     }
 
@@ -41,7 +48,7 @@ public sealed class FloorTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
-        var act = () => new Floor(ValidFloorName, null!, new PersonEvents());
+        var act = () => new Floor(ValidFloorName, null!);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -49,7 +56,7 @@ public sealed class FloorTests : IDisposable
     public void Constructor_ShouldCreateInstance_WhenValidNameAndOutlineAreProvided()
     {
         // Act
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents());
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
 
         // Assert
         _testFloor.Name.Should().Be(ValidFloorName);
@@ -60,7 +67,7 @@ public sealed class FloorTests : IDisposable
     public void TryAddPersonLocationUpdate_ShouldThrowArgumentNullException_WhenPersonLocationUpdateIsNull()
     {
         // Arrange
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents());
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
 
         // Act & Assert
         var act = () => _testFloor.TryAddPersonLocationUpdate(null!);
@@ -71,7 +78,7 @@ public sealed class FloorTests : IDisposable
     public void TryAddPersonLocationUpdate_ShouldReturnFalse_WhenPersonLocationUpdateIsNotOnFloor()
     {
         // Arrange
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents());
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(8, 8));
 
         // Act
@@ -85,7 +92,7 @@ public sealed class FloorTests : IDisposable
     public void TryAddPersonLocationUpdate_ShouldReturnTrue_WhenPersonLocationUpdateIsOnFloor()
     {
         // Arrange
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents());
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(2, 2));
 
         // Act
@@ -96,21 +103,19 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public async Task
+    public void
         TryAddPersonLocationUpdate_ShouldRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsNew()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents());
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
-        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEventArgs>(
-            h => _testFloor.PersonAddedToFloor += h,
-            h => _testFloor.PersonAddedToFloor -= h);
+        PersonAddedToFloorEventArgs? personAddedToFloorEvent = null;
+        _testFloor.PersonAddedToFloor += (_, e) => personAddedToFloorEvent = e;
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovement);
-        var personAddedToFloorEvent = await personAddedToFloorEventTask;
 
         // Assert
         personAddedToFloorEvent.Should().NotBeNull();
@@ -120,45 +125,40 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public async Task
+    public void
         TryAddPersonLocationUpdate_ShouldNotRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsKnown()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents());
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovement = new PersonLocationUpdate(personId, location);
         _testFloor.TryAddPersonLocationUpdate(personMovement);
-
-        var personAddedToFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToFloorEventArgs>(
-            h => _testFloor.PersonAddedToFloor += h,
-            h => _testFloor.PersonAddedToFloor -= h,
-            TimeSpan.FromMilliseconds(50));
+        PersonAddedToFloorEventArgs? personAddedToFloorEvent = null;
+        _testFloor.PersonAddedToFloor += (_, e) => personAddedToFloorEvent = e;
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovement);
-        var personAddedToFloorEvent = await personAddedToFloorEventTask;
 
         // Assert
         personAddedToFloorEvent.Should().BeNull();
     }
 
     [Fact]
-    public async Task TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonExpires()
+    public void TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonExpires()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents(), TimeSpan.FromMilliseconds(10));
+        var personTimeout = TimeSpan.FromMilliseconds(10);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, personTimeout, _clock, _timerFactory);
         var personMovement = new PersonLocationUpdate(personId, location);
-
-        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEventArgs>(
-            h => _testFloor.PersonRemovedFromFloor += h,
-            h => _testFloor.PersonRemovedFromFloor -= h);
+        PersonRemovedFromFloorEventArgs? personRemovedFromFloorEvent = null;
+        _testFloor.PersonRemovedFromFloor += (_, e) => personRemovedFromFloorEvent = e;
+        _testFloor.TryAddPersonLocationUpdate(personMovement);
 
         // Act
-        _testFloor.TryAddPersonLocationUpdate(personMovement);
-        var personRemovedFromFloorEvent = await personRemovedFromFloorEventTask;
+        _clock.AdvanceBy(personTimeout * 2);
 
         // Assert
         personRemovedFromFloorEvent.Should().NotBeNull();
@@ -167,56 +167,27 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public async Task
+    public void
         TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonMovesOffFloorAndPersonIsKnown()
     {
         // Arrange
         var personId = Guid.NewGuid();
         var locationOnFloor = new Location(2, 2);
         var locationOffFloor = new Location(200, 200);
-        _testFloor = new Floor(ValidFloorName, s_validOutline, new PersonEvents());
+        _testFloor = new Floor(ValidFloorName, s_validOutline);
         var personMovementOnFloor = new PersonLocationUpdate(personId, locationOnFloor);
         var personMovementOffFloor = new PersonLocationUpdate(personId, locationOffFloor);
         _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
-
-        var personRemovedFromFloorEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromFloorEventArgs>(
-            h => _testFloor.PersonRemovedFromFloor += h,
-            h => _testFloor.PersonRemovedFromFloor -= h,
-            TimeSpan.FromMilliseconds(10));
+        PersonRemovedFromFloorEventArgs? personRemovedFromFloorEvent = null;
+        _testFloor.PersonRemovedFromFloor += (_, e) => personRemovedFromFloorEvent = e;
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personMovementOffFloor);
-        var personRemovedFromFloorEvent = await personRemovedFromFloorEventTask;
 
         // Assert
         personRemovedFromFloorEvent.Should().NotBeNull();
         personRemovedFromFloorEvent.FloorName.Should().Be(ValidFloorName);
         personRemovedFromFloorEvent.PersonId.Should().Be(personId);
-    }
-
-    [Fact]
-    public async Task Dispose_ShouldNotRaisePersonExpiredEvent_WhenPersonIsLocatedOnFloor()
-    {
-        // Arrange
-        var personId = Guid.NewGuid();
-        var locationOnFloor = new Location(2, 2);
-        var personEvents = new PersonEvents();
-        _testFloor = new Floor(ValidFloorName, s_validOutline, personEvents, TimeSpan.FromMilliseconds(20));
-        var personMovementOnFloor = new PersonLocationUpdate(personId, locationOnFloor);
-        _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
-
-        var personExpiredEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonExpiredEvent>(
-                h => personEvents.Expired += h,
-                h => personEvents.Expired -= h,
-                TimeSpan.FromMilliseconds(40));
-
-        // Act
-        _testFloor.Dispose();
-        var personExpiredEvent = await personExpiredEventTask;
-
-        // Assert
-        personExpiredEvent.Should().BeNull();
     }
 
     public void Dispose()

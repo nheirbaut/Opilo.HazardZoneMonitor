@@ -1,19 +1,21 @@
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
+using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
-using Opilo.HazardZoneMonitor.Shared.Events;
+using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
-using TrackedPerson = Opilo.HazardZoneMonitor.Features.PersonTracking.Domain.Person;
+using Opilo.HazardZoneMonitor.Shared.Time;
 
 namespace Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 
 public sealed class Floor : IDisposable
 {
-    private readonly Dictionary<Guid, TrackedPerson> _personsOnFloor = [];
+    private readonly Dictionary<Guid, Person> _personsOnFloor = [];
     private readonly TimeSpan _personLifespan;
-    private readonly IPersonEvents _personEvents;
     private volatile bool _disposed;
     private readonly Lock _personsOnFloorLock = new();
+    private readonly IClock _clock;
+    private readonly ITimerFactory _timerFactory;
 
     public readonly static TimeSpan DefaultPersonLifespan = TimeSpan.FromMilliseconds(200);
 
@@ -23,18 +25,18 @@ public sealed class Floor : IDisposable
     public event EventHandler<PersonAddedToFloorEventArgs>? PersonAddedToFloor;
     public event EventHandler<PersonRemovedFromFloorEventArgs>? PersonRemovedFromFloor;
 
-    public Floor(string name, Outline outline, IPersonEvents personEvents, TimeSpan? personLifespan = null)
+    public Floor(string name, Outline outline, TimeSpan? personLifespan = null,
+        IClock? clock = null,
+        ITimerFactory? timerFactory = null)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
-        ArgumentNullException.ThrowIfNull(personEvents);
 
         Name = name;
         Outline = outline;
-        _personEvents = personEvents;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
-
-        _personEvents.Expired += OnPersonExpired;
+        _clock = clock ?? new SystemClock();
+        _timerFactory = timerFactory ?? new SystemTimerFactory();
     }
 
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
@@ -59,35 +61,39 @@ public sealed class Floor : IDisposable
                 return true;
             }
 
-            _personsOnFloor.Add(
-                personLocationUpdate.PersonId,
-                TrackedPerson.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
-                    _personEvents));
+            var newPerson = Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
+                _clock, _timerFactory);
+
+            newPerson.Expired += OnPersonExpired;
+            _personsOnFloor.Add(personLocationUpdate.PersonId, newPerson);
         }
 
-        var addedHandlers = PersonAddedToFloor;
-        addedHandlers?.Invoke(this,
+        PersonAddedToFloor?.Invoke(this,
             new PersonAddedToFloorEventArgs(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
 
         return true;
     }
 
-    private void OnPersonExpired(object? _, DomainEventArgs<PersonExpiredEvent> args)
+    private void OnPersonExpired(object? _, PersonExpiredEventArgs args)
     {
-        RemovePersonFromFloor(args.DomainEvent.PersonId);
+        RemovePersonFromFloor(args.PersonId);
     }
 
     private void RemovePersonFromFloor(Guid personId)
     {
+        Person? removedPerson = null;
+
         lock (_personsOnFloorLock)
         {
             if (_personsOnFloor.Remove(personId, out _))
-            {
-                var removedHandlers = PersonRemovedFromFloor;
-                removedHandlers?.Invoke(this,
-                    new PersonRemovedFromFloorEventArgs(Name, personId));
-            }
+                PersonRemovedFromFloor?.Invoke(this, new PersonRemovedFromFloorEventArgs(Name, personId));
         }
+
+        if (removedPerson is null)
+            return;
+
+        removedPerson.Expired -= OnPersonExpired;
+        removedPerson.Dispose();
     }
 
     public void Dispose()
@@ -97,11 +103,17 @@ public sealed class Floor : IDisposable
 
         _disposed = true;
 
-        _personEvents.Expired -= OnPersonExpired;
+        List<Person>? persons;
+        lock (_personsOnFloorLock)
+        {
+            persons = _personsOnFloor.Values.ToList();
+            _personsOnFloor.Clear();
+        }
 
-        foreach (var (_, person) in _personsOnFloor)
+        foreach (var person in persons)
+        {
+            person.Expired -= OnPersonExpired;
             person.Dispose();
-
-        _personsOnFloor.Clear();
+        }
     }
 }

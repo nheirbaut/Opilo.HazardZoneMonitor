@@ -13,13 +13,13 @@ internal static class PersonHelper
     public static PersonCreatedEventArgs CreatePersonCreatedEventLocatedOutsideHazardZone(HazardZone hazardZone)
         => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetPointOutside());
 
-    public static PersonLocationChangedEvent CreatePersonLocationChangedEventLocatedInHazardZone(HazardZone hazardZone)
+    public static PersonLocationChangedEventArgs CreatePersonLocationChangedEventLocatedInHazardZone(HazardZone hazardZone)
         => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetCentroid());
 
-    public static PersonLocationChangedEvent CreatePersonLocationChangedEventLocatedOutsideHazardZone(HazardZone hazardZone)
+    public static PersonLocationChangedEventArgs CreatePersonLocationChangedEventLocatedOutsideHazardZone(HazardZone hazardZone)
         => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetPointOutside());
 
-    public static PersonLocationChangedEvent CreatePersonLocationChangedEventLocatedOutsideHazardZone(HazardZone hazardZone, Guid personId)
+    public static PersonLocationChangedEventArgs CreatePersonLocationChangedEventLocatedOutsideHazardZone(HazardZone hazardZone, Guid personId)
         => new(personId, hazardZone.Outline.Vertices.GetPointOutside());
 
     private static Location GetCentroid(this ReadOnlyCollection<Location> locations)

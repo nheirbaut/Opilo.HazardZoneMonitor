@@ -2,17 +2,12 @@ using Opilo.HazardZoneMonitor.Shared.Abstractions;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 
-internal sealed class FakeClock : IClock
+internal sealed class FakeClock(DateTime? initialUtcNow = null) : IClock
 {
     private readonly Lock _lock = new();
     private readonly HashSet<FakeTimer> _timers = [];
 
-    public DateTime UtcNow { get; private set; }
-
-    public FakeClock(DateTime? initialUtcNow = null)
-    {
-        UtcNow = initialUtcNow ?? DateTime.UnixEpoch;
-    }
+    public DateTime UtcNow { get; private set; } = initialUtcNow ?? DateTime.UnixEpoch;
 
     public void AdvanceBy(TimeSpan delta)
     {
