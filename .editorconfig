@@ -158,9 +158,6 @@ csharp_space_between_square_brackets = false
 # CA1040 : Avoid empty interfaces
 dotnet_diagnostic.CA1040.severity = none;
 
-# CA1030 : Consider making 'Raise' an event
-dotnet_diagnostic.CA1030.severity = none
-
 # CA1716 : Identifiers should not match keywords
 # This repo intentionally uses a `Shared` namespace segment; keep the signal but don't fail builds.
 dotnet_diagnostic.CA1716.severity = suggestion
@@ -170,11 +167,8 @@ dotnet_diagnostic.CA1716.severity = suggestion
 # Error CA1707 : Remove the underscores from member name
 dotnet_diagnostic.CA1707.severity = none
 
-# Error CA5394 : Random is an insecure random number generator.
-dotnet_diagnostic.CA5394.severity = none
-
 # Error CA2007 : Consider calling ConfigureAwait on the awaited task
-dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA2007.severity = suggestion
 
 # C++ Files
 [*.{cpp,h,in}]

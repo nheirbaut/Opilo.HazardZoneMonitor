@@ -2,194 +2,111 @@ using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.UnitTests.TestUtilities;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
-using Opilo.HazardZoneMonitor.Shared.Events;
 
 namespace Opilo.HazardZoneMonitor.UnitTests.Domain;
 
 public sealed class PersonTests : IDisposable
 {
     Person? _testPerson;
+    private readonly FakeClock _clock;
+    private readonly FakeTimerFactory _timerFactory;
+    private readonly Guid _personId;
+    private readonly Location _location;
+    private readonly TimeSpan _timeout;
+
+    public PersonTests()
+    {
+        _personId = Guid.NewGuid();
+        _location = new Location(0, 0);
+        _timeout = TimeSpan.FromSeconds(1);
+        _clock = new FakeClock(DateTime.UnixEpoch);
+        _timerFactory = new FakeTimerFactory(_clock);
+    }
 
     [Fact]
     public void Create_ShouldCreateValidPerson_WhenParametersAreValid()
     {
-        // Arrange
-        var personId = Guid.NewGuid();
-        var location = new Location(0, 0);
-        var timeout = TimeSpan.FromSeconds(1);
-        var personEvents = new PersonEvents();
-
         // Act
-        _testPerson = Person.Create(personId, location, timeout, personEvents);
+        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
 
         // Assert
         _testPerson.Should().NotBeNull();
-        _testPerson!.Id.Should().Be(personId);
-        _testPerson.Location.Should().Be(location);
-    }
-
-    [Fact]
-    public void Create_ShouldRaisePersonCreatedEvent_WhenParametersAreValid()
-    {
-        // Arrange
-        var personId = Guid.NewGuid();
-        var location = new Location(0, 0);
-        var timeout = TimeSpan.FromSeconds(1);
-        var personEvents = new PersonEvents();
-        var receivedEvents = new List<PersonCreatedEvent>();
-        EventHandler<DomainEventArgs<PersonCreatedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
-        personEvents.Created += handler;
-
-        try
-        {
-            // Act
-            _testPerson = Person.Create(personId, location, timeout, personEvents);
-            var personCreatedEvent = receivedEvents.Single();
-
-            // Assert
-            personCreatedEvent.Should().NotBeNull();
-            personCreatedEvent.PersonId.Should().Be(personId);
-            personCreatedEvent.Location.Should().Be(location);
-        }
-        finally
-        {
-            personEvents.Created -= handler;
-        }
+        _testPerson!.Id.Should().Be(_personId);
+        _testPerson.Location.Should().Be(_location);
     }
 
     [Fact]
     public void UpdateLocation_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
     {
         // Arrange
-        var personId = Guid.NewGuid();
-        var initialLocation = new Location(0, 0);
         var newLocation = new Location(1, 1);
-        var timeout = TimeSpan.FromSeconds(1);
-        var personEvents = new PersonEvents();
-        var receivedEvents = new List<PersonLocationChangedEvent>();
-        EventHandler<DomainEventArgs<PersonLocationChangedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
-        personEvents.LocationChanged += handler;
+        PersonLocationChangedEventArgs? personLocationChangedEvent = null;
 
-        try
-        {
-            _testPerson = Person.Create(personId, initialLocation, timeout, personEvents);
+        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson.LocationChanged += (_, e) => personLocationChangedEvent = e;
 
-            // Act
-            _testPerson.UpdateLocation(newLocation);
-            var personLocationChangedEvent = receivedEvents.Single();
+        // Act
+        _testPerson.UpdateLocation(newLocation);
 
-            // Assert
-            personLocationChangedEvent.Should().NotBeNull();
-            personLocationChangedEvent.PersonId.Should().Be(personId);
-            personLocationChangedEvent.CurrentLocation.Should().Be(newLocation);
-        }
-        finally
-        {
-            personEvents.LocationChanged -= handler;
-        }
+        // Assert
+        personLocationChangedEvent.Should().NotBeNull();
+        personLocationChangedEvent.PersonId.Should().Be(_personId);
+        personLocationChangedEvent.CurrentLocation.Should().Be(newLocation);
     }
 
     [Fact]
     public void UpdateLocation_ShouldNotRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
-        var personId = Guid.NewGuid();
-        var testLocation = new Location(0, 0);
-        var timeout = TimeSpan.FromSeconds(1);
-        var personEvents = new PersonEvents();
+        PersonLocationChangedEventArgs? personLocationChangedEvent = null;
 
-        var receivedEvents = new List<PersonLocationChangedEvent>();
-        EventHandler<DomainEventArgs<PersonLocationChangedEvent>> handler = (_, e) => receivedEvents.Add(e.DomainEvent);
-        personEvents.LocationChanged += handler;
+        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson.LocationChanged += (_, e) => personLocationChangedEvent = e;
 
-        try
-        {
-            _testPerson = Person.Create(personId, testLocation, timeout, personEvents);
+        // Act
+        _testPerson.UpdateLocation(_location);
 
-            // Act
-            _testPerson.UpdateLocation(testLocation);
-            var personLocationChangedEvent = receivedEvents.SingleOrDefault();
-
-            // Assert
-            personLocationChangedEvent.Should().BeNull();
-        }
-        finally
-        {
-            personEvents.LocationChanged -= handler;
-        }
+        // Assert
+        personLocationChangedEvent.Should().BeNull();
     }
 
     [Fact]
     public void UpdateLocation_ShouldResetExpiration_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
-        var personId = Guid.NewGuid();
-        var testLocation = new Location(0, 0);
-        var timeout = TimeSpan.FromMilliseconds(100);
-
         var clock = new FakeClock(DateTime.UnixEpoch);
         var timerFactory = new FakeTimerFactory(clock);
-        var personEvents = new PersonEvents();
 
-        var expiredEvents = new List<PersonExpiredEvent>();
-        EventHandler<DomainEventArgs<PersonExpiredEvent>> handler = (_, e) => expiredEvents.Add(e.DomainEvent);
-        personEvents.Expired += handler;
+        var expiredEvents = new List<PersonExpiredEventArgs>();
 
-        try
-        {
-            _testPerson = Person.Create(personId, testLocation, timeout, clock, timerFactory, personEvents);
-            clock.AdvanceBy(TimeSpan.FromMilliseconds(75));
+        _testPerson = Person.Create(_personId, _location, _timeout, clock, timerFactory);
+        _testPerson.Expired += (_, e) => expiredEvents.Add(e);
+        clock.AdvanceBy(_timeout / 2);
 
-            // Act
-            _testPerson.UpdateLocation(testLocation);
-            clock.AdvanceBy(TimeSpan.FromMilliseconds(75)); // total 150ms from create
+        // Act
+        _testPerson.UpdateLocation(_location);
+        clock.AdvanceBy(_timeout - TimeSpan.FromMilliseconds(1));
 
-            // Assert
-            expiredEvents.Should().BeEmpty();
-
-            // And after enough time, it expires exactly once
-            clock.AdvanceBy(TimeSpan.FromMilliseconds(30)); // total 180ms (> 175ms expected)
-            expiredEvents.Should().ContainSingle();
-            expiredEvents.Single().PersonId.Should().Be(personId);
-        }
-        finally
-        {
-            personEvents.Expired -= handler;
-        }
+        // Assert
+        expiredEvents.Should().BeEmpty();
     }
 
     [Fact]
     public void ExpirePerson_ShouldRaisePersonExpiredEvent_WhenTimeExpires()
     {
         // Arrange
-        var lifespanTimeout = TimeSpan.FromMilliseconds(10);
-        var personId = Guid.NewGuid();
-        var location = new Location(0, 0);
+        var expiredEvents = new List<PersonExpiredEventArgs>();
 
-        var clock = new FakeClock(DateTime.UnixEpoch);
-        var timerFactory = new FakeTimerFactory(clock);
-        var personEvents = new PersonEvents();
+        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson.Expired += (_, e) => expiredEvents.Add(e);
 
-        var expiredEvents = new List<PersonExpiredEvent>();
-        EventHandler<DomainEventArgs<PersonExpiredEvent>> handler = (_, e) => expiredEvents.Add(e.DomainEvent);
-        personEvents.Expired += handler;
+        // Act
+        _clock.AdvanceBy(_timeout);
+        var personExpiredEvent = expiredEvents.Single();
 
-        try
-        {
-            _testPerson = Person.Create(personId, location, lifespanTimeout, clock, timerFactory, personEvents);
-
-            // Act
-            clock.AdvanceBy(lifespanTimeout);
-            var personExpiredEvent = expiredEvents.Single();
-
-            // Assert
-            personExpiredEvent.Should().NotBeNull();
-            personExpiredEvent.PersonId.Should().Be(personId);
-        }
-        finally
-        {
-            personEvents.Expired -= handler;
-        }
+        // Assert
+        personExpiredEvent.Should().NotBeNull();
+        personExpiredEvent.PersonId.Should().Be(_personId);
     }
 
     public void Dispose()

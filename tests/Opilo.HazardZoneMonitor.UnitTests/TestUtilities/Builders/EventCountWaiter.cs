@@ -10,16 +10,16 @@ internal sealed class EventCountWaiter(int expectedCount)
 
     // ReSharper disable once CollectionNeverQueried.Global
     // ReSharper disable once MemberCanBePrivate.Global
-    public ConcurrentBag<PersonAddedToHazardZoneEvent> ReceivedEvents { get;  } = [];
+    public ConcurrentBag<PersonAddedToHazardZoneEventArgs> ReceivedEvents { get;  } = [];
 
-    public void Signal(PersonAddedToHazardZoneEvent personAddedToHazardZoneEvent)
+    public void Signal(PersonAddedToHazardZoneEventArgs personAddedToHazardZoneEvent)
     {
         ReceivedEvents.Add(personAddedToHazardZoneEvent);
         if (Interlocked.Increment(ref _currentCount) == expectedCount)
             _tcs.TrySetResult(true);
     }
 
-    public List<PersonAddedToHazardZoneEvent> Wait(TimeSpan timeout)
+    public List<PersonAddedToHazardZoneEventArgs> Wait(TimeSpan timeout)
     {
         if (!_tcs.Task.Wait(timeout))
             throw new TimeoutException(

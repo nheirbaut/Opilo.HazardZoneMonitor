@@ -13,7 +13,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
         // Act & Assert
-        var act = () => new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero, new PersonEvents());
+        var act = () => new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -22,7 +22,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
         // Act & Assert
-        var act = () => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero, new PersonEvents());
+        var act = () => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
         act.Should().Throw<ArgumentException>();
     }
 
@@ -30,7 +30,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
-        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero, new PersonEvents());
+        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -39,7 +39,7 @@ public sealed class HazardZoneTests : IDisposable
     {
         // Act
         using var hazardZone =
-            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero, new PersonEvents());
+            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
 
         // Assert
         hazardZone.Name.Should().Be(HazardZoneBuilder.DefaultName);
@@ -49,14 +49,12 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_ShouldAllowNegativePreAlarmDuration_WhenPreAlarmDurationIsNegative()
+    public void Constructor_ShouldThrowArgumentException_WhenPreAlarmDurationIsNegative()
     {
-        // Act
-        using var hazardZone = new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline,
-            TimeSpan.FromMilliseconds(-100), new PersonEvents());
-
-        // Assert
-        hazardZone.PreAlarmDuration.Should().Be(TimeSpan.FromMilliseconds(-100));
+        // Act & Assert
+        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline,
+            TimeSpan.FromMilliseconds(-100));
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
@@ -67,7 +65,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
 
@@ -89,8 +87,8 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedOutsideHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions
-                .RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions
+                .RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                     h => hazardZone.PersonAddedToHazardZone += h,
                     h => hazardZone.PersonAddedToHazardZone -= h,
                     TimeSpan.FromMilliseconds(50));
@@ -112,12 +110,12 @@ public sealed class HazardZoneTests : IDisposable
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         hazardZone.Handle(personCreatedEvent);
         var personRemovedFromHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
                 h => hazardZone.PersonRemovedFromHazardZone += h,
                 h => hazardZone.PersonRemovedFromHazardZone -= h);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEvent(personCreatedEvent.PersonId));
+        hazardZone.Handle(new PersonExpiredEventArgs(personCreatedEvent.PersonId));
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -136,13 +134,13 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.Handle(personCreatedEvent);
 
         var personRemovedFromHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
                 h => hazardZone.PersonRemovedFromHazardZone += h,
                 h => hazardZone.PersonRemovedFromHazardZone -= h,
                 TimeSpan.FromMilliseconds(40));
 
         // Act
-        hazardZone.Handle(new PersonExpiredEvent(personCreatedEvent.PersonId));
+        hazardZone.Handle(new PersonExpiredEventArgs(personCreatedEvent.PersonId));
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
@@ -157,7 +155,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
 
@@ -180,7 +178,7 @@ public sealed class HazardZoneTests : IDisposable
         var personLocationChangedEvent =
             PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h,
                 TimeSpan.FromMilliseconds(40));
@@ -208,7 +206,7 @@ public sealed class HazardZoneTests : IDisposable
             initialPersonLocationChangedEvent.PersonId);
 
         var personRemovedFromHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
                 h => hazardZone.PersonRemovedFromHazardZone += h,
                 h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -235,19 +233,19 @@ public sealed class HazardZoneTests : IDisposable
 
         var newLocation = new Location(3, 3);
         var personRemovedFromHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
                 h => hazardZone.PersonRemovedFromHazardZone += h,
                 h => hazardZone.PersonRemovedFromHazardZone -= h,
                 TimeSpan.FromMilliseconds(40));
 
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h,
                 TimeSpan.FromMilliseconds(40));
 
         // Act
-        hazardZone.Handle(new PersonLocationChangedEvent(initialPersonLocationChangedEvent.PersonId, newLocation));
+        hazardZone.Handle(new PersonLocationChangedEventArgs(initialPersonLocationChangedEvent.PersonId, newLocation));
         var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
@@ -380,7 +378,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
 
@@ -404,7 +402,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
         hazardZone.Handle(personCreatedEvent);
@@ -428,7 +426,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
 
@@ -452,7 +450,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
         hazardZone.Handle(personCreatedEvent);
@@ -477,7 +475,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
 
@@ -491,7 +489,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task SetAllowedNumberOfPersons_ShouldTransitionToAlarm_WhenInActiveStateBelowThresholdWithZeroPreAlarm()
+    public async Task
+        SetAllowedNumberOfPersons_ShouldTransitionToAlarm_WhenInActiveStateBelowThresholdWithZeroPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -502,7 +501,7 @@ public sealed class HazardZoneTests : IDisposable
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
         hazardZone.Handle(personCreatedEvent);
@@ -606,7 +605,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldRemainActive_WhenPersonMovesOutsideInActiveStateUnderThreshold()
+    public async Task
+        OnPersonLocationChangedEvent_ShouldRemainActive_WhenPersonMovesOutsideInActiveStateUnderThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -614,15 +614,15 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1)
             .Build();
         var personId = Guid.NewGuid();
-        var initialEvent = new PersonCreatedEvent(personId, new Location(2, 2));
-            var addedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
-            hazardZone.Handle(initialEvent);
-            await addedEventTask;
+        var initialEvent = new PersonCreatedEventArgs(personId, new Location(2, 2));
+        var addedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
+            h => hazardZone.PersonAddedToHazardZone += h,
+            h => hazardZone.PersonAddedToHazardZone -= h);
+        hazardZone.Handle(initialEvent);
+        await addedEventTask;
 
-        var moveEvent = new PersonLocationChangedEvent(personId, new Location(20, 20));
-        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+        var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
+        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
             h => hazardZone.PersonRemovedFromHazardZone += h,
             h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -649,17 +649,17 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = hazardZoneBuilder.Build();
 
         var secondPersonAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
-        hazardZone.Handle(new PersonCreatedEvent(Guid.NewGuid(), new Location(2, 2)));
+        hazardZone.Handle(new PersonCreatedEventArgs(Guid.NewGuid(), new Location(2, 2)));
 
         var secondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
         secondPersonAddedToHazardZoneEvent.Should().NotBeNull();
 
-        var firstPersonExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var firstPersonExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
         var firstPersonRemovedFromHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
                 h => hazardZone.PersonRemovedFromHazardZone += h,
                 h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -716,9 +716,9 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var personExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
         var personRemovedFromHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
                 h => hazardZone.PersonRemovedFromHazardZone += h,
                 h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -734,7 +734,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void SetAllowedNumberOfPersons_ShouldTransitionToActive_WhenAllowedNumberOfPersonsEqualsCountInPreAlarmState()
+    public void
+        SetAllowedNumberOfPersons_ShouldTransitionToActive_WhenAllowedNumberOfPersonsEqualsCountInPreAlarmState()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -815,7 +816,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
 
@@ -829,7 +830,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInPreAlarmStateUnderThreshold()
+    public async Task
+        OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInPreAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -837,8 +839,8 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1);
         using var hazardZone = hazardZoneBuilder.Build();
         var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
-        var moveEvent = new PersonLocationChangedEvent(personId, new Location(20, 20));
-        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+        var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
+        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
             h => hazardZone.PersonRemovedFromHazardZone += h,
             h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -852,7 +854,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldRemainInPreAlarm_WhenPersonMovesOutsideInPreAlarmStateOverThreshold()
+    public async Task
+        OnPersonLocationChangedEvent_ShouldRemainInPreAlarm_WhenPersonMovesOutsideInPreAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -860,14 +863,14 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(0)
             .Build();
         var additionalPersonId = Guid.NewGuid();
-        var additionalPersonAddedTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+        var additionalPersonAddedTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
             h => hazardZone.PersonAddedToHazardZone += h,
             h => hazardZone.PersonAddedToHazardZone -= h);
-        hazardZone.Handle(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
+        hazardZone.Handle(new PersonCreatedEventArgs(additionalPersonId, new Location(2, 2)));
         await additionalPersonAddedTask;
 
-        var moveEvent = new PersonLocationChangedEvent(additionalPersonId, new Location(20, 20));
-        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+        var moveEvent = new PersonLocationChangedEventArgs(additionalPersonId, new Location(20, 20));
+        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
             h => hazardZone.PersonRemovedFromHazardZone += h,
             h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -910,17 +913,17 @@ public sealed class HazardZoneTests : IDisposable
 
         var newPersonId = Guid.NewGuid();
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
-        hazardZone.Handle(new PersonCreatedEvent(newPersonId, new Location(2, 2)));
+        hazardZone.Handle(new PersonCreatedEventArgs(newPersonId, new Location(2, 2)));
 
         var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
         personAddedToHazardZoneEvent.Should().NotBeNull();
         personAddedToHazardZoneEvent.PersonId.Should().Be(newPersonId);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEvent(newPersonId));
+        hazardZone.Handle(new PersonExpiredEventArgs(newPersonId));
 
         // Assert
         hazardZone.IsActive.Should().BeTrue();
@@ -969,9 +972,9 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var personExpiredEvent = new PersonExpiredEvent(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
         var personRemovedFromHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
                 h => hazardZone.PersonRemovedFromHazardZone += h,
                 h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -1046,7 +1049,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         var personAddedToHazardZoneEventTask =
-            DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
                 h => hazardZone.PersonAddedToHazardZone += h,
                 h => hazardZone.PersonAddedToHazardZone -= h);
 
@@ -1060,7 +1063,8 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInAlarmStateUnderThreshold()
+    public async Task
+        OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -1068,8 +1072,8 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1);
         using var hazardZone = hazardZoneBuilder.Build();
         var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
-        var moveEvent = new PersonLocationChangedEvent(personId, new Location(20, 20));
-        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+        var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
+        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
             h => hazardZone.PersonRemovedFromHazardZone += h,
             h => hazardZone.PersonRemovedFromHazardZone -= h);
 
@@ -1091,14 +1095,14 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(0)
             .Build();
         var additionalPersonId = Guid.NewGuid();
-        var additionalPersonAddedTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEvent>(
+        var additionalPersonAddedTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
             h => hazardZone.PersonAddedToHazardZone += h,
             h => hazardZone.PersonAddedToHazardZone -= h);
-        hazardZone.Handle(new PersonCreatedEvent(additionalPersonId, new Location(2, 2)));
+        hazardZone.Handle(new PersonCreatedEventArgs(additionalPersonId, new Location(2, 2)));
         await additionalPersonAddedTask;
 
-        var moveEvent = new PersonLocationChangedEvent(additionalPersonId, new Location(20, 20));
-        var removedEventTask = DomainEventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEvent>(
+        var moveEvent = new PersonLocationChangedEventArgs(additionalPersonId, new Location(20, 20));
+        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
             h => hazardZone.PersonRemovedFromHazardZone += h,
             h => hazardZone.PersonRemovedFromHazardZone -= h);
 
