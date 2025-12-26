@@ -81,16 +81,15 @@ public sealed class Floor : IDisposable
 
     private void RemovePersonFromFloor(Guid personId)
     {
-        Person? removedPerson = null;
+        Person? removedPerson;
 
         lock (_personsOnFloorLock)
         {
-            if (_personsOnFloor.Remove(personId, out _))
-                PersonRemovedFromFloor?.Invoke(this, new PersonRemovedFromFloorEventArgs(Name, personId));
-        }
+            if (!_personsOnFloor.Remove(personId, out removedPerson))
+                return;
 
-        if (removedPerson is null)
-            return;
+            PersonRemovedFromFloor?.Invoke(this, new PersonRemovedFromFloorEventArgs(Name, personId));
+        }
 
         removedPerson.Expired -= OnPersonExpired;
         removedPerson.Dispose();

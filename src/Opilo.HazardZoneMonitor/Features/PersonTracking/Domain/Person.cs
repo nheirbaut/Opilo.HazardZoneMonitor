@@ -55,7 +55,6 @@ public sealed class Person : IDisposable
     private void OnExpiryTimerElapsed(object? sender, EventArgs e)
     {
         Expired?.Invoke(this, new PersonExpiredEventArgs(Id));
-        _expiryTimer.Stop();
     }
 
     public void Dispose() => _expiryTimer.Dispose();
