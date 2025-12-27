@@ -120,4 +120,222 @@ public sealed class OutlineTests
         resultInside.Should().BeTrue();
         resultOutside.Should().BeFalse();
     }
+
+    [Fact]
+    public void Overlaps_ShouldThrowArgumentNullException_WhenOtherIsNull()
+    {
+        // Arrange
+        var outline = new Outline(s_validVertices);
+
+        // Act
+        var act = () => outline.Overlaps(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Overlaps_ShouldReturnTrue_WhenOutlinesShareEdgeIntersection()
+    {
+        // Arrange
+        var outline1 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(4, 0),
+            new Location(4, 4),
+            new Location(0, 4)
+        ]));
+        var outline2 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(6, 2),
+            new Location(6, 6),
+            new Location(2, 6)
+        ]));
+
+        // Act
+        var result = outline1.Overlaps(outline2);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Overlaps_ShouldReturnFalse_WhenOutlinesAreCompletelyDisjoint()
+    {
+        // Arrange
+        var outline1 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(2, 0),
+            new Location(2, 2),
+            new Location(0, 2)
+        ]));
+        var outline2 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(5, 5),
+            new Location(7, 5),
+            new Location(7, 7),
+            new Location(5, 7)
+        ]));
+
+        // Act
+        var result = outline1.Overlaps(outline2);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Overlaps_ShouldReturnTrue_WhenOutlinesTouchAtSinglePoint()
+    {
+        // Arrange
+        var outline1 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(2, 0),
+            new Location(2, 2),
+            new Location(0, 2)
+        ]));
+        var outline2 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(4, 2),
+            new Location(4, 4),
+            new Location(2, 4)
+        ]));
+
+        // Act
+        var result = outline1.Overlaps(outline2);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Overlaps_ShouldReturnTrue_WhenOutlinesShareCollinearEdgeSegment()
+    {
+        // Arrange
+        var outline1 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(2, 0),
+            new Location(2, 2),
+            new Location(0, 2)
+        ]));
+        var outline2 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(1, 0),
+            new Location(3, 0),
+            new Location(3, 2),
+            new Location(1, 2)
+        ]));
+
+        // Act
+        var result = outline1.Overlaps(outline2);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Overlaps_ShouldReturnTrue_WhenOneOutlineCompletelyContainsAnother()
+    {
+        // Arrange
+        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(3, 2),
+            new Location(3, 3),
+            new Location(2, 3)
+        ]));
+        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(5, 0),
+            new Location(5, 5),
+            new Location(0, 5)
+        ]));
+
+        // Act
+        var result = innerOutline.Overlaps(outerOutline);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsWithin_ShouldThrowArgumentNullException_WhenOtherIsNull()
+    {
+        // Arrange
+        var outline = new Outline(s_validVertices);
+
+        // Act
+        var act = () => outline.IsWithin(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void IsWithin_ShouldReturnTrue_WhenOutlineIsFullyInsideOther()
+    {
+        // Arrange
+        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(1, 1),
+            new Location(3, 1),
+            new Location(3, 3),
+            new Location(1, 3)
+        ]));
+        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(4, 0),
+            new Location(4, 4),
+            new Location(0, 4)
+        ]));
+
+        // Act
+        var result = innerOutline.IsWithin(outerOutline);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsWithin_ShouldReturnFalse_WhenOutlineIsPartiallyOutside()
+    {
+        // Arrange
+        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(5, 2),
+            new Location(5, 5),
+            new Location(2, 5)
+        ]));
+        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(4, 0),
+            new Location(4, 4),
+            new Location(0, 4)
+        ]));
+
+        // Act
+        var result = innerOutline.IsWithin(outerOutline);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsWithin_ShouldReturnFalse_WhenOutlineVertexIsOnBoundary()
+    {
+        // Arrange
+        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),  // This vertex is exactly on the outer outline's boundary
+            new Location(2, 0),
+            new Location(2, 2),
+            new Location(0, 2)
+        ]));
+        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(4, 0),
+            new Location(4, 4),
+            new Location(0, 4)
+        ]));
+
+        // Act
+        var result = innerOutline.IsWithin(outerOutline);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }

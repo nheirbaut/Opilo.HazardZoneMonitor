@@ -1,8 +1,11 @@
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Shared.Guards;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Shared.Time;
 
@@ -11,6 +14,7 @@ namespace Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 public sealed class Floor : IDisposable
 {
     private readonly List<Person> _personsOnFloor = [];
+    private readonly List<HazardZone> _hazardZones;
     private readonly TimeSpan _personLifespan;
     private volatile bool _disposed;
     private readonly Lock _personsOnFloorLock = new();
@@ -21,22 +25,42 @@ public sealed class Floor : IDisposable
 
     public string Name { get; }
     public Outline Outline { get; }
+    public IReadOnlyCollection<HazardZone> HazardZones => _hazardZones.AsReadOnly();
 
     public event EventHandler<PersonAddedToFloorEventArgs>? PersonAddedToFloor;
     public event EventHandler<PersonRemovedFromFloorEventArgs>? PersonRemovedFromFloor;
+    public event EventHandler<PersonAddedToHazardZoneEventArgs>? PersonAddedToHazardZone;
+    public event EventHandler<PersonRemovedFromHazardZoneEventArgs>? PersonRemovedFromHazardZone;
 
-    public Floor(string name, Outline outline, TimeSpan? personLifespan = null,
+    public Floor(
+        string name,
+        Outline outline,
+        IList<HazardZone> hazardZones,
+        TimeSpan? personLifespan = null,
         IClock? clock = null,
         ITimerFactory? timerFactory = null)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
+        Guard.Against.Null(hazardZones);
+
+        var hazardZoneList = hazardZones.ToList();
+        Guard.Against.DuplicateHazardZones(hazardZoneList, nameof(hazardZones));
+        Guard.Against.OverlappingHazardZones(hazardZoneList, nameof(hazardZones));
+        Guard.Against.HazardZonesOutsideFloor(hazardZoneList, outline, nameof(hazardZones));
 
         Name = name;
         Outline = outline;
+        _hazardZones = hazardZoneList;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
         _clock = clock ?? new SystemClock();
         _timerFactory = timerFactory ?? new SystemTimerFactory();
+
+        foreach (var hazardZone in _hazardZones)
+        {
+            hazardZone.PersonAddedToHazardZone += OnHazardZonePersonAdded;
+            hazardZone.PersonRemovedFromHazardZone += OnHazardZonePersonRemoved;
+        }
     }
 
     public bool TryAddPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
@@ -51,6 +75,10 @@ public sealed class Floor : IDisposable
             return false;
         }
 
+        bool isNewPerson;
+        Guid personId;
+        Location location;
+
         lock (_personsOnFloorLock)
         {
             if (_personsOnFloor.Any(p => p.TryLocationUpdate(personLocationUpdate)))
@@ -62,18 +90,67 @@ public sealed class Floor : IDisposable
                 _clock, _timerFactory);
 
             newPerson.Expired += OnPersonExpired;
+            newPerson.LocationChanged += OnPersonLocationChanged;
             _personsOnFloor.Add(newPerson);
 
-            PersonAddedToFloor?.Invoke(this,
-                new PersonAddedToFloorEventArgs(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
+            isNewPerson = true;
+            personId = personLocationUpdate.PersonId;
+            location = personLocationUpdate.Location;
+        }
+
+        if (isNewPerson)
+        {
+            PersonAddedToFloor?.Invoke(this, new PersonAddedToFloorEventArgs(Name, personId, location));
+            NotifyHazardZonesOfPersonCreated(personId, location);
         }
 
         return true;
     }
 
+    private void NotifyHazardZonesOfPersonCreated(Guid personId, Location location)
+    {
+        if (_disposed)
+            return;
+
+        var personCreatedEvent = new PersonCreatedEventArgs(personId, location);
+        foreach (var hazardZone in _hazardZones)
+        {
+            hazardZone.Handle(personCreatedEvent);
+        }
+    }
+
     private void OnPersonExpired(object? _, PersonExpiredEventArgs args)
     {
+        if (!_disposed)
+        {
+            foreach (var hazardZone in _hazardZones)
+            {
+                hazardZone.Handle(args);
+            }
+        }
+
         RemovePersonFromFloorIfPersonIsOnFloor(args.PersonId);
+    }
+
+    private void OnPersonLocationChanged(object? _, PersonLocationChangedEventArgs args)
+    {
+        if (_disposed)
+            return;
+
+        foreach (var hazardZone in _hazardZones)
+        {
+            hazardZone.Handle(args);
+        }
+    }
+
+    private void OnHazardZonePersonAdded(object? _, PersonAddedToHazardZoneEventArgs args)
+    {
+        PersonAddedToHazardZone?.Invoke(this, args);
+    }
+
+    private void OnHazardZonePersonRemoved(object? _, PersonRemovedFromHazardZoneEventArgs args)
+    {
+        PersonRemovedFromHazardZone?.Invoke(this, args);
     }
 
     private void RemovePersonFromFloorIfPersonIsOnFloor(Guid personId)
@@ -93,6 +170,7 @@ public sealed class Floor : IDisposable
         }
 
         personToRemove.Expired -= OnPersonExpired;
+        personToRemove.LocationChanged -= OnPersonLocationChanged;
         personToRemove.Dispose();
     }
 
@@ -113,7 +191,14 @@ public sealed class Floor : IDisposable
         foreach (var person in persons)
         {
             person.Expired -= OnPersonExpired;
+            person.LocationChanged -= OnPersonLocationChanged;
             person.Dispose();
+        }
+
+        foreach (var hazardZone in _hazardZones)
+        {
+            hazardZone.PersonAddedToHazardZone -= OnHazardZonePersonAdded;
+            hazardZone.PersonRemovedFromHazardZone -= OnHazardZonePersonRemoved;
         }
     }
 }
