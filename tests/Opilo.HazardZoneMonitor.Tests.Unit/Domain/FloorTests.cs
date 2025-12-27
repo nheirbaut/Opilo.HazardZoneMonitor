@@ -1,6 +1,8 @@
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
+using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Tests.Unit.Domain;
@@ -71,6 +73,25 @@ public sealed class FloorTests : IDisposable
 
         // Assert
         _testFloor.Name.Should().Be(ValidFloorName);
+    }
+
+    [Fact]
+    public void Constructor_ShouldThrowArgumentException_WhenHazardZoneOutlineIsNotWithinFloorOutline()
+    {
+        // Arrange
+        var hazardZoneOutline = new Outline(new([
+            new Location(10, 10),
+            new Location(12, 10),
+            new Location(12, 12),
+            new Location(10, 12)
+        ]));
+        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+
+        // Act
+        var act = () => new Floor(ValidFloorName, s_validOutline, [hazardZone]);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]

@@ -4,6 +4,7 @@ using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Shared.Guards;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Shared.Time;
 
@@ -40,9 +41,12 @@ public sealed class Floor : IDisposable
         Guard.Against.Null(outline);
         Guard.Against.Null(hazardZones);
 
+        var hazardZoneList = hazardZones.ToList();
+        Guard.Against.HazardZonesOutsideFloor(hazardZoneList, outline, nameof(hazardZones));
+
         Name = name;
         Outline = outline;
-        _hazardZones = hazardZones.ToList();
+        _hazardZones = hazardZoneList;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
         _clock = clock ?? new SystemClock();
         _timerFactory = timerFactory ?? new SystemTimerFactory();
