@@ -58,74 +58,63 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_ShouldRaisePersonAddedEvent_WhenPersonIsCreatedInZone()
+    public void OnPersonCreatedEvent_ShouldRaisePersonAddedEvent_WhenPersonIsCreatedInZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personCreatedEvent);
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        personAddedToHazardZoneEvent.Should().NotBeNull();
+        var personAddedToHazardZoneEvent = personAddedEvents.Single();
         personAddedToHazardZoneEvent.PersonId.Should().Be(personCreatedEvent.PersonId);
         personAddedToHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_ShouldNotRaisePersonAddedEvent_WhenPersonIsCreatedOutsideZone()
+    public void OnPersonCreatedEvent_ShouldNotRaisePersonAddedEvent_WhenPersonIsCreatedOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedOutsideHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions
-                .RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                    h => hazardZone.PersonAddedToHazardZone += h,
-                    h => hazardZone.PersonAddedToHazardZone -= h,
-                    TimeSpan.FromMilliseconds(50));
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personCreatedEvent);
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        personAddedToHazardZoneEvent.Should().BeNull();
+        personAddedEvents.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task OnPersonExpiredEvent_ShouldRaisePersonRemovedEvent_WhenPersonExpiresInZone()
+    public void OnPersonExpiredEvent_ShouldRaisePersonRemovedEvent_WhenPersonExpiresInZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
         hazardZone.Handle(personCreatedEvent);
-        var personRemovedFromHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-                h => hazardZone.PersonRemovedFromHazardZone += h,
-                h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
         hazardZone.Handle(new PersonExpiredEventArgs(personCreatedEvent.PersonId));
-        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
         personRemovedFromHazardZoneEvent.PersonId.Should().Be(personCreatedEvent.PersonId);
         personRemovedFromHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public async Task OnPersonExpiredEvent_ShouldNotRaisePersonRemovedEvent_WhenPersonExpiresOutsideZone()
+    public void OnPersonExpiredEvent_ShouldNotRaisePersonRemovedEvent_WhenPersonExpiresOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -133,66 +122,55 @@ public sealed class HazardZoneTests : IDisposable
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedOutsideHazardZone(hazardZone);
         hazardZone.Handle(personCreatedEvent);
 
-        var personRemovedFromHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-                h => hazardZone.PersonRemovedFromHazardZone += h,
-                h => hazardZone.PersonRemovedFromHazardZone -= h,
-                TimeSpan.FromMilliseconds(40));
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
         hazardZone.Handle(new PersonExpiredEventArgs(personCreatedEvent.PersonId));
-        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        personRemovedFromHazardZoneEvent.Should().BeNull();
+        personRemovedEvents.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldRaisePersonAddedEvent_WhenUnknownPersonMovesIntoZone()
+    public void OnPersonLocationChangedEvent_ShouldRaisePersonAddedEvent_WhenUnknownPersonMovesIntoZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         var personLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personLocationChangedEvent);
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        personAddedToHazardZoneEvent.Should().NotBeNull();
+        var personAddedToHazardZoneEvent = personAddedEvents.Single();
         personAddedToHazardZoneEvent.PersonId.Should().Be(personLocationChangedEvent.PersonId);
         personAddedToHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldNotRaisePersonAddedEvent_WhenUnknownPersonMovesOutsideZone()
+    public void OnPersonLocationChangedEvent_ShouldNotRaisePersonAddedEvent_WhenUnknownPersonMovesOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         var personLocationChangedEvent =
             PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h,
-                TimeSpan.FromMilliseconds(40));
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personLocationChangedEvent);
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        personAddedToHazardZoneEvent.Should().BeNull();
+        personAddedEvents.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldRaisePersonRemovedEvent_WhenKnownPersonMovesOutsideZone()
+    public void OnPersonLocationChangedEvent_ShouldRaisePersonRemovedEvent_WhenKnownPersonMovesOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -205,23 +183,20 @@ public sealed class HazardZoneTests : IDisposable
             hazardZone,
             initialPersonLocationChangedEvent.PersonId);
 
-        var personRemovedFromHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-                h => hazardZone.PersonRemovedFromHazardZone += h,
-                h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
         hazardZone.Handle(newPersonLocationChangedEvent);
-        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
         personRemovedFromHazardZoneEvent.PersonId.Should().Be(initialPersonLocationChangedEvent.PersonId);
         personRemovedFromHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldNotRaiseEvents_WhenKnownPersonMovesWithinZone()
+    public void OnPersonLocationChangedEvent_ShouldNotRaiseEvents_WhenKnownPersonMovesWithinZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -232,26 +207,18 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.Handle(initialPersonLocationChangedEvent);
 
         var newLocation = new Location(3, 3);
-        var personRemovedFromHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-                h => hazardZone.PersonRemovedFromHazardZone += h,
-                h => hazardZone.PersonRemovedFromHazardZone -= h,
-                TimeSpan.FromMilliseconds(40));
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h,
-                TimeSpan.FromMilliseconds(40));
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(new PersonLocationChangedEventArgs(initialPersonLocationChangedEvent.PersonId, newLocation));
-        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        personRemovedFromHazardZoneEvent.Should().BeNull();
-        personAddedToHazardZoneEvent.Should().BeNull();
+        personRemovedEvents.Should().BeEmpty();
+        personAddedEvents.Should().BeEmpty();
     }
 
     [Fact]
@@ -368,7 +335,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public async Task OnPersonCreatedEvent_ShouldRemainActive_WhenInActiveStateUnderThreshold()
+    public void OnPersonCreatedEvent_ShouldRemainActive_WhenInActiveStateUnderThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -377,22 +344,20 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
 
         // Assert
+        personAddedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
-    public async Task SetAllowedNumberOfPersons_ShouldRemainActive_WhenInActiveStateAboveThreshold()
+    public void SetAllowedNumberOfPersons_ShouldRemainActive_WhenInActiveStateAboveThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -401,12 +366,10 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
+        personAddedEvents.Should().HaveCount(1);
 
         // Act
         hazardZone.SetAllowedNumberOfPersons(2);
@@ -417,7 +380,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_ShouldTransitionToPreAlarm_WhenInActiveStateOverThresholdWithPreAlarm()
+    public void OnPersonCreatedEvent_ShouldTransitionToPreAlarm_WhenInActiveStateOverThresholdWithPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -425,22 +388,20 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
 
         // Assert
+        personAddedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
-    public async Task SetAllowedNumberOfPersons_ShouldTransitionToPreAlarm_WhenInActiveStateBelowThresholdWithPreAlarm()
+    public void SetAllowedNumberOfPersons_ShouldTransitionToPreAlarm_WhenInActiveStateBelowThresholdWithPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -449,12 +410,10 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
+        personAddedEvents.Should().HaveCount(1);
 
         // Act
         hazardZone.SetAllowedNumberOfPersons(0);
@@ -465,7 +424,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_ShouldTransitionToAlarm_WhenInActiveStateOverThresholdWithZeroPreAlarm()
+    public void OnPersonCreatedEvent_ShouldTransitionToAlarm_WhenInActiveStateOverThresholdWithZeroPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -474,22 +433,20 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
 
         // Assert
+        personAddedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
-    public async Task
+    public void
         SetAllowedNumberOfPersons_ShouldTransitionToAlarm_WhenInActiveStateBelowThresholdWithZeroPreAlarm()
     {
         // Arrange
@@ -500,12 +457,10 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
+        personAddedEvents.Should().HaveCount(1);
 
         // Act
         hazardZone.SetAllowedNumberOfPersons(0);
@@ -605,7 +560,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task
+    public void
         OnPersonLocationChangedEvent_ShouldRemainActive_WhenPersonMovesOutsideInActiveStateUnderThreshold()
     {
         // Arrange
@@ -615,22 +570,20 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
         var personId = Guid.NewGuid();
         var initialEvent = new PersonCreatedEventArgs(personId, new Location(2, 2));
-        var addedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-            h => hazardZone.PersonAddedToHazardZone += h,
-            h => hazardZone.PersonAddedToHazardZone -= h);
+        var addedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => addedEvents.Add(e);
         hazardZone.Handle(initialEvent);
-        await addedEventTask;
+        addedEvents.Should().HaveCount(1);
 
         var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
-        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-            h => hazardZone.PersonRemovedFromHazardZone += h,
-            h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
         hazardZone.Handle(moveEvent);
-        await removedEventTask;
 
         // Assert
+        removedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
@@ -640,7 +593,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public async Task OnPersonExpiredEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
+    public void OnPersonExpiredEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -648,27 +601,21 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var secondPersonAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var secondPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => secondPersonAddedEvents.Add(e);
         hazardZone.Handle(new PersonCreatedEventArgs(Guid.NewGuid(), new Location(2, 2)));
 
-        var secondPersonAddedToHazardZoneEvent = await secondPersonAddedToHazardZoneEventTask;
-        secondPersonAddedToHazardZoneEvent.Should().NotBeNull();
+        secondPersonAddedEvents.Should().HaveCount(1);
 
         var firstPersonExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
-        var firstPersonRemovedFromHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-                h => hazardZone.PersonRemovedFromHazardZone += h,
-                h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var firstPersonRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => firstPersonRemovedEvents.Add(e);
 
         // Act
         hazardZone.Handle(firstPersonExpiredEvent);
-        var personRemovedFromHazardZoneEvent = await firstPersonRemovedFromHazardZoneEventTask;
 
         // Assert
-        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        var personRemovedFromHazardZoneEvent = firstPersonRemovedEvents.Single();
         personRemovedFromHazardZoneEvent.PersonId.Should().Be(firstPersonExpiredEvent.PersonId);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
@@ -708,7 +655,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonExpiredEvent_ShouldTransitionToActive_WhenInPreAlarmStateUnderThreshold()
+    public void OnPersonExpiredEvent_ShouldTransitionToActive_WhenInPreAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -717,17 +664,14 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = hazardZoneBuilder.Build();
 
         var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
-        var personRemovedFromHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-                h => hazardZone.PersonRemovedFromHazardZone += h,
-                h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personExpiredEvent);
-        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
         personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
@@ -807,7 +751,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
+    public void OnPersonCreatedEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -815,22 +759,20 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1)
             .Build();
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
 
         // Assert
+        personAddedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
-    public async Task
+    public void
         OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInPreAlarmStateUnderThreshold()
     {
         // Arrange
@@ -840,21 +782,20 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = hazardZoneBuilder.Build();
         var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
-        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-            h => hazardZone.PersonRemovedFromHazardZone += h,
-            h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
         hazardZone.Handle(moveEvent);
-        await removedEventTask;
 
         // Assert
+        removedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
-    public async Task
+    public void
         OnPersonLocationChangedEvent_ShouldRemainInPreAlarm_WhenPersonMovesOutsideInPreAlarmStateOverThreshold()
     {
         // Arrange
@@ -863,22 +804,20 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(0)
             .Build();
         var additionalPersonId = Guid.NewGuid();
-        var additionalPersonAddedTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-            h => hazardZone.PersonAddedToHazardZone += h,
-            h => hazardZone.PersonAddedToHazardZone -= h);
+        var additionalPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => additionalPersonAddedEvents.Add(e);
         hazardZone.Handle(new PersonCreatedEventArgs(additionalPersonId, new Location(2, 2)));
-        await additionalPersonAddedTask;
+        additionalPersonAddedEvents.Should().HaveCount(1);
 
         var moveEvent = new PersonLocationChangedEventArgs(additionalPersonId, new Location(20, 20));
-        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-            h => hazardZone.PersonRemovedFromHazardZone += h,
-            h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
         hazardZone.Handle(moveEvent);
-        await removedEventTask;
 
         // Assert
+        removedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
@@ -904,7 +843,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public async Task OnPersonExpiredEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
+    public void OnPersonExpiredEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -912,14 +851,11 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var newPersonId = Guid.NewGuid();
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
         hazardZone.Handle(new PersonCreatedEventArgs(newPersonId, new Location(2, 2)));
 
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
-        personAddedToHazardZoneEvent.Should().NotBeNull();
+        var personAddedToHazardZoneEvent = personAddedEvents.Single();
         personAddedToHazardZoneEvent.PersonId.Should().Be(newPersonId);
 
         // Act
@@ -964,7 +900,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonExpiredEvent_ShouldTransitionToActive_WhenInAlarmStateUnderThreshold()
+    public void OnPersonExpiredEvent_ShouldTransitionToActive_WhenInAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -973,17 +909,14 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = hazardZoneBuilder.Build();
 
         var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
-        var personRemovedFromHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-                h => hazardZone.PersonRemovedFromHazardZone += h,
-                h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personExpiredEvent);
-        var personRemovedFromHazardZoneEvent = await personRemovedFromHazardZoneEventTask;
 
         // Assert
-        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
         personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
@@ -1040,7 +973,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public async Task OnPersonCreatedEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
+    public void OnPersonCreatedEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -1048,22 +981,20 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1)
             .Build();
         var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        var personAddedToHazardZoneEventTask =
-            EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-                h => hazardZone.PersonAddedToHazardZone += h,
-                h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         hazardZone.Handle(personCreatedEvent);
-        await personAddedToHazardZoneEventTask;
 
         // Assert
+        personAddedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
-    public async Task
+    public void
         OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInAlarmStateUnderThreshold()
     {
         // Arrange
@@ -1073,21 +1004,20 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = hazardZoneBuilder.Build();
         var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
-        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-            h => hazardZone.PersonRemovedFromHazardZone += h,
-            h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
         hazardZone.Handle(moveEvent);
-        await removedEventTask;
 
         // Assert
+        removedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
-    public async Task OnPersonLocationChangedEvent_ShouldRemainInAlarm_WhenPersonMovesOutsideInAlarmStateOverThreshold()
+    public void OnPersonLocationChangedEvent_ShouldRemainInAlarm_WhenPersonMovesOutsideInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -1095,22 +1025,20 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(0)
             .Build();
         var additionalPersonId = Guid.NewGuid();
-        var additionalPersonAddedTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-            h => hazardZone.PersonAddedToHazardZone += h,
-            h => hazardZone.PersonAddedToHazardZone -= h);
+        var additionalPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => additionalPersonAddedEvents.Add(e);
         hazardZone.Handle(new PersonCreatedEventArgs(additionalPersonId, new Location(2, 2)));
-        await additionalPersonAddedTask;
+        additionalPersonAddedEvents.Should().HaveCount(1);
 
         var moveEvent = new PersonLocationChangedEventArgs(additionalPersonId, new Location(20, 20));
-        var removedEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonRemovedFromHazardZoneEventArgs>(
-            h => hazardZone.PersonRemovedFromHazardZone += h,
-            h => hazardZone.PersonRemovedFromHazardZone -= h);
+        var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
         hazardZone.Handle(moveEvent);
-        await removedEventTask;
 
         // Assert
+        removedEvents.Should().HaveCount(1);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }

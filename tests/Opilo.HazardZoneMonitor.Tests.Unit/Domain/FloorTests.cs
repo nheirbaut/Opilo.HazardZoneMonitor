@@ -292,7 +292,7 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
-    public async Task TryAddPersonLocationUpdate_ShouldForwardPersonCreatedEventToHazardZones_WhenNewPersonIsAdded()
+    public void TryAddPersonLocationUpdate_ShouldForwardPersonCreatedEventToHazardZones_WhenNewPersonIsAdded()
     {
         // Arrange
         var floorOutline = new Outline([new(0, 0), new(100, 0), new(100, 100), new(0, 100)]);
@@ -305,16 +305,14 @@ public sealed class FloorTests : IDisposable
         var location = new Location(20, 20); // Inside hazard zone
         var personLocationUpdate = new PersonLocationUpdate(personId, location);
 
-        var personAddedToHazardZoneEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
-            h => hazardZone.PersonAddedToHazardZone += h,
-            h => hazardZone.PersonAddedToHazardZone -= h);
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
         _testFloor.TryAddPersonLocationUpdate(personLocationUpdate);
-        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
 
         // Assert
-        personAddedToHazardZoneEvent.Should().NotBeNull();
+        var personAddedToHazardZoneEvent = personAddedEvents.Single();
         personAddedToHazardZoneEvent.PersonId.Should().Be(personId);
         personAddedToHazardZoneEvent.HazardZoneName.Should().Be("TestZone");
     }
