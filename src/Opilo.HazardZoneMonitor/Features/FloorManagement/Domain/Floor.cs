@@ -77,6 +77,7 @@ public sealed class Floor : IDisposable
                 _clock, _timerFactory);
 
             newPerson.Expired += OnPersonExpired;
+            newPerson.LocationChanged += OnPersonLocationChanged;
             _personsOnFloor.Add(newPerson);
 
             PersonAddedToFloor?.Invoke(this,
@@ -102,6 +103,14 @@ public sealed class Floor : IDisposable
         RemovePersonFromFloorIfPersonIsOnFloor(args.PersonId);
     }
 
+    private void OnPersonLocationChanged(object? _, PersonLocationChangedEventArgs args)
+    {
+        foreach (var hazardZone in _hazardZones)
+        {
+            hazardZone.Handle(args);
+        }
+    }
+
     private void RemovePersonFromFloorIfPersonIsOnFloor(Guid personId)
     {
         Person? personToRemove;
@@ -119,6 +128,7 @@ public sealed class Floor : IDisposable
         }
 
         personToRemove.Expired -= OnPersonExpired;
+        personToRemove.LocationChanged -= OnPersonLocationChanged;
         personToRemove.Dispose();
     }
 
@@ -139,6 +149,7 @@ public sealed class Floor : IDisposable
         foreach (var person in persons)
         {
             person.Expired -= OnPersonExpired;
+            person.LocationChanged -= OnPersonLocationChanged;
             person.Dispose();
         }
     }
