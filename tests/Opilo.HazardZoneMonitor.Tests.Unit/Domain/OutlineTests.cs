@@ -218,4 +218,28 @@ public sealed class OutlineTests
         // Assert
         act.Should().Throw<ArgumentNullException>();
     }
+
+    [Fact]
+    public void IsWithin_ShouldReturnTrue_WhenOutlineIsFullyInsideOther()
+    {
+        // Arrange
+        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(1, 1),
+            new Location(3, 1),
+            new Location(3, 3),
+            new Location(1, 3)
+        ]));
+        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(4, 0),
+            new Location(4, 4),
+            new Location(0, 4)
+        ]));
+
+        // Act
+        var result = innerOutline.IsWithin(outerOutline);
+
+        // Assert
+        result.Should().BeTrue();
+    }
 }

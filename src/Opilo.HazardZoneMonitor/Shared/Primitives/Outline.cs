@@ -61,8 +61,7 @@ public sealed class Outline
     public bool IsWithin(Outline other)
     {
         Guard.Against.Null(other);
-        _ = Vertices;
-        return false;
+        return Vertices.All(v => other.IsLocationInside(v));
     }
 
     private bool AnyEdgesIntersect(Outline other)
