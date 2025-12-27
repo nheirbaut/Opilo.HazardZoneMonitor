@@ -43,10 +43,11 @@ public static class HazardZoneGuards
             throw new ArgumentException("Collection contains null HazardZone elements.", parameterName);
         }
 
-        var distinctCount = hazardZones.Distinct().Count();
-        if (distinctCount != hazardZones.Count)
+        var names = hazardZones.Select(hz => hz.Name).ToList();
+        var distinctNames = names.Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        if (distinctNames != names.Count)
         {
-            throw new ArgumentException("Duplicate HazardZones are not allowed.", parameterName);
+            throw new ArgumentException("Duplicate HazardZone names are not allowed.", parameterName);
         }
     }
 

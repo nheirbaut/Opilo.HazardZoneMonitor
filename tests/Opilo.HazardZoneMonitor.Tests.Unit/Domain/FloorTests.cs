@@ -115,6 +115,35 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_ShouldThrowArgumentException_WhenHazardZonesHaveSameName()
+    {
+        // Arrange
+        var outline1 = new Outline(new([
+            new Location(1, 1),
+            new Location(2, 1),
+            new Location(2, 2),
+            new Location(1, 2)
+        ]));
+        var outline2 = new Outline(new([
+            new Location(2.5, 2.5),
+            new Location(3.5, 2.5),
+            new Location(3.5, 3.5),
+            new Location(2.5, 3.5)
+        ]));
+
+        using var hazardZone1 = new HazardZone("SameName", outline1, TimeSpan.FromSeconds(5));
+        using var hazardZone2 = new HazardZone("SameName", outline2, TimeSpan.FromSeconds(5));
+
+        // Act
+        var act = () => new Floor(ValidFloorName, s_validOutline, [hazardZone1, hazardZone2]);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("hazardZones")
+            .WithMessage("*duplicate*name*");
+    }
+
+    [Fact]
     public void Constructor_ShouldThrowArgumentException_WhenHazardZonesOverlap()
     {
         // Arrange
