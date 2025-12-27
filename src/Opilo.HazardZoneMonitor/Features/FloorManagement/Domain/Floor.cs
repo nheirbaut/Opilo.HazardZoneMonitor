@@ -35,7 +35,7 @@ public sealed class Floor : IDisposable
     public Floor(
         string name,
         Outline outline,
-        IEnumerable<HazardZone> hazardZones,
+        IList<HazardZone> hazardZones,
         TimeSpan? personLifespan = null,
         IClock? clock = null,
         ITimerFactory? timerFactory = null)

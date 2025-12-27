@@ -3,8 +3,8 @@ using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
-using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Opilo.HazardZoneMonitor.Tests.Unit.Domain;
 
