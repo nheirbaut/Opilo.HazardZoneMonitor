@@ -75,6 +75,10 @@ public sealed class Floor : IDisposable
             return false;
         }
 
+        bool isNewPerson;
+        Guid personId;
+        Location location;
+
         lock (_personsOnFloorLock)
         {
             if (_personsOnFloor.Any(p => p.TryLocationUpdate(personLocationUpdate)))
@@ -89,10 +93,15 @@ public sealed class Floor : IDisposable
             newPerson.LocationChanged += OnPersonLocationChanged;
             _personsOnFloor.Add(newPerson);
 
-            PersonAddedToFloor?.Invoke(this,
-                new PersonAddedToFloorEventArgs(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
+            isNewPerson = true;
+            personId = personLocationUpdate.PersonId;
+            location = personLocationUpdate.Location;
+        }
 
-            NotifyHazardZonesOfPersonCreated(personLocationUpdate.PersonId, personLocationUpdate.Location);
+        if (isNewPerson)
+        {
+            PersonAddedToFloor?.Invoke(this, new PersonAddedToFloorEventArgs(Name, personId, location));
+            NotifyHazardZonesOfPersonCreated(personId, location);
         }
 
         return true;
