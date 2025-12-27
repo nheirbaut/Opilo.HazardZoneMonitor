@@ -31,7 +31,7 @@ public sealed class FloorTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
         // Act & Assert
-        var act = () => new Floor(null!, s_validOutline);
+        var act = () => new Floor(null!, s_validOutline, []);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -40,7 +40,7 @@ public sealed class FloorTests : IDisposable
     public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
         // Act & Assert
-        var act = () => new Floor(invalidName, s_validOutline);
+        var act = () => new Floor(invalidName, s_validOutline, []);
         act.Should().Throw<ArgumentException>();
     }
 
@@ -48,7 +48,7 @@ public sealed class FloorTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
-        var act = () => new Floor(ValidFloorName, null!);
+        var act = () => new Floor(ValidFloorName, null!, []);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -56,7 +56,7 @@ public sealed class FloorTests : IDisposable
     public void Constructor_ShouldCreateInstance_WhenValidNameAndOutlineAreProvided()
     {
         // Act
-        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
 
         // Assert
         _testFloor.Name.Should().Be(ValidFloorName);
@@ -64,10 +64,20 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_ShouldCreateInstance_WhenEmptyHazardZonesCollectionIsProvided()
+    {
+        // Act
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
+
+        // Assert
+        _testFloor.Name.Should().Be(ValidFloorName);
+    }
+
+    [Fact]
     public void TryAddPersonLocationUpdate_ShouldThrowArgumentNullException_WhenPersonLocationUpdateIsNull()
     {
         // Arrange
-        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
 
         // Act & Assert
         var act = () => _testFloor.TryAddPersonLocationUpdate(null!);
@@ -78,7 +88,7 @@ public sealed class FloorTests : IDisposable
     public void TryAddPersonLocationUpdate_ShouldReturnFalse_WhenPersonLocationUpdateIsNotOnFloor()
     {
         // Arrange
-        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(8, 8));
 
         // Act
@@ -92,7 +102,7 @@ public sealed class FloorTests : IDisposable
     public void TryAddPersonLocationUpdate_ShouldReturnTrue_WhenPersonLocationUpdateIsOnFloor()
     {
         // Arrange
-        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(2, 2));
 
         // Act
@@ -109,7 +119,7 @@ public sealed class FloorTests : IDisposable
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
-        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(personId, location);
         PersonAddedToFloorEventArgs? personAddedToFloorEvent = null;
         _testFloor.PersonAddedToFloor += (_, e) => personAddedToFloorEvent = e;
@@ -131,7 +141,7 @@ public sealed class FloorTests : IDisposable
         // Arrange
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
-        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(personId, location);
         _testFloor.TryAddPersonLocationUpdate(personMovement);
         PersonAddedToFloorEventArgs? personAddedToFloorEvent = null;
@@ -151,7 +161,7 @@ public sealed class FloorTests : IDisposable
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
         var personTimeout = TimeSpan.FromMilliseconds(10);
-        _testFloor = new Floor(ValidFloorName, s_validOutline, personTimeout, _clock, _timerFactory);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, [], personTimeout, _clock, _timerFactory);
         var personMovement = new PersonLocationUpdate(personId, location);
         PersonRemovedFromFloorEventArgs? personRemovedFromFloorEvent = null;
         _testFloor.PersonRemovedFromFloor += (_, e) => personRemovedFromFloorEvent = e;
@@ -174,7 +184,7 @@ public sealed class FloorTests : IDisposable
         var personId = Guid.NewGuid();
         var locationOnFloor = new Location(2, 2);
         var locationOffFloor = new Location(200, 200);
-        _testFloor = new Floor(ValidFloorName, s_validOutline);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, []);
         var personMovementOnFloor = new PersonLocationUpdate(personId, locationOnFloor);
         var personMovementOffFloor = new PersonLocationUpdate(personId, locationOffFloor);
         _testFloor.TryAddPersonLocationUpdate(personMovementOnFloor);
