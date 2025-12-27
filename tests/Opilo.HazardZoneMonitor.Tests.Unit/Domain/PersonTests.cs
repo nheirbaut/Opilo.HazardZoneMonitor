@@ -36,7 +36,22 @@ public sealed class PersonTests : IDisposable
     }
 
     [Fact]
-    public void UpdateLocation_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
+    public void TryLocationUpdate_ShouldReturnFalse_WhenLocationUpdateIsForDifferentPerson()
+    {
+        // Arrange
+        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        var differentPersonId = Guid.NewGuid();
+        var personLocationUpdate = new PersonLocationUpdate(differentPersonId, new Location(1, 1));
+
+        // Act
+        var result = _testPerson.TryLocationUpdate(personLocationUpdate);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void TryLocationUpdate_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
     {
         // Arrange
         var newLocation = new Location(1, 1);
@@ -45,17 +60,20 @@ public sealed class PersonTests : IDisposable
         _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
         _testPerson.LocationChanged += (_, e) => personLocationChangedEvent = e;
 
+        var personLocationUpdate = new PersonLocationUpdate(_personId, newLocation);
+
         // Act
-        _testPerson.UpdateLocation(newLocation);
+        var result = _testPerson.TryLocationUpdate(personLocationUpdate);
 
         // Assert
+        result.Should().BeTrue();
         personLocationChangedEvent.Should().NotBeNull();
         personLocationChangedEvent.PersonId.Should().Be(_personId);
         personLocationChangedEvent.CurrentLocation.Should().Be(newLocation);
     }
 
     [Fact]
-    public void UpdateLocation_ShouldNotRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToSameValue()
+    public void TryLocationUpdate_ShouldNotRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         PersonLocationChangedEventArgs? personLocationChangedEvent = null;
@@ -63,15 +81,18 @@ public sealed class PersonTests : IDisposable
         _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
         _testPerson.LocationChanged += (_, e) => personLocationChangedEvent = e;
 
+        var personLocationUpdate = new PersonLocationUpdate(_personId, _location);
+
         // Act
-        _testPerson.UpdateLocation(_location);
+        var result = _testPerson.TryLocationUpdate(personLocationUpdate);
 
         // Assert
+        result.Should().BeTrue();
         personLocationChangedEvent.Should().BeNull();
     }
 
     [Fact]
-    public void UpdateLocation_ShouldResetExpiration_WhenLocationIsUpdatedToSameValue()
+    public void TryLocationUpdate_ShouldResetExpiration_WhenLocationIsUpdatedToSameValue()
     {
         // Arrange
         var clock = new FakeClock(DateTime.UnixEpoch);
@@ -83,11 +104,14 @@ public sealed class PersonTests : IDisposable
         _testPerson.Expired += (_, e) => expiredEvents.Add(e);
         clock.AdvanceBy(_timeout / 2);
 
+        var personLocationUpdate = new PersonLocationUpdate(_personId, _location);
+
         // Act
-        _testPerson.UpdateLocation(_location);
+        var result = _testPerson.TryLocationUpdate(personLocationUpdate);
         clock.AdvanceBy(_timeout - TimeSpan.FromMilliseconds(1));
 
         // Assert
+        result.Should().BeTrue();
         expiredEvents.Should().BeEmpty();
     }
 

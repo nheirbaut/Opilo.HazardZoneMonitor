@@ -1,3 +1,4 @@
+using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
@@ -22,16 +23,22 @@ public sealed class Person : IDisposable
         return new Person(id, location, lifespanTimeout, clock, timerFactory);
     }
 
-    public void UpdateLocation(Location newLocation)
+    public bool TryLocationUpdate(PersonLocationUpdate personLocationUpdate)
     {
-        // Any update counts as a heartbeat; extend the expiration.
+        Guard.Against.Null(personLocationUpdate);
+
+        if (personLocationUpdate.PersonId != Id)
+            return false;
+
         RescheduleExpiry();
 
-        if (newLocation == Location)
-            return;
+        if (personLocationUpdate.Location == Location)
+            return true;
 
-        Location = newLocation;
+        Location = personLocationUpdate.Location;
         LocationChanged?.Invoke(this, new PersonLocationChangedEventArgs(Id, Location));
+
+        return true;
     }
 
     private Person(Guid id, Location initialLocation, TimeSpan timeout, IClock clock, ITimerFactory timerFactory)
@@ -39,7 +46,6 @@ public sealed class Person : IDisposable
         Id = id;
         Location = initialLocation;
 
-        // One-shot timer: we restart it on each heartbeat.
         _expiryTimer = timerFactory.Create(timeout, autoReset: false);
         _expiryTimer.Elapsed += OnExpiryTimerElapsed;
         _expiryTimer.Start();
@@ -47,7 +53,6 @@ public sealed class Person : IDisposable
 
     private void RescheduleExpiry()
     {
-        // Restart the one-shot timer so it expires timeout after the last heartbeat.
         _expiryTimer.Stop();
         _expiryTimer.Start();
     }
