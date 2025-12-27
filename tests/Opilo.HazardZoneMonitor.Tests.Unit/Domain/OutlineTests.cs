@@ -157,4 +157,28 @@ public sealed class OutlineTests
         // Assert
         result.Should().BeTrue();
     }
+
+    [Fact]
+    public void Overlaps_ShouldReturnFalse_WhenOutlinesAreCompletelyDisjoint()
+    {
+        // Arrange
+        var outline1 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(2, 0),
+            new Location(2, 2),
+            new Location(0, 2)
+        ]));
+        var outline2 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(5, 5),
+            new Location(7, 5),
+            new Location(7, 7),
+            new Location(5, 7)
+        ]));
+
+        // Act
+        var result = outline1.Overlaps(outline2);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }
