@@ -61,7 +61,39 @@ public sealed class Outline
     public bool IsWithin(Outline other)
     {
         Guard.Against.Null(other);
-        return Vertices.All(v => other.IsLocationInside(v));
+        return Vertices.All(v => other.IsLocationInside(v) && !other.IsLocationOnBoundary(v));
+    }
+
+    private bool IsLocationOnBoundary(Location location)
+    {
+        for (var i = 0; i < Vertices.Count; i++)
+        {
+            var v1 = Vertices[i];
+            var v2 = Vertices[(i + 1) % Vertices.Count];
+
+            if (IsPointOnSegment(location, v1, v2))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsPointOnSegment(Location point, Location segmentStart, Location segmentEnd)
+    {
+        // Check if point is collinear with the segment
+        var crossProduct = (point.Y - segmentStart.Y) * (segmentEnd.X - segmentStart.X) -
+                          (point.X - segmentStart.X) * (segmentEnd.Y - segmentStart.Y);
+
+        if (Math.Abs(crossProduct) > 0.0001) // Not collinear
+            return false;
+
+        // Check if point is within the bounding box of the segment
+        var withinX = point.X >= Math.Min(segmentStart.X, segmentEnd.X) &&
+                     point.X <= Math.Max(segmentStart.X, segmentEnd.X);
+        var withinY = point.Y >= Math.Min(segmentStart.Y, segmentEnd.Y) &&
+                     point.Y <= Math.Max(segmentStart.Y, segmentEnd.Y);
+
+        return withinX && withinY;
     }
 
     private bool AnyEdgesIntersect(Outline other)
