@@ -181,4 +181,28 @@ public sealed class OutlineTests
         // Assert
         result.Should().BeFalse();
     }
+
+    [Fact]
+    public void Overlaps_ShouldReturnTrue_WhenOutlinesTouchAtSinglePoint()
+    {
+        // Arrange
+        var outline1 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(2, 0),
+            new Location(2, 2),
+            new Location(0, 2)
+        ]));
+        var outline2 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(4, 2),
+            new Location(4, 4),
+            new Location(2, 4)
+        ]));
+
+        // Act
+        var result = outline1.Overlaps(outline2);
+
+        // Assert
+        result.Should().BeTrue();
+    }
 }
