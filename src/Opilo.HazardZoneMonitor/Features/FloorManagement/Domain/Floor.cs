@@ -42,6 +42,7 @@ public sealed class Floor : IDisposable
         Guard.Against.Null(hazardZones);
 
         var hazardZoneList = hazardZones.ToList();
+        Guard.Against.DuplicateHazardZones(hazardZoneList, nameof(hazardZones));
         Guard.Against.HazardZonesOutsideFloor(hazardZoneList, outline, nameof(hazardZones));
 
         Name = name;

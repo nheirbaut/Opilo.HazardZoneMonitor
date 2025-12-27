@@ -95,6 +95,25 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_ShouldThrowArgumentException_WhenDuplicateHazardZonesAreProvided()
+    {
+        // Arrange
+        var hazardZoneOutline = new Outline(new([
+            new Location(1, 1),
+            new Location(3, 1),
+            new Location(3, 3),
+            new Location(1, 3)
+        ]));
+        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+
+        // Act
+        var act = () => new Floor(ValidFloorName, s_validOutline, [hazardZone, hazardZone]);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
     public void TryAddPersonLocationUpdate_ShouldThrowArgumentNullException_WhenPersonLocationUpdateIsNull()
     {
         // Arrange

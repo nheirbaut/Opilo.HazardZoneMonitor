@@ -25,4 +25,18 @@ public static class HazardZoneGuards
             }
         }
     }
+
+    public static void DuplicateHazardZones(
+        this IGuardClause guardClause,
+        IReadOnlyCollection<HazardZone> hazardZones,
+        string parameterName)
+    {
+        ArgumentNullException.ThrowIfNull(hazardZones);
+
+        var distinctCount = hazardZones.Distinct().Count();
+        if (distinctCount != hazardZones.Count)
+        {
+            throw new ArgumentException("Duplicate HazardZones are not allowed.", parameterName);
+        }
+    }
 }
