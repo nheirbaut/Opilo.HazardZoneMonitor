@@ -242,4 +242,28 @@ public sealed class OutlineTests
         // Assert
         result.Should().BeTrue();
     }
+
+    [Fact]
+    public void IsWithin_ShouldReturnFalse_WhenOutlineIsPartiallyOutside()
+    {
+        // Arrange
+        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(5, 2),
+            new Location(5, 5),
+            new Location(2, 5)
+        ]));
+        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(4, 0),
+            new Location(4, 4),
+            new Location(0, 4)
+        ]));
+
+        // Act
+        var result = innerOutline.IsWithin(outerOutline);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }
