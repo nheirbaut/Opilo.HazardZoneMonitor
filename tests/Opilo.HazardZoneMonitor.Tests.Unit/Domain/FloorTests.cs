@@ -252,7 +252,7 @@ public sealed class FloorTests : IDisposable
         var personId = Guid.NewGuid();
         var location = new Location(2, 2);
         var personTimeout = TimeSpan.FromMilliseconds(10);
-        _testFloor = new Floor(ValidFloorName, s_validOutline, [], personTimeout, _clock, _timerFactory);
+        _testFloor = new Floor(ValidFloorName, s_validOutline, [], personTimeout, _timerFactory);
         var personMovement = new PersonLocationUpdate(personId, location);
         PersonRemovedFromFloorEventArgs? personRemovedFromFloorEvent = null;
         _testFloor.PersonRemovedFromFloor += (_, e) => personRemovedFromFloorEvent = e;
@@ -354,7 +354,7 @@ public sealed class FloorTests : IDisposable
 
         using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
         var personTimeout = TimeSpan.FromMilliseconds(10);
-        _testFloor = new Floor("Test Floor", floorOutline, [hazardZone], personTimeout, _clock, _timerFactory);
+        _testFloor = new Floor("Test Floor", floorOutline, [hazardZone], personTimeout, _timerFactory);
 
         var personId = Guid.NewGuid();
         var location = new Location(20, 20); // Inside hazard zone

@@ -1,3 +1,5 @@
+// ReSharper disable AccessToDisposedClosure
+
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
