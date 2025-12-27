@@ -45,6 +45,13 @@ public sealed class Outline
         return windingNumber != 0;
     }
 
+    public bool Overlaps(Outline other)
+    {
+        Guard.Against.Null(other);
+        _ = Vertices;
+        return false;
+    }
+
     private static bool IsUpwardCrossing(Location v1, Location v2, Location point)
         => v1.Y <= point.Y && v2.Y > point.Y;
 

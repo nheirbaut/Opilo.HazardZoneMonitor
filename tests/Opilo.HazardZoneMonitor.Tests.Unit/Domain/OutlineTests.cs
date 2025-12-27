@@ -120,4 +120,17 @@ public sealed class OutlineTests
         resultInside.Should().BeTrue();
         resultOutside.Should().BeFalse();
     }
+
+    [Fact]
+    public void Overlaps_ShouldThrowArgumentNullException_WhenOtherIsNull()
+    {
+        // Arrange
+        var outline = new Outline(s_validVertices);
+
+        // Act
+        var act = () => outline.Overlaps(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
 }
