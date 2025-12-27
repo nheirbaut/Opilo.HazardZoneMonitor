@@ -17,6 +17,11 @@ public static class HazardZoneGuards
 
         foreach (var hazardZone in hazardZones)
         {
+            if (hazardZone is null)
+            {
+                throw new ArgumentException("Collection contains null HazardZone elements.", parameterName);
+            }
+
             if (!hazardZone.Outline.IsWithin(floorOutline))
             {
                 throw new ArgumentException(
@@ -33,6 +38,11 @@ public static class HazardZoneGuards
     {
         ArgumentNullException.ThrowIfNull(hazardZones);
 
+        if (hazardZones.Any(hz => hz is null))
+        {
+            throw new ArgumentException("Collection contains null HazardZone elements.", parameterName);
+        }
+
         var distinctCount = hazardZones.Distinct().Count();
         if (distinctCount != hazardZones.Count)
         {
@@ -48,6 +58,12 @@ public static class HazardZoneGuards
         ArgumentNullException.ThrowIfNull(hazardZones);
 
         var hazardZoneList = hazardZones.ToList();
+
+        if (hazardZoneList.Any(hz => hz is null))
+        {
+            throw new ArgumentException("Collection contains null HazardZone elements.", parameterName);
+        }
+
         for (var i = 0; i < hazardZoneList.Count; i++)
         {
             for (var j = i + 1; j < hazardZoneList.Count; j++)
