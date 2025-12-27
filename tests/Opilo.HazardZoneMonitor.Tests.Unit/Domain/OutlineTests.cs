@@ -133,4 +133,28 @@ public sealed class OutlineTests
         // Assert
         act.Should().Throw<ArgumentNullException>();
     }
+
+    [Fact]
+    public void Overlaps_ShouldReturnTrue_WhenOutlinesShareEdgeIntersection()
+    {
+        // Arrange
+        var outline1 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(4, 0),
+            new Location(4, 4),
+            new Location(0, 4)
+        ]));
+        var outline2 = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(6, 2),
+            new Location(6, 6),
+            new Location(2, 6)
+        ]));
+
+        // Act
+        var result = outline1.Overlaps(outline2);
+
+        // Assert
+        result.Should().BeTrue();
+    }
 }
