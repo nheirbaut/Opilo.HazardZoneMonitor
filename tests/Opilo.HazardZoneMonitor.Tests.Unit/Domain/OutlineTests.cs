@@ -205,4 +205,17 @@ public sealed class OutlineTests
         // Assert
         result.Should().BeTrue();
     }
+
+    [Fact]
+    public void IsWithin_ShouldThrowArgumentNullException_WhenOtherIsNull()
+    {
+        // Arrange
+        var outline = new Outline(s_validVertices);
+
+        // Act
+        var act = () => outline.IsWithin(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
 }
