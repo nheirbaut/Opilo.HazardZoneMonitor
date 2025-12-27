@@ -100,6 +100,11 @@ public sealed class Floor : IDisposable
 
     private void OnPersonExpired(object? _, PersonExpiredEventArgs args)
     {
+        foreach (var hazardZone in _hazardZones)
+        {
+            hazardZone.Handle(args);
+        }
+
         RemovePersonFromFloorIfPersonIsOnFloor(args.PersonId);
     }
 

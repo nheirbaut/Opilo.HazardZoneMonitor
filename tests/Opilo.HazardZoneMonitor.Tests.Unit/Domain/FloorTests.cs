@@ -318,6 +318,34 @@ public sealed class FloorTests : IDisposable
         personAddedToHazardZoneEvent.PersonId.Should().Be(personId);
     }
 
+    [Fact]
+    public void TryAddPersonLocationUpdate_ShouldForwardPersonExpiredEventToHazardZones_WhenPersonExpires()
+    {
+        // Arrange
+        var floorOutline = new Outline([new(0, 0), new(100, 0), new(100, 100), new(0, 100)]);
+        var hazardZoneOutline = new Outline([new(10, 10), new(40, 10), new(40, 40), new(10, 40)]);
+
+        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+        var personTimeout = TimeSpan.FromMilliseconds(10);
+        _testFloor = new Floor("Test Floor", floorOutline, [hazardZone], personTimeout, _clock, _timerFactory);
+
+        var personId = Guid.NewGuid();
+        var location = new Location(20, 20); // Inside hazard zone
+
+        // Add person first
+        _testFloor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location));
+
+        PersonRemovedFromHazardZoneEventArgs? personRemovedFromHazardZoneEvent = null;
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedFromHazardZoneEvent = e;
+
+        // Act
+        _clock.AdvanceBy(personTimeout * 2);
+
+        // Assert
+        personRemovedFromHazardZoneEvent.Should().NotBeNull();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personId);
+    }
+
     public void Dispose()
     {
         _testFloor?.Dispose();
