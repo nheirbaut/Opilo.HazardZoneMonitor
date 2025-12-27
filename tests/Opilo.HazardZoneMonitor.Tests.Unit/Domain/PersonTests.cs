@@ -27,7 +27,7 @@ public sealed class PersonTests : IDisposable
     public void Create_ShouldCreateValidPerson_WhenParametersAreValid()
     {
         // Act
-        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);
 
         // Assert
         _testPerson.Should().NotBeNull();
@@ -39,7 +39,7 @@ public sealed class PersonTests : IDisposable
     public void TryLocationUpdate_ShouldReturnFalse_WhenLocationUpdateIsForDifferentPerson()
     {
         // Arrange
-        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);
         var differentPersonId = Guid.NewGuid();
         var personLocationUpdate = new PersonLocationUpdate(differentPersonId, new Location(1, 1));
 
@@ -57,7 +57,7 @@ public sealed class PersonTests : IDisposable
         var newLocation = new Location(1, 1);
         PersonLocationChangedEventArgs? personLocationChangedEvent = null;
 
-        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);
         _testPerson.LocationChanged += (_, e) => personLocationChangedEvent = e;
 
         var personLocationUpdate = new PersonLocationUpdate(_personId, newLocation);
@@ -78,7 +78,7 @@ public sealed class PersonTests : IDisposable
         // Arrange
         PersonLocationChangedEventArgs? personLocationChangedEvent = null;
 
-        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);
         _testPerson.LocationChanged += (_, e) => personLocationChangedEvent = e;
 
         var personLocationUpdate = new PersonLocationUpdate(_personId, _location);
@@ -100,7 +100,7 @@ public sealed class PersonTests : IDisposable
 
         var expiredEvents = new List<PersonExpiredEventArgs>();
 
-        _testPerson = Person.Create(_personId, _location, _timeout, clock, timerFactory);
+        _testPerson = Person.Create(_personId, _location, _timeout, timerFactory);
         _testPerson.Expired += (_, e) => expiredEvents.Add(e);
         clock.AdvanceBy(_timeout / 2);
 
@@ -121,7 +121,7 @@ public sealed class PersonTests : IDisposable
         // Arrange
         var expiredEvents = new List<PersonExpiredEventArgs>();
 
-        _testPerson = Person.Create(_personId, _location, _timeout, _clock, _timerFactory);
+        _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);
         _testPerson.Expired += (_, e) => expiredEvents.Add(e);
 
         // Act

@@ -18,7 +18,6 @@ public sealed class Floor : IDisposable
     private readonly TimeSpan _personLifespan;
     private volatile bool _disposed;
     private readonly Lock _personsOnFloorLock = new();
-    private readonly IClock _clock;
     private readonly ITimerFactory _timerFactory;
 
     public readonly static TimeSpan DefaultPersonLifespan = TimeSpan.FromMilliseconds(200);
@@ -37,7 +36,6 @@ public sealed class Floor : IDisposable
         Outline outline,
         IList<HazardZone> hazardZones,
         TimeSpan? personLifespan = null,
-        IClock? clock = null,
         ITimerFactory? timerFactory = null)
     {
         Guard.Against.NullOrWhiteSpace(name);
@@ -53,7 +51,6 @@ public sealed class Floor : IDisposable
         Outline = outline;
         _hazardZones = hazardZoneList;
         _personLifespan = personLifespan ?? DefaultPersonLifespan;
-        _clock = clock ?? new SystemClock();
         _timerFactory = timerFactory ?? new SystemTimerFactory();
 
         foreach (var hazardZone in _hazardZones)
@@ -87,7 +84,7 @@ public sealed class Floor : IDisposable
             }
 
             var newPerson = Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
-                _clock, _timerFactory);
+                _timerFactory);
 
             newPerson.Expired += OnPersonExpired;
             newPerson.LocationChanged += OnPersonLocationChanged;

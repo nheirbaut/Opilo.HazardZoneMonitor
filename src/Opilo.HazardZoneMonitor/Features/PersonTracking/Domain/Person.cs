@@ -15,12 +15,11 @@ public sealed class Person : IDisposable
     public event EventHandler<PersonLocationChangedEventArgs>? LocationChanged;
     public event EventHandler<PersonExpiredEventArgs>? Expired;
 
-    public static Person Create(Guid id, Location location, TimeSpan lifespanTimeout, IClock clock, ITimerFactory timerFactory)
+    public static Person Create(Guid id, Location location, TimeSpan lifespanTimeout, ITimerFactory timerFactory)
     {
-        ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(timerFactory);
 
-        return new Person(id, location, lifespanTimeout, clock, timerFactory);
+        return new Person(id, location, lifespanTimeout, timerFactory);
     }
 
     public bool TryLocationUpdate(PersonLocationUpdate personLocationUpdate)
@@ -41,7 +40,7 @@ public sealed class Person : IDisposable
         return true;
     }
 
-    private Person(Guid id, Location initialLocation, TimeSpan timeout, IClock clock, ITimerFactory timerFactory)
+    private Person(Guid id, Location initialLocation, TimeSpan timeout, ITimerFactory timerFactory)
     {
         Id = id;
         Location = initialLocation;

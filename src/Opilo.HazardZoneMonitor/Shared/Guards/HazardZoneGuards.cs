@@ -38,11 +38,6 @@ public static class HazardZoneGuards
     {
         ArgumentNullException.ThrowIfNull(hazardZones);
 
-        if (hazardZones.Any(hz => hz is null))
-        {
-            throw new ArgumentException("Collection contains null HazardZone elements.", parameterName);
-        }
-
         var names = hazardZones.Select(hz => hz.Name).ToList();
         var distinctNames = names.Distinct(StringComparer.OrdinalIgnoreCase).Count();
         if (distinctNames != names.Count)
@@ -59,11 +54,6 @@ public static class HazardZoneGuards
         ArgumentNullException.ThrowIfNull(hazardZones);
 
         var hazardZoneList = hazardZones.ToList();
-
-        if (hazardZoneList.Any(hz => hz is null))
-        {
-            throw new ArgumentException("Collection contains null HazardZone elements.", parameterName);
-        }
 
         for (var i = 0; i < hazardZoneList.Count; i++)
         {
