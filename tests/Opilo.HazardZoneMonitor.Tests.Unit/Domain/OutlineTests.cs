@@ -231,6 +231,30 @@ public sealed class OutlineTests
     }
 
     [Fact]
+    public void Overlaps_ShouldReturnTrue_WhenOneOutlineCompletelyContainsAnother()
+    {
+        // Arrange
+        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(2, 2),
+            new Location(3, 2),
+            new Location(3, 3),
+            new Location(2, 3)
+        ]));
+        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
+            new Location(0, 0),
+            new Location(5, 0),
+            new Location(5, 5),
+            new Location(0, 5)
+        ]));
+
+        // Act
+        var result = innerOutline.Overlaps(outerOutline);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
     public void IsWithin_ShouldThrowArgumentNullException_WhenOtherIsNull()
     {
         // Arrange
