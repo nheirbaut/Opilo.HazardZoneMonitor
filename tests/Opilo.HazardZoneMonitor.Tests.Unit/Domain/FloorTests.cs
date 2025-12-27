@@ -1,6 +1,7 @@
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
+using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
@@ -259,6 +260,34 @@ public sealed class FloorTests : IDisposable
         personRemovedFromFloorEvent.Should().NotBeNull();
         personRemovedFromFloorEvent.FloorName.Should().Be(ValidFloorName);
         personRemovedFromFloorEvent.PersonId.Should().Be(personId);
+    }
+
+    [Fact]
+    public async Task TryAddPersonLocationUpdate_ShouldForwardPersonCreatedEventToHazardZones_WhenNewPersonIsAdded()
+    {
+        // Arrange
+        var floorOutline = new Outline([new(0, 0), new(100, 0), new(100, 100), new(0, 100)]);
+        var hazardZoneOutline = new Outline([new(10, 10), new(40, 10), new(40, 40), new(10, 40)]);
+        
+        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+        _testFloor = new Floor("Test Floor", floorOutline, [hazardZone]);
+        
+        var personId = Guid.NewGuid();
+        var location = new Location(20, 20); // Inside hazard zone
+        var personLocationUpdate = new PersonLocationUpdate(personId, location);
+        
+        var personAddedToHazardZoneEventTask = EventsExtensions.RegisterAndWaitForEvent<PersonAddedToHazardZoneEventArgs>(
+            h => hazardZone.PersonAddedToHazardZone += h,
+            h => hazardZone.PersonAddedToHazardZone -= h);
+
+        // Act
+        _testFloor.TryAddPersonLocationUpdate(personLocationUpdate);
+        var personAddedToHazardZoneEvent = await personAddedToHazardZoneEventTask;
+
+        // Assert
+        personAddedToHazardZoneEvent.Should().NotBeNull();
+        personAddedToHazardZoneEvent.PersonId.Should().Be(personId);
+        personAddedToHazardZoneEvent.HazardZoneName.Should().Be("TestZone");
     }
 
     public void Dispose()

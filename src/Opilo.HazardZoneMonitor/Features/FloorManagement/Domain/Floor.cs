@@ -81,9 +81,20 @@ public sealed class Floor : IDisposable
 
             PersonAddedToFloor?.Invoke(this,
                 new PersonAddedToFloorEventArgs(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
+
+            NotifyHazardZonesOfPersonCreated(personLocationUpdate.PersonId, personLocationUpdate.Location);
         }
 
         return true;
+    }
+
+    private void NotifyHazardZonesOfPersonCreated(Guid personId, Location location)
+    {
+        var personCreatedEvent = new PersonCreatedEventArgs(personId, location);
+        foreach (var hazardZone in _hazardZones)
+        {
+            hazardZone.Handle(personCreatedEvent);
+        }
     }
 
     private void OnPersonExpired(object? _, PersonExpiredEventArgs args)
