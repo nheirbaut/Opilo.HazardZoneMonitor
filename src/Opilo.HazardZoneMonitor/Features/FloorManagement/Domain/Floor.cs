@@ -44,55 +44,39 @@ public sealed class Floor : IDisposable
         Guard.Against.Null(personLocationUpdate);
 
         var locationIsOnFloor = Outline.IsLocationInside(personLocationUpdate.Location);
-        Person? personToRemove = null;
 
-        lock (_personsOnFloorLock)
+        if (!locationIsOnFloor)
         {
-            if (!locationIsOnFloor)
-            {
-                personToRemove = _personsOnFloor.FirstOrDefault(p => p.Id == personLocationUpdate.PersonId);
-
-                if (personToRemove != null)
-                {
-                    _personsOnFloor.Remove(personToRemove);
-                    PersonRemovedFromFloor?.Invoke(this, new PersonRemovedFromFloorEventArgs(Name, personLocationUpdate.PersonId));
-                }
-
-                // Cleanup is done outside the lock
-            }
-            else if (_personsOnFloor.Any(p => p.TryLocationUpdate(personLocationUpdate)))
-            {
-                return true;
-            }
-            else
-            {
-                var newPerson = Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
-                    _clock, _timerFactory);
-
-                newPerson.Expired += OnPersonExpired;
-                _personsOnFloor.Add(newPerson);
-
-                PersonAddedToFloor?.Invoke(this,
-                    new PersonAddedToFloorEventArgs(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
-            }
-        }
-
-        if (personToRemove != null)
-        {
-            personToRemove.Expired -= OnPersonExpired;
-            personToRemove.Dispose();
+            RemovePersonFromFloorIfPersonIsOnFloor(personLocationUpdate.PersonId);
             return false;
         }
 
-        return locationIsOnFloor;
+        lock (_personsOnFloorLock)
+        {
+            if (_personsOnFloor.Any(p => p.TryLocationUpdate(personLocationUpdate)))
+            {
+                return true;
+            }
+
+            var newPerson = Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
+                _clock, _timerFactory);
+
+            newPerson.Expired += OnPersonExpired;
+            _personsOnFloor.Add(newPerson);
+
+            PersonAddedToFloor?.Invoke(this,
+                new PersonAddedToFloorEventArgs(Name, personLocationUpdate.PersonId, personLocationUpdate.Location));
+        }
+
+        return true;
     }
 
     private void OnPersonExpired(object? _, PersonExpiredEventArgs args)
     {
-        RemovePersonFromFloor(args.PersonId);
+        RemovePersonFromFloorIfPersonIsOnFloor(args.PersonId);
     }
 
-    private void RemovePersonFromFloor(Guid personId)
+    private void RemovePersonFromFloorIfPersonIsOnFloor(Guid personId)
     {
         Person? personToRemove;
 
