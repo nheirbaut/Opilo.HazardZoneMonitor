@@ -114,6 +114,27 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_ShouldThrowArgumentException_WhenHazardZonesOverlap()
+    {
+        // Arrange
+        var floorOutline = new Outline([new(0, 0), new(100, 0), new(100, 100), new(0, 100)]);
+        
+        var overlappingOutline1 = new Outline([new(10, 10), new(60, 10), new(60, 60), new(10, 60)]);
+        var overlappingOutline2 = new Outline([new(40, 40), new(90, 40), new(90, 90), new(40, 90)]);
+        
+        using var hazardZone1 = new HazardZone("Zone1", overlappingOutline1, TimeSpan.FromSeconds(5));
+        using var hazardZone2 = new HazardZone("Zone2", overlappingOutline2, TimeSpan.FromSeconds(5));
+
+        // Act
+        var act = () => new Floor("Test Floor", floorOutline, [hazardZone1, hazardZone2]);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("hazardZones")
+            .WithMessage("*overlap*");
+    }
+
+    [Fact]
     public void TryAddPersonLocationUpdate_ShouldThrowArgumentNullException_WhenPersonLocationUpdateIsNull()
     {
         // Arrange

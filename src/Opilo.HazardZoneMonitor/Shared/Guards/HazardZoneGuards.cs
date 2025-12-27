@@ -39,4 +39,26 @@ public static class HazardZoneGuards
             throw new ArgumentException("Duplicate HazardZones are not allowed.", parameterName);
         }
     }
+
+    public static void OverlappingHazardZones(
+        this IGuardClause guardClause,
+        IReadOnlyCollection<HazardZone> hazardZones,
+        string parameterName)
+    {
+        ArgumentNullException.ThrowIfNull(hazardZones);
+
+        var hazardZoneList = hazardZones.ToList();
+        for (var i = 0; i < hazardZoneList.Count; i++)
+        {
+            for (var j = i + 1; j < hazardZoneList.Count; j++)
+            {
+                if (hazardZoneList[i].Outline.Overlaps(hazardZoneList[j].Outline))
+                {
+                    throw new ArgumentException(
+                        $"HazardZone '{hazardZoneList[i].Name}' overlaps with '{hazardZoneList[j].Name}'.",
+                        parameterName);
+                }
+            }
+        }
+    }
 }
