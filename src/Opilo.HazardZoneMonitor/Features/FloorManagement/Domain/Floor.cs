@@ -109,6 +109,9 @@ public sealed class Floor : IDisposable
 
     private void NotifyHazardZonesOfPersonCreated(Guid personId, Location location)
     {
+        if (_disposed)
+            return;
+
         var personCreatedEvent = new PersonCreatedEventArgs(personId, location);
         foreach (var hazardZone in _hazardZones)
         {
@@ -118,9 +121,12 @@ public sealed class Floor : IDisposable
 
     private void OnPersonExpired(object? _, PersonExpiredEventArgs args)
     {
-        foreach (var hazardZone in _hazardZones)
+        if (!_disposed)
         {
-            hazardZone.Handle(args);
+            foreach (var hazardZone in _hazardZones)
+            {
+                hazardZone.Handle(args);
+            }
         }
 
         RemovePersonFromFloorIfPersonIsOnFloor(args.PersonId);
@@ -128,6 +134,9 @@ public sealed class Floor : IDisposable
 
     private void OnPersonLocationChanged(object? _, PersonLocationChangedEventArgs args)
     {
+        if (_disposed)
+            return;
+
         foreach (var hazardZone in _hazardZones)
         {
             hazardZone.Handle(args);
