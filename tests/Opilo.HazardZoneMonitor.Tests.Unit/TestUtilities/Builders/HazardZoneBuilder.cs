@@ -1,5 +1,4 @@
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 
@@ -115,7 +114,7 @@ internal sealed class HazardZoneBuilder
         {
             var personId = Guid.NewGuid();
             var insideLocation = new Location(2, 2);
-            hazardZone.Handle(new PersonCreatedEventArgs(personId, insideLocation));
+            hazardZone.HandlePersonCreated(personId, insideLocation);
         }
 
         IdsOfPersonsAdded = waiter.Wait(TimeSpan.FromSeconds(5)).Select(e => e.PersonId).ToList();

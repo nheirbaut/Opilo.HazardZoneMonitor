@@ -109,10 +109,9 @@ public sealed class Floor : IDisposable
         if (_disposed)
             return;
 
-        var personCreatedEvent = new PersonCreatedEventArgs(personId, location);
         foreach (var hazardZone in _hazardZones)
         {
-            hazardZone.Handle(personCreatedEvent);
+            hazardZone.HandlePersonCreated(personId, location);
         }
     }
 
