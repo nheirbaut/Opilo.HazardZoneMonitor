@@ -34,7 +34,6 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
 
     public override void ManuallyDeactivate()
     {
-        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
         HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }
@@ -44,7 +43,6 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         if (!RegisteredActivationSourceIds.Remove(sourceId))
             return;
 
-        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
         HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }
