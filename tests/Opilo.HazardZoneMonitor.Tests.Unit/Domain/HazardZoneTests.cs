@@ -402,6 +402,29 @@ public sealed class HazardZoneTests : IDisposable
     // Activating (ZoneState=Activating, AlarmState=None)
     //------------------------------------------------------------------------------
 
+    [Fact]
+    public void ActivationTimer_ShouldTransitionToActive_WhenInActivatingStateAndTimerElapses()
+    {
+        // Arrange
+        var testActivationDuration = TimeSpan.FromMilliseconds(10);
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(testActivationDuration)
+            .WithTime(clock, timerFactory)
+            .Build();
+
+        hazardZone.ManuallyActivate();
+
+        // Act
+        clock.AdvanceBy(testActivationDuration);
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
     //------------------------------------------------------------------------------
     // Active (ZoneState=Active, AlarmState=None)
     //------------------------------------------------------------------------------
