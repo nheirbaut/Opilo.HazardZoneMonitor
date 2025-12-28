@@ -7,20 +7,37 @@ title HazardZone State Diagram
 [*] --> Inactive
 
 '------------------------------------------------------------------------------
-' Inactive (IsActive=false, AlarmState=None)
+' Inactive (ZoneState=Inactive, AlarmState=None)
 '------------------------------------------------------------------------------
 
-Inactive : IsActive = false
+Inactive : ZoneState = Inactive
 Inactive : AlarmState = None
 
-Inactive --> Active : ManuallyActivate()
-Inactive --> Active : ActivateFromExternalSource(source ID)\n[source ID unknown]
+Inactive --> Activating : ManuallyActivate()\n[activationDuration > 0]
+Inactive --> Activating : ActivateFromExternalSource(source ID)\n[source ID unknown]\n[activationDuration > 0]
+Inactive --> Active : ManuallyActivate()\n[activationDuration == 0]
+Inactive --> Active : ActivateFromExternalSource(source ID)\n[source ID unknown]\n[activationDuration == 0]
 
 '------------------------------------------------------------------------------
-' Active (IsActive=true, AlarmState=None)
+' Activating (ZoneState=Activating, AlarmState=None)
 '------------------------------------------------------------------------------
 
-Active : IsActive = true
+Activating : ZoneState = Activating
+Activating : AlarmState = None
+Activating : entry / RaiseHazardZoneActivationStarted()
+Activating : entry / StartActivationTimer()
+
+Activating --> Activating : OnPersonAdded()
+Activating --> Activating : OnPersonRemoved()
+Activating --> Active : OnActivationTimerElapsed()
+Activating --> Inactive : ManuallyDeactivate()
+Activating --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
+
+'------------------------------------------------------------------------------
+' Active (ZoneState=Active, AlarmState=None)
+'------------------------------------------------------------------------------
+
+Active : ZoneState = Active
 Active : AlarmState = None
 
 Active --> Active : OnPersonAdded()\n[numberOfPersons <= allowedNumberOfPersons]
@@ -34,10 +51,10 @@ Active --> Inactive : ManuallyDeactivate()
 Active --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
 
 '------------------------------------------------------------------------------
-' PreAlarm (IsActive=true, AlarmState=PreAlarm)
+' PreAlarm (ZoneState=Active, AlarmState=PreAlarm)
 '------------------------------------------------------------------------------
 
-PreAlarm : IsActive = true
+PreAlarm : ZoneState = Active
 PreAlarm : AlarmState = PreAlarm
 
 PreAlarm --> PreAlarm : RemovePerson()\n[numberOfPersons > allowedNumberOfPersons]
@@ -50,10 +67,10 @@ PreAlarm --> Inactive : ManuallyDeactivate()
 PreAlarm --> Inactive : DeactivateFromExternalSource(source ID)\n[source ID known]
 
 '------------------------------------------------------------------------------
-' Alarm (IsActive=true, AlarmState=Alarm)
+' Alarm (ZoneState=Active, AlarmState=Alarm)
 '------------------------------------------------------------------------------
 
-Alarm : IsActive = true
+Alarm : ZoneState = Active
 Alarm : AlarmState = Alarm
 
 Alarm --> Alarm : RemovePerson()\n[numberOfPersons > allowedNumberOfPersons]
