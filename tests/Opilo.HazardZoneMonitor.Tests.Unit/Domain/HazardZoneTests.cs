@@ -1263,6 +1263,27 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ManuallyDeactivate_ShouldRaiseAlarmStateChangedToNone_WhenPreAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
     public void DeactivateFromExternalSource_ShouldTransitionToInactive_WhenInPreAlarmStateWithKnownSource()
     {
         // Arrange
