@@ -1,16 +1,20 @@
 using System.Net;
+using System.Net.Http.Json;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Opilo.HazardZoneMonitor.Api;
+using Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.FloorManagement;
 
 public sealed class GetFloorsEndpointTests : IDisposable
 {
-    private readonly WebApplicationFactory<IApiMarker> _factory;
+    private readonly CustomWebApplicationFactory _factory;
 
     public GetFloorsEndpointTests()
     {
-        _factory = new WebApplicationFactory<IApiMarker>();
+        _factory = new CustomWebApplicationFactory(new FakeFloorRegistry([]));
     }
 
     [Fact]
@@ -41,8 +45,56 @@ public sealed class GetFloorsEndpointTests : IDisposable
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
     }
 
+    [Fact]
+    public async Task GetFloors_ShouldReturnSingleFloor_WhenFloorExists()
+    {
+        // Arrange
+        await using var factory = new CustomWebApplicationFactory(
+            new FakeFloorRegistry([new FloorDto("floor-1", "Ground Floor")]));
+        var client = factory.CreateClient();
+
+        // Act
+        var floors = await client.GetFromJsonAsync<FloorDto[]>("/api/v1/floors");
+
+        // Assert
+        floors.Should().NotBeNull();
+        floors!.Length.Should().Be(1);
+        floors[0].Id.Should().NotBeNullOrEmpty();
+        floors[0].Name.Should().NotBeNullOrEmpty();
+    }
+
     public void Dispose()
     {
         _factory.Dispose();
+    }
+}
+
+internal sealed class FakeFloorRegistry : IFloorRegistry
+{
+    private readonly IReadOnlyList<FloorDto> _floors;
+
+    public FakeFloorRegistry(IReadOnlyList<FloorDto> floors)
+    {
+        _floors = floors;
+    }
+
+    public IReadOnlyList<FloorDto> GetAllFloors() => _floors;
+}
+
+internal sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>
+{
+    private readonly IFloorRegistry _floorRegistry;
+
+    public CustomWebApplicationFactory(IFloorRegistry floorRegistry)
+    {
+        _floorRegistry = floorRegistry;
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureServices(services =>
+        {
+            services.AddSingleton(_floorRegistry);
+        });
     }
 }
