@@ -508,6 +508,35 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ActivationTimer_WhenElapsed_RaisesHazardZoneStateChangedToActive()
+    {
+        // Arrange
+        var testActivationDuration = TimeSpan.FromMilliseconds(10);
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(testActivationDuration)
+            .WithTime(clock, timerFactory)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ManuallyActivate(); // Transition to Activating
+        stateChangedEvents.Clear(); // Clear the Inactive->Activating event
+
+        // Act
+        clock.AdvanceBy(testActivationDuration);
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Active);
+    }
+
+    [Fact]
     public void ManuallyDeactivate_ShouldTransitionToInactive_WhenInActivatingState()
     {
         // Arrange
