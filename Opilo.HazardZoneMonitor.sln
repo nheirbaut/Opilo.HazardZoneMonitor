@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor.Api
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor.Tests.Integration", "tests\Opilo.HazardZoneMonitor.Tests.Integration\Opilo.HazardZoneMonitor.Tests.Integration.csproj", "{FF8ED484-CE81-4DE2-A9B4-CA69D99615D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opilo.HazardZoneMonitor.Api.Tests.Unit", "tests\Opilo.HazardZoneMonitor.Api.Tests.Unit\Opilo.HazardZoneMonitor.Api.Tests.Unit.csproj", "{82B5240B-3168-4C7D-92ED-337FB82DE86B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,18 @@ Global
 		{FF8ED484-CE81-4DE2-A9B4-CA69D99615D2}.Release|x64.Build.0 = Release|Any CPU
 		{FF8ED484-CE81-4DE2-A9B4-CA69D99615D2}.Release|x86.ActiveCfg = Release|Any CPU
 		{FF8ED484-CE81-4DE2-A9B4-CA69D99615D2}.Release|x86.Build.0 = Release|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Debug|x64.Build.0 = Debug|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Debug|x86.Build.0 = Debug|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Release|x64.ActiveCfg = Release|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Release|x64.Build.0 = Release|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Release|x86.ActiveCfg = Release|Any CPU
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,5 +109,6 @@ Global
 		{35AC8E98-97CB-4AD4-BD3F-BE6BE57DF298} = {F80165AB-816F-4E8F-95D1-3560331A0D95}
 		{826993C2-09BC-4A4D-82EE-CECE327A407C} = {E45269D4-D9D4-45AF-9726-4D4CFD1F83F0}
 		{FF8ED484-CE81-4DE2-A9B4-CA69D99615D2} = {F80165AB-816F-4E8F-95D1-3560331A0D95}
+		{82B5240B-3168-4C7D-92ED-337FB82DE86B} = {F80165AB-816F-4E8F-95D1-3560331A0D95}
 	EndGlobalSection
 EndGlobal
