@@ -21,6 +21,8 @@ internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
             return;
         }
 
+        HazardZone.RaiseHazardZoneActivationStarted();
+
         _enteredActivatingAtUtc = HazardZone.Clock.UtcNow;
 
         _activationTimer = HazardZone.TimerFactory.Create(HazardZone.ActivationDuration);

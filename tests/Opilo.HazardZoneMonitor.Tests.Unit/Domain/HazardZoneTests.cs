@@ -466,6 +466,26 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
+    [Fact]
+    public void ManuallyActivate_ShouldRaiseHazardZoneActivationStartedEvent_WhenTransitioningToActivatingState()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        var activationStartedEvents = new List<HazardZoneActivationStartedEventArgs>();
+        hazardZone.HazardZoneActivationStarted += (_, e) => activationStartedEvents.Add(e);
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        var activationStartedEvent = activationStartedEvents.Single();
+        activationStartedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+    }
+
     //------------------------------------------------------------------------------
     // Active (ZoneState=Active, AlarmState=None)
     //------------------------------------------------------------------------------
