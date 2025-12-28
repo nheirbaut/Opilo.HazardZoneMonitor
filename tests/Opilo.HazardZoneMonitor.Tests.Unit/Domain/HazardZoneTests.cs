@@ -418,6 +418,26 @@ public sealed class HazardZoneTests : IDisposable
         stateChangedEvent.NewState.Should().Be(ZoneState.Activating);
     }
 
+    [Fact]
+    public void ActivateFromExternalSource_WhenInactiveWithActivationDuration_RaisesHazardZoneStateChangedToActivating()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.FromSeconds(10))
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Activating);
+    }
+
     //------------------------------------------------------------------------------
     // Activating (ZoneState=Activating, AlarmState=None)
     //------------------------------------------------------------------------------
