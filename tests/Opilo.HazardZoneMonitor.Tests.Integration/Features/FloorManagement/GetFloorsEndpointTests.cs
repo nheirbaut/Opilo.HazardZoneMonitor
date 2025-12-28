@@ -49,18 +49,15 @@ public sealed class GetFloorsEndpointTests : IDisposable
     public async Task GetFloors_ShouldReturnSingleFloor_WhenFloorExists()
     {
         // Arrange
-        await using var factory = new CustomWebApplicationFactory(
-            new FakeFloorRegistry([new FloorDto("floor-1", "Ground Floor")]));
+        var expectedFloors = new[] { new FloorDto("floor-1", "Ground Floor") };
+        await using var factory = new CustomWebApplicationFactory(new FakeFloorRegistry(expectedFloors));
         var client = factory.CreateClient();
 
         // Act
         var floors = await client.GetFromJsonAsync<FloorDto[]>("/api/v1/floors");
 
         // Assert
-        floors.Should().NotBeNull();
-        floors!.Length.Should().Be(1);
-        floors[0].Id.Should().NotBeNullOrEmpty();
-        floors[0].Name.Should().NotBeNullOrEmpty();
+        floors.Should().BeEquivalentTo(expectedFloors);
     }
 
     public void Dispose()
