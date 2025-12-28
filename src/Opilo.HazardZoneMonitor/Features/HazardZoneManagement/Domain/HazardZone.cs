@@ -26,6 +26,7 @@ public sealed class HazardZone : IDisposable
     public event EventHandler<PersonRemovedFromHazardZoneEventArgs>? PersonRemovedFromHazardZone;
     public event EventHandler<HazardZoneActivationStartedEventArgs>? HazardZoneActivationStarted;
     public event EventHandler<HazardZoneActivatedEventArgs>? HazardZoneActivated;
+    public event EventHandler<HazardZoneStateChangedEventArgs>? HazardZoneStateChanged;
 
     internal IClock Clock { get; }
 
@@ -156,6 +157,12 @@ public sealed class HazardZone : IDisposable
     {
         var handlers = HazardZoneActivated;
         handlers?.Invoke(this, new HazardZoneActivatedEventArgs(Name));
+    }
+
+    internal void RaiseHazardZoneStateChanged(ZoneState newState)
+    {
+        var handlers = HazardZoneStateChanged;
+        handlers?.Invoke(this, new HazardZoneStateChangedEventArgs(Name, newState));
     }
 
     public void Dispose()
