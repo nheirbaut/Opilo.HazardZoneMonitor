@@ -546,6 +546,26 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ActivateFromExternalSource_ShouldRaiseHazardZoneActivatedEvent_WhenActivationDurationIsZeroAndTransitionsDirectlyToActive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        var activatedEvents = new List<HazardZoneActivatedEventArgs>();
+        hazardZone.HazardZoneActivated += (_, e) => activatedEvents.Add(e);
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ExternalSource1");
+
+        // Assert
+        var activatedEvent = activatedEvents.Single();
+        activatedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
+    }
+
+    [Fact]
     public void HandlePersonCreated_ShouldTrackPersonAndRemainActivating_WhenPersonEntersWhileActivating()
     {
         // Arrange
