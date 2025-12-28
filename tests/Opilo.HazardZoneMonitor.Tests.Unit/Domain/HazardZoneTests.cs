@@ -305,6 +305,22 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ManuallyActivate_ShouldTransitionToActive_WhenActivationDurationIsZero()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
     public void ActivateFromExternalSource_ShouldTransitionToActive_WhenInInactiveStateWithUnknownSource()
     {
         // Arrange
@@ -315,6 +331,23 @@ public sealed class HazardZoneTests : IDisposable
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ActivateFromExternalSource_ShouldTransitionToActivatingState_WhenActivationDurationIsGreaterThanZero()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -352,8 +385,6 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
     // Activating (ZoneState=Activating, AlarmState=None)
     //------------------------------------------------------------------------------
-
-    // TODO: Add Activating state tests here
 
     //------------------------------------------------------------------------------
     // Active (ZoneState=Active, AlarmState=None)
