@@ -28,6 +28,19 @@ public sealed class GetFloorsEndpointTests : IDisposable
         content.Should().Be("[]");
     }
 
+    [Fact]
+    public async Task GetFloors_ShouldReturnApplicationJson()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(new Uri("/api/v1/floors", UriKind.Relative));
+
+        // Assert
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
+    }
+
     public void Dispose()
     {
         _factory.Dispose();
