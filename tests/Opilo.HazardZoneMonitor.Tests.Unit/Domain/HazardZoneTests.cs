@@ -850,6 +850,30 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ManuallyDeactivate_WhenActive_RaisesHazardZoneStateChangedToInactive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ManuallyActivate(); // Transition to Active
+        stateChangedEvents.Clear(); // Clear the Inactive->Active event
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Inactive);
+    }
+
+    [Fact]
     public void SetAllowedNumberOfPersons_ShouldRemainActive_WhenInActiveStateAboveThreshold()
     {
         // Arrange
@@ -1020,6 +1044,31 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_WhenActive_RaisesHazardZoneStateChangedToInactive()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ActivateFromExternalSource(sourceId); // Transition to Active
+        stateChangedEvents.Clear(); // Clear the Inactive->Active event
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Inactive);
     }
 
     [Fact]
