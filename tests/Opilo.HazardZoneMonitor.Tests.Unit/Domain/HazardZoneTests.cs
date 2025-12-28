@@ -594,6 +594,26 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ManuallyActivate_ShouldNotRaiseHazardZoneActivatedEvent_WhenTransitioningToActivatingState()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        var activatedEvents = new List<HazardZoneActivatedEventArgs>();
+        hazardZone.HazardZoneActivated += (_, e) => activatedEvents.Add(e);
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        activatedEvents.Should().BeEmpty();
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+    }
+
+    [Fact]
     public void HandlePersonCreated_ShouldTrackPersonAndRemainActivating_WhenPersonEntersWhileActivating()
     {
         // Arrange
