@@ -59,7 +59,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRaisePersonAddedEvent_WhenPersonIsCreatedInZone()
+    public void HandlePersonCreated_ShouldRaisePersonAddedEvent_WhenPersonIsCreatedInZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -79,7 +79,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldNotRaisePersonAddedEvent_WhenPersonIsCreatedOutsideZone()
+    public void HandlePersonCreated_ShouldNotRaisePersonAddedEvent_WhenPersonIsCreatedOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -97,7 +97,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldRaisePersonRemovedEvent_WhenPersonExpiresInZone()
+    public void HandlePersonExpired_ShouldRaisePersonRemovedEvent_WhenPersonExpiresInZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -118,7 +118,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldNotRaisePersonRemovedEvent_WhenPersonExpiresOutsideZone()
+    public void HandlePersonExpired_ShouldNotRaisePersonRemovedEvent_WhenPersonExpiresOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -138,7 +138,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldRaisePersonAddedEvent_WhenUnknownPersonMovesIntoZone()
+    public void HandlePersonLocationChanged_ShouldRaisePersonAddedEvent_WhenUnknownPersonMovesIntoZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -158,7 +158,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldNotRaisePersonAddedEvent_WhenUnknownPersonMovesOutsideZone()
+    public void HandlePersonLocationChanged_ShouldNotRaisePersonAddedEvent_WhenUnknownPersonMovesOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -176,7 +176,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldRaisePersonRemovedEvent_WhenKnownPersonMovesOutsideZone()
+    public void HandlePersonLocationChanged_ShouldRaisePersonRemovedEvent_WhenKnownPersonMovesOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -199,7 +199,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldNotRaiseEvents_WhenKnownPersonMovesWithinZone()
+    public void HandlePersonLocationChanged_ShouldNotRaiseEvents_WhenKnownPersonMovesWithinZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
@@ -337,7 +337,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRemainActive_WhenInActiveStateUnderThreshold()
+    public void HandlePersonCreated_ShouldRemainActive_WhenInActiveStateUnderThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -384,7 +384,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldTransitionToPreAlarm_WhenInActiveStateOverThresholdWithPreAlarm()
+    public void HandlePersonCreated_ShouldTransitionToPreAlarm_WhenInActiveStateOverThresholdWithPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -430,7 +430,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldTransitionToAlarm_WhenInActiveStateOverThresholdWithZeroPreAlarm()
+    public void HandlePersonCreated_ShouldTransitionToAlarm_WhenInActiveStateOverThresholdWithZeroPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -569,7 +569,7 @@ public sealed class HazardZoneTests : IDisposable
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldRemainActive_WhenPersonMovesOutsideInActiveStateUnderThreshold()
+        HandlePersonLocationChanged_ShouldRemainActive_WhenPersonMovesOutsideInActiveStateUnderThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -601,7 +601,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
+    public void HandlePersonExpired_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -665,7 +665,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldTransitionToActive_WhenInPreAlarmStateUnderThreshold()
+    public void HandlePersonExpired_ShouldTransitionToActive_WhenInPreAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -761,7 +761,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
+    public void HandlePersonCreated_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -785,7 +785,7 @@ public sealed class HazardZoneTests : IDisposable
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInPreAlarmStateUnderThreshold()
+        HandlePersonLocationChanged_ShouldTransitionToActive_WhenPersonMovesOutsideInPreAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -808,7 +808,7 @@ public sealed class HazardZoneTests : IDisposable
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldRemainInPreAlarm_WhenPersonMovesOutsideInPreAlarmStateOverThreshold()
+        HandlePersonLocationChanged_ShouldRemainInPreAlarm_WhenPersonMovesOutsideInPreAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -856,7 +856,7 @@ public sealed class HazardZoneTests : IDisposable
     //------------------------------------------------------------------------------
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
+    public void HandlePersonExpired_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -914,7 +914,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldTransitionToActive_WhenInAlarmStateUnderThreshold()
+    public void HandlePersonExpired_ShouldTransitionToActive_WhenInAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -987,7 +987,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
+    public void HandlePersonCreated_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -1010,7 +1010,7 @@ public sealed class HazardZoneTests : IDisposable
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInAlarmStateUnderThreshold()
+        HandlePersonLocationChanged_ShouldTransitionToActive_WhenPersonMovesOutsideInAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -1032,7 +1032,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldRemainInAlarm_WhenPersonMovesOutsideInAlarmStateOverThreshold()
+    public void HandlePersonLocationChanged_ShouldRemainInAlarm_WhenPersonMovesOutsideInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
