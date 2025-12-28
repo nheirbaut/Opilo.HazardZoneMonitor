@@ -352,6 +352,22 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ActivateFromExternalSource_ShouldTransitionToActive_WhenActivationDurationIsZero()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
     public void ActivateFromExternalSource_ShouldNotTransition_WhenInInactiveStateWithKnownSource()
     {
         // Arrange
