@@ -550,6 +550,32 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ZoneState.Should().Be(ZoneState.Activating);
     }
 
+    [Fact]
+    public void HandlePersonExpired_ShouldRemovePersonAndRemainActivating_WhenPersonExpiresWhileActivating()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        var personId = Guid.NewGuid();
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+
+        var locationInsideZone = hazardZone.GetLocationInside();
+        hazardZone.HandlePersonCreated(personId, locationInsideZone);
+
+        hazardZone.ManuallyActivate();
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
+
+        // Act
+        hazardZone.HandlePersonExpired(personId);
+
+        // Assert
+        personRemovedEvents.Should().HaveCount(1);
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+    }
+
     //------------------------------------------------------------------------------
     // Active (ZoneState=Active, AlarmState=None)
     //------------------------------------------------------------------------------
