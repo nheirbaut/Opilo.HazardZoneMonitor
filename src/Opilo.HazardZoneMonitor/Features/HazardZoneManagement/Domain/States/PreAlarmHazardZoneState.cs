@@ -27,7 +27,7 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         _preAlarmTimer.Start();
     }
 
-    public override bool IsActive => true;
+    public override ZoneState ZoneState => ZoneState.Active;
     public override AlarmState AlarmState => AlarmState.PreAlarm;
 
     public override void ManuallyDeactivate()

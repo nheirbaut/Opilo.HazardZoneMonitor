@@ -16,33 +16,42 @@ public sealed class HazardZone : IDisposable
 
     public string Name { get; }
     public Outline Outline { get; }
+    public TimeSpan ActivationDuration { get; }
     public TimeSpan PreAlarmDuration { get; }
-    public bool IsActive => _currentState.IsActive;
+    public ZoneState ZoneState => _currentState.ZoneState;
     public AlarmState AlarmState => _currentState.AlarmState;
     public int AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
 
     public event EventHandler<PersonAddedToHazardZoneEventArgs>? PersonAddedToHazardZone;
     public event EventHandler<PersonRemovedFromHazardZoneEventArgs>? PersonRemovedFromHazardZone;
+    public event EventHandler<HazardZoneActivationStartedEventArgs>? HazardZoneActivationStarted;
 
     internal IClock Clock { get; }
 
     internal ITimerFactory TimerFactory { get; }
 
     public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration)
-        : this(name, outline, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
+        : this(name, outline, TimeSpan.Zero, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
     {
     }
 
-    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
+    public HazardZone(string name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration)
+        : this(name, outline, activationDuration, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
+    {
+    }
+
+    public HazardZone(string name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
+        Guard.Against.Negative(activationDuration);
         Guard.Against.Negative(preAlarmDuration);
         Guard.Against.Null(clock);
         Guard.Against.Null(timerFactory);
 
         Name = name;
         Outline = outline;
+        ActivationDuration = activationDuration;
         PreAlarmDuration = preAlarmDuration;
 
         Clock = clock;
@@ -134,6 +143,12 @@ public sealed class HazardZone : IDisposable
     {
         var handlers = PersonRemovedFromHazardZone;
         handlers?.Invoke(this, new PersonRemovedFromHazardZoneEventArgs(personId, Name));
+    }
+
+    internal void RaiseHazardZoneActivationStarted()
+    {
+        var handlers = HazardZoneActivationStarted;
+        handlers?.Invoke(this, new HazardZoneActivationStartedEventArgs(Name));
     }
 
     public void Dispose()

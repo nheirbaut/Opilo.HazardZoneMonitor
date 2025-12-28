@@ -9,11 +9,18 @@ internal sealed class InactiveHazardZoneState(
     int allowedNumberOfPersons)
     : HazardZoneStateBase(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
 {
-    public override bool IsActive => false;
+    public override ZoneState ZoneState => ZoneState.Inactive;
     public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyActivate()
     {
+        if (HazardZone.ActivationDuration > TimeSpan.Zero)
+        {
+            HazardZone.TransitionTo(new ActivatingHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+                AllowedNumberOfPersons));
+            return;
+        }
+
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }
@@ -22,6 +29,13 @@ internal sealed class InactiveHazardZoneState(
     {
         if (!RegisteredActivationSourceIds.Add(sourceId))
             return;
+
+        if (HazardZone.ActivationDuration > TimeSpan.Zero)
+        {
+            HazardZone.TransitionTo(new ActivatingHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+                AllowedNumberOfPersons));
+            return;
+        }
 
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));

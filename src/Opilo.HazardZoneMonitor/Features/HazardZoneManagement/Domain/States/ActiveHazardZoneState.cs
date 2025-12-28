@@ -9,7 +9,7 @@ internal sealed class ActiveHazardZoneState(
     int allowedNumberOfPersons)
     : HazardZoneStateBase(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
 {
-    public override bool IsActive => true;
+    public override ZoneState ZoneState => ZoneState.Active;
     public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyDeactivate()

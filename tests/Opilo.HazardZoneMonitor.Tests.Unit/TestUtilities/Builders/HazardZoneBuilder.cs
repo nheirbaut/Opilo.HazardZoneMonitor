@@ -9,6 +9,7 @@ internal sealed class HazardZoneBuilder
     private HazardZoneTestState _desiredState = HazardZoneTestState.Inactive;
     private readonly List<string> _externalActivationSourceIds = new();
     private int _allowedNumberOfPersons;
+    private TimeSpan _activationDuration = TimeSpan.Zero;
     private TimeSpan _preAlarmDuration = DefaultPreAlarmDuration;
     private IClock? _clock;
     private ITimerFactory? _timerFactory;
@@ -48,6 +49,12 @@ internal sealed class HazardZoneBuilder
         return this;
     }
 
+    public HazardZoneBuilder WithActivationDuration(TimeSpan duration)
+    {
+        _activationDuration = duration;
+        return this;
+    }
+
     public HazardZoneBuilder WithPreAlarmDuration(TimeSpan duration)
     {
         _preAlarmDuration = duration;
@@ -67,8 +74,8 @@ internal sealed class HazardZoneBuilder
             _preAlarmDuration = TimeSpan.Zero;
 
         var hazardZone = (_clock is not null && _timerFactory is not null)
-            ? new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration, _clock, _timerFactory)
-            : new HazardZone(DefaultName, DefaultOutline, _preAlarmDuration);
+            ? new HazardZone(DefaultName, DefaultOutline, _activationDuration, _preAlarmDuration, _clock, _timerFactory)
+            : new HazardZone(DefaultName, DefaultOutline, _activationDuration, _preAlarmDuration);
         hazardZone.SetAllowedNumberOfPersons(_allowedNumberOfPersons);
 
         foreach (var sourceId in _externalActivationSourceIds)
@@ -96,7 +103,7 @@ internal sealed class HazardZoneBuilder
 
     private static void DeactivateIfActive(HazardZone hazardZone)
     {
-        if (hazardZone.IsActive)
+        if (hazardZone.ZoneState != ZoneState.Inactive)
             hazardZone.ManuallyDeactivate();
     }
 
