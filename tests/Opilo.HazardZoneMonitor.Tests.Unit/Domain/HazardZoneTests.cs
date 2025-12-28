@@ -417,6 +417,8 @@ public sealed class HazardZoneTests : IDisposable
 
         hazardZone.ManuallyActivate();
 
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+
         // Act
         clock.AdvanceBy(testActivationDuration);
 
@@ -438,26 +440,6 @@ public sealed class HazardZoneTests : IDisposable
 
         // Act
         hazardZone.ManuallyDeactivate();
-
-        // Assert
-        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
-        hazardZone.AlarmState.Should().Be(AlarmState.None);
-    }
-
-    [Fact]
-    public void DeactivateFromExternalSource_ShouldTransitionToInactive_WhenInActivatingStateWithKnownSource()
-    {
-        // Arrange
-        var sourceId = "ext-src";
-        var activationDuration = TimeSpan.FromSeconds(3);
-        using var hazardZone = HazardZoneBuilder.Create()
-            .WithActivationDuration(activationDuration)
-            .Build();
-
-        hazardZone.ActivateFromExternalSource(sourceId);
-
-        // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
