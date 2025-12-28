@@ -1131,6 +1131,30 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void HandlePersonExpired_ShouldRaiseAlarmStateChangedToNone_WhenPreAlarmAndUnderThreshold()
+    {
+        // Arrange
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm);
+
+        using var hazardZone = hazardZoneBuilder.Build();
+
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.HandlePersonExpired(personId);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
     public void
         SetAllowedNumberOfPersons_ShouldTransitionToActive_WhenAllowedNumberOfPersonsEqualsCountInPreAlarmState()
     {
@@ -1176,24 +1200,24 @@ public sealed class HazardZoneTests : IDisposable
         var testPreAlarmDuration = TimeSpan.FromMilliseconds(10);
         var clock = new FakeClock(DateTime.UnixEpoch);
         var timerFactory = new FakeTimerFactory(clock);
-        
+
         using var hazardZone = HazardZoneBuilder.Create()
             .WithAllowedNumberOfPersons(1)
             .WithPreAlarmDuration(testPreAlarmDuration)
             .WithTime(clock, timerFactory)
             .Build();
         hazardZone.ManuallyActivate();
-        
+
         var locationInside = hazardZone.GetLocationInside();
         hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
         hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
-        
+
         var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
-        
+
         // Act
         clock.AdvanceBy(testPreAlarmDuration);
-        
+
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
         var alarmEvent = alarmStateChangedEvents.Single();
