@@ -556,6 +556,30 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void ManuallyDeactivate_WhenActivating_RaisesHazardZoneStateChangedToInactive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.FromSeconds(10))
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ManuallyActivate(); // Transition to Activating
+        stateChangedEvents.Clear(); // Clear the Inactive->Activating event
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Inactive);
+    }
+
+    [Fact]
     public void DeactivateFromExternalSource_ShouldTransitionToInactive_WhenInActivatingStateWithKnownSource()
     {
         // Arrange
