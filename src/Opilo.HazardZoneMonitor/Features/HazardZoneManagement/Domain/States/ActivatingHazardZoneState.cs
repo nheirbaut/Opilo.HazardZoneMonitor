@@ -37,6 +37,15 @@ internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
             AllowedNumberOfPersons));
     }
 
+    public override void DeactivateFromExternalSource(string sourceId)
+    {
+        if (!RegisteredActivationSourceIds.Remove(sourceId))
+            return;
+
+        HazardZone.TransitionTo(new InactiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
+            AllowedNumberOfPersons));
+    }
+
     private void OnActivationTimerElapsed(object? _, EventArgs __)
     {
         if (HazardZone.Clock.UtcNow < _enteredActivatingAtUtc.Add(HazardZone.ActivationDuration))
