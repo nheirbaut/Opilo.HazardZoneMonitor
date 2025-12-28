@@ -24,7 +24,6 @@ Inactive --> Active : ActivateFromExternalSource(source ID)\n[source ID unknown]
 
 Activating : ZoneState = Activating
 Activating : AlarmState = None
-Activating : entry / RaiseHazardZoneActivationStarted()
 Activating : entry / StartActivationTimer()
 
 Activating --> Activating : OnPersonAdded()
