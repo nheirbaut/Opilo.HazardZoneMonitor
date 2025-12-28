@@ -121,7 +121,7 @@ public sealed class Floor : IDisposable
         {
             foreach (var hazardZone in _hazardZones)
             {
-                hazardZone.Handle(args);
+                hazardZone.HandlePersonExpired(args.PersonId);
             }
         }
 

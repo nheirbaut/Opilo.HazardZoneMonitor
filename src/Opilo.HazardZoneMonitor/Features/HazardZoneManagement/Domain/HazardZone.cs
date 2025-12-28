@@ -65,10 +65,12 @@ public sealed class HazardZone : IDisposable
         }
     }
 
-    public void Handle(PersonExpiredEventArgs personExpiredEventArgs)
+    public void HandlePersonExpired(Guid personId)
     {
-        Guard.Against.Null(personExpiredEventArgs);
-        HandlePersonExpiredEvent(personExpiredEventArgs);
+        lock (_zoneStateLock)
+        {
+            _currentState.OnPersonRemovedFromHazardZone(personId);
+        }
     }
 
     public void Handle(PersonLocationChangedEventArgs personLocationChangedEvent)
@@ -119,11 +121,6 @@ public sealed class HazardZone : IDisposable
     internal void OnPreAlarmTimerElapsed()
     {
         lock (_zoneStateLock) _currentState.OnPreAlarmTimerElapsed();
-    }
-
-    private void HandlePersonExpiredEvent(PersonExpiredEventArgs personExpiredEventArgs)
-    {
-        lock (_zoneStateLock) _currentState.OnPersonRemovedFromHazardZone(personExpiredEventArgs.PersonId);
     }
 
     private void HandlePersonLocationChangedEvent(PersonLocationChangedEventArgs personLocationChangedEvent)

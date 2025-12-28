@@ -7,7 +7,7 @@ namespace Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
 internal static class HazardZoneHelperExtensions
 {
     public static Location GetLocationOutside(this HazardZone hazardZone)
-        => hazardZone.Outline.Vertices.GetCentroid();
+        => hazardZone.Outline.Vertices.GetPointOutside();
 
     public static Location GetLocationInside(this HazardZone hazardZone)
         => hazardZone.Outline.Vertices.GetCentroid();

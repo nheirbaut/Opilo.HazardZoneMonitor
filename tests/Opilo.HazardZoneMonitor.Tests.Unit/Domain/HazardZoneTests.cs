@@ -110,7 +110,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEventArgs(newPersonId));
+        hazardZone.HandlePersonExpired(newPersonId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
@@ -126,14 +126,13 @@ public sealed class HazardZoneTests : IDisposable
 
         var newPersonId = Guid.NewGuid();
         var locationOutsideZone = hazardZone.GetLocationOutside();
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedOutsideHazardZone(hazardZone);
         hazardZone.HandlePersonCreated(newPersonId, locationOutsideZone);
 
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEventArgs(personCreatedEvent.PersonId));
+        hazardZone.HandlePersonExpired(newPersonId);
 
         // Assert
         personRemovedEvents.Should().BeEmpty();
@@ -623,16 +622,16 @@ public sealed class HazardZoneTests : IDisposable
 
         secondPersonAddedEvents.Should().HaveCount(1);
 
-        var firstPersonExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var firstPersonToExpireId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var firstPersonRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => firstPersonRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(firstPersonExpiredEvent);
+        hazardZone.HandlePersonExpired(firstPersonToExpireId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = firstPersonRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(firstPersonExpiredEvent.PersonId);
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(firstPersonToExpireId);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
@@ -679,16 +678,16 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personExpiredEvent);
+        hazardZone.HandlePersonExpired(personId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personId);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
@@ -879,7 +878,7 @@ public sealed class HazardZoneTests : IDisposable
         personAddedToHazardZoneEvent.PersonId.Should().Be(newPersonId);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEventArgs(newPersonId));
+        hazardZone.HandlePersonExpired(newPersonId);
 
         // Assert
         hazardZone.IsActive.Should().BeTrue();
@@ -928,16 +927,16 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personExpiredEvent);
+        hazardZone.HandlePersonExpired(personId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personId);
         hazardZone.IsActive.Should().BeTrue();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
