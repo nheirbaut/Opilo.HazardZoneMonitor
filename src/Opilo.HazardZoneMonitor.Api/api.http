@@ -1,0 +1,4 @@
+@baseUrl = http://localhost:5000
+
+### Health check / Root endpoint
+GET {{baseUrl}}/
