@@ -11,7 +11,6 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
         int allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
-        HazardZone.RaiseHazardZoneActivated();
         HazardZone.RaiseHazardZoneStateChanged(ZoneState.Active);
     }
 
