@@ -14,6 +14,9 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
     .ReadFrom.Services(services));
 
+builder.Services.Configure<FloorConfiguration>(builder.Configuration.GetSection("FloorManagement"));
+builder.Services.AddSingleton<IFloorRegistry, FloorRegistry>();
+
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();

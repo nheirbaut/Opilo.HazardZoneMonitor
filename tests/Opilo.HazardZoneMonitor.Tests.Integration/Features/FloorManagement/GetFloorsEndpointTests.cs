@@ -60,6 +60,33 @@ public sealed class GetFloorsEndpointTests : IDisposable
         floors.Should().BeEquivalentTo(expectedFloors);
     }
 
+    [Fact]
+    public async Task GetFloors_ShouldReturnFloors_WhenRunningWithTestConfiguration()
+    {
+        // Arrange
+#pragma warning disable CA2000 // Dispose objects before losing scope - factory is disposed by using statement
+        using var factory = new WebApplicationFactory<IApiMarker>()
+#pragma warning restore CA2000
+            .WithWebHostBuilder(builder =>
+            {
+                builder.UseEnvironment("Test");
+            });
+
+        var client = factory.CreateClient();
+
+        // Act
+        var floors = await client.GetFromJsonAsync<FloorDto[]>("/api/v1/floors");
+
+        // Assert
+        floors.Should().NotBeNull();
+        floors.Should().NotBeEmpty();
+        floors.Should().AllSatisfy(floor =>
+        {
+            floor.Id.Should().NotBeNullOrWhiteSpace();
+            floor.Name.Should().NotBeNullOrWhiteSpace();
+        });
+    }
+
     public void Dispose()
     {
         _factory.Dispose();
