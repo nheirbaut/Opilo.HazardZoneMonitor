@@ -399,7 +399,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ManuallyActivate_WhenInactiveWithActivationDuration_RaisesHazardZoneStateChangedFromInactiveToActivating()
+    public void ManuallyActivate_ShouldRaiseHazardZoneStateChangedToActivating_WhenInactiveWithActivationDuration()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -419,7 +419,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ActivateFromExternalSource_WhenInactiveWithActivationDuration_RaisesHazardZoneStateChangedToActivating()
+    public void ActivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToActivating_WhenInactiveWithActivationDuration()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -439,7 +439,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ManuallyActivate_WhenInactiveWithZeroActivationDuration_RaisesHazardZoneStateChangedToActive()
+    public void ManuallyActivate_ShouldRaiseHazardZoneStateChangedToActive_WhenInactiveWithZeroActivationDuration()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -459,7 +459,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ActivateFromExternalSource_WhenInactiveWithZeroActivationDuration_RaisesHazardZoneStateChangedToActive()
+    public void ActivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToActive_WhenInactiveWithZeroActivationDuration()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -508,7 +508,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ActivationTimer_WhenElapsed_RaisesHazardZoneStateChangedToActive()
+    public void ActivationTimer_ShouldRaiseHazardZoneStateChangedToActive_WhenElapsed()
     {
         // Arrange
         var testActivationDuration = TimeSpan.FromMilliseconds(10);
@@ -556,7 +556,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ManuallyDeactivate_WhenActivating_RaisesHazardZoneStateChangedToInactive()
+    public void ManuallyDeactivate_ShouldRaiseHazardZoneStateChangedToInactive_WhenActivating()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -600,7 +600,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void DeactivateFromExternalSource_WhenActivating_RaisesHazardZoneStateChangedToInactive()
+    public void DeactivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToInactive_WhenActivating()
     {
         // Arrange
         var sourceId = "ext-src";
@@ -703,7 +703,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void ManuallyDeactivate_WhenActive_RaisesHazardZoneStateChangedToInactive()
+    public void ManuallyDeactivate_ShouldRaiseHazardZoneStateChangedToInactive_WhenActive()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -797,7 +797,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void HandlePersonCreated_WhenActiveAndOverThreshold_RaisesAlarmStateChangedToPreAlarm()
+    public void HandlePersonCreated_ShouldRaiseAlarmStateChangedToPreAlarm_WhenActiveAndOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -846,7 +846,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void HandlePersonCreated_WhenActiveAndOverThresholdWithZeroPreAlarmDuration_RaisesAlarmStateChangedToAlarm()
+    public void HandlePersonCreated_ShouldRaiseAlarmStateChangedToAlarm_WhenActiveAndOverThresholdWithZeroPreAlarmDuration()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -854,15 +854,15 @@ public sealed class HazardZoneTests : IDisposable
             .WithPreAlarmDuration(TimeSpan.Zero)
             .Build();
         hazardZone.ManuallyActivate();
-        
+
         var locationInside = hazardZone.GetLocationInside();
         var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
-        
+
         // Act
         hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
         hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
-        
+
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
         var alarmEvent = alarmStateChangedEvents.Single();
@@ -951,7 +951,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void DeactivateFromExternalSource_WhenActive_RaisesHazardZoneStateChangedToInactive()
+    public void DeactivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToInactive_WhenActive()
     {
         // Arrange
         var sourceId = "ext-src";
@@ -1167,6 +1167,38 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
+    }
+
+    [Fact]
+    public void PreAlarmTimer_ShouldRaiseAlarmStateChangedToAlarm_WhenElapsed()
+    {
+        // Arrange
+        var testPreAlarmDuration = TimeSpan.FromMilliseconds(10);
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+        
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithPreAlarmDuration(testPreAlarmDuration)
+            .WithTime(clock, timerFactory)
+            .Build();
+        hazardZone.ManuallyActivate();
+        
+        var locationInside = hazardZone.GetLocationInside();
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+        
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+        
+        // Act
+        clock.AdvanceBy(testPreAlarmDuration);
+        
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
