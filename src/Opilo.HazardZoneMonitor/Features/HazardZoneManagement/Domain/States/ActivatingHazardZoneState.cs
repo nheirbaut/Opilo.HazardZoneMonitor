@@ -2,20 +2,29 @@ using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
-internal sealed class AlarmHazardZoneState : HazardZoneStateBase
+internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
 {
-    public AlarmHazardZoneState(
+    private readonly Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer _activationTimer;
+    private readonly DateTime _enteredActivatingAtUtc;
+
+    public ActivatingHazardZoneState(
         HazardZone hazardZone,
         HashSet<Guid> personsInZone,
         HashSet<string> registeredActivationSourceIds,
         int allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
-        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.Alarm);
+        HazardZone.RaiseHazardZoneStateChanged(ZoneState.Activating);
+
+        _enteredActivatingAtUtc = HazardZone.Clock.UtcNow;
+
+        _activationTimer = HazardZone.TimerFactory.Create(HazardZone.ActivationDuration);
+        _activationTimer.Elapsed += OnActivationTimerElapsed;
+        _activationTimer.Start();
     }
 
-    public override ZoneState ZoneState => ZoneState.Active;
-    public override AlarmState AlarmState => AlarmState.Alarm;
+    public override ZoneState ZoneState => ZoneState.Activating;
+    public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyDeactivate()
     {
@@ -32,23 +41,21 @@ internal sealed class AlarmHazardZoneState : HazardZoneStateBase
             AllowedNumberOfPersons));
     }
 
-    protected override void OnPersonRemovedFromHazardZone()
+    private void OnActivationTimerElapsed(object? _, EventArgs __)
     {
-        if (PersonsInZone.Count > AllowedNumberOfPersons)
+        if (HazardZone.Clock.UtcNow < _enteredActivatingAtUtc.Add(HazardZone.ActivationDuration))
             return;
 
-        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }
 
-    protected override void OnAllowedNumberOfPersonsChanged()
+    protected override void Dispose(bool disposing)
     {
-        if (PersonsInZone.Count <= AllowedNumberOfPersons)
-        {
-            HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
-            HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
-                AllowedNumberOfPersons));
-        }
+        _activationTimer.Stop();
+        _activationTimer.Elapsed -= OnActivationTimerElapsed;
+        _activationTimer.Dispose();
+
+        base.Dispose(disposing);
     }
 }

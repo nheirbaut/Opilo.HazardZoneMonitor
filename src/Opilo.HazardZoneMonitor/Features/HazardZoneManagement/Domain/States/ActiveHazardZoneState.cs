@@ -2,14 +2,19 @@ using Opilo.HazardZoneMonitor.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
-internal sealed class ActiveHazardZoneState(
-    HazardZone hazardZone,
-    HashSet<Guid> personsInZone,
-    HashSet<string> registeredActivationSourceIds,
-    int allowedNumberOfPersons)
-    : HazardZoneStateBase(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
+internal sealed class ActiveHazardZoneState : HazardZoneStateBase
 {
-    public override bool IsActive => true;
+    public ActiveHazardZoneState(
+        HazardZone hazardZone,
+        HashSet<Guid> personsInZone,
+        HashSet<string> registeredActivationSourceIds,
+        int allowedNumberOfPersons)
+        : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
+    {
+        HazardZone.RaiseHazardZoneStateChanged(ZoneState.Active);
+    }
+
+    public override ZoneState ZoneState => ZoneState.Active;
     public override AlarmState AlarmState => AlarmState.None;
 
     public override void ManuallyDeactivate()

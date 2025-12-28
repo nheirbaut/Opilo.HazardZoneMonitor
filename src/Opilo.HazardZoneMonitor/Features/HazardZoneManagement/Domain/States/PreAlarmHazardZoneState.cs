@@ -14,6 +14,8 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         int allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
+        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.PreAlarm);
+
         if (HazardZone.PreAlarmDuration == TimeSpan.Zero)
         {
             HazardZone.OnPreAlarmTimerElapsed();
@@ -27,7 +29,7 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         _preAlarmTimer.Start();
     }
 
-    public override bool IsActive => true;
+    public override ZoneState ZoneState => ZoneState.Active;
     public override AlarmState AlarmState => AlarmState.PreAlarm;
 
     public override void ManuallyDeactivate()
@@ -56,6 +58,7 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         if (PersonsInZone.Count > AllowedNumberOfPersons)
             return;
 
+        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }
@@ -63,8 +66,11 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
     protected override void OnAllowedNumberOfPersonsChanged()
     {
         if (PersonsInZone.Count <= AllowedNumberOfPersons)
+        {
+            HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
             HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
                 AllowedNumberOfPersons));
+        }
     }
 
     private void OnPreAlarmTimerElapsed(object? _, EventArgs __)

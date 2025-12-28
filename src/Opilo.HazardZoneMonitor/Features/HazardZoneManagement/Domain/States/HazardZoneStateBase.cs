@@ -8,7 +8,7 @@ internal abstract class HazardZoneStateBase(
     HashSet<string> registeredActivationSourceIds,
     int allowedNumberOfPersons) : IDisposable
 {
-    public abstract bool IsActive { get; }
+    public abstract ZoneState ZoneState { get; }
     public abstract AlarmState AlarmState { get; }
     public int AllowedNumberOfPersons { get; private set; } = allowedNumberOfPersons;
 

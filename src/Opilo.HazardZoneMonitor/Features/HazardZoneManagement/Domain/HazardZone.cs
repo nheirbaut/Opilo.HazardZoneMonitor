@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Shared.Time;
@@ -17,33 +16,43 @@ public sealed class HazardZone : IDisposable
 
     public string Name { get; }
     public Outline Outline { get; }
+    public TimeSpan ActivationDuration { get; }
     public TimeSpan PreAlarmDuration { get; }
-    public bool IsActive => _currentState.IsActive;
+    public ZoneState ZoneState => _currentState.ZoneState;
     public AlarmState AlarmState => _currentState.AlarmState;
     public int AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
 
     public event EventHandler<PersonAddedToHazardZoneEventArgs>? PersonAddedToHazardZone;
     public event EventHandler<PersonRemovedFromHazardZoneEventArgs>? PersonRemovedFromHazardZone;
+    public event EventHandler<HazardZoneStateChangedEventArgs>? HazardZoneStateChanged;
+    public event EventHandler<HazardZoneAlarmStateChangedEventArgs>? HazardZoneAlarmStateChanged;
 
     internal IClock Clock { get; }
 
     internal ITimerFactory TimerFactory { get; }
 
     public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration)
-        : this(name, outline, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
+        : this(name, outline, TimeSpan.Zero, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
     {
     }
 
-    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
+    public HazardZone(string name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration)
+        : this(name, outline, activationDuration, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
+    {
+    }
+
+    public HazardZone(string name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
     {
         Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
+        Guard.Against.Negative(activationDuration);
         Guard.Against.Negative(preAlarmDuration);
         Guard.Against.Null(clock);
         Guard.Against.Null(timerFactory);
 
         Name = name;
         Outline = outline;
+        ActivationDuration = activationDuration;
         PreAlarmDuration = preAlarmDuration;
 
         Clock = clock;
@@ -52,22 +61,33 @@ public sealed class HazardZone : IDisposable
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
     }
 
-    public void Handle(PersonCreatedEventArgs personCreatedEvent)
+    public void HandlePersonCreated(Guid personId, Location location)
     {
-        Guard.Against.Null(personCreatedEvent);
-        HandlePersonCreatedEvent(personCreatedEvent);
+        Guard.Against.Null(location);
+
+        lock (_zoneStateLock)
+        {
+            if (!Outline.IsLocationInside(location))
+                return;
+
+            _currentState.OnPersonAddedToHazardZone(personId);
+        }
     }
 
-    public void Handle(PersonExpiredEventArgs personExpiredEventArgs)
+    public void HandlePersonExpired(Guid personId)
     {
-        Guard.Against.Null(personExpiredEventArgs);
-        HandlePersonExpiredEvent(personExpiredEventArgs);
+        lock (_zoneStateLock)
+        {
+            _currentState.OnPersonRemovedFromHazardZone(personId);
+        }
     }
 
-    public void Handle(PersonLocationChangedEventArgs personLocationChangedEvent)
+    public void HandlePersonLocationChanged(Guid personId, Location location)
     {
-        Guard.Against.Null(personLocationChangedEvent);
-        HandlePersonLocationChangedEvent(personLocationChangedEvent);
+        lock (_zoneStateLock)
+        {
+            _currentState.OnPersonChangedLocation(personId, location);
+        }
     }
 
     public void ManuallyActivate()
@@ -114,39 +134,24 @@ public sealed class HazardZone : IDisposable
         lock (_zoneStateLock) _currentState.OnPreAlarmTimerElapsed();
     }
 
-    private void HandlePersonCreatedEvent(PersonCreatedEventArgs personCreatedEvent)
-    {
-        lock (_zoneStateLock)
-        {
-            if (!Outline.IsLocationInside(personCreatedEvent.Location))
-                return;
-
-            _currentState.OnPersonAddedToHazardZone(personCreatedEvent.PersonId);
-        }
-    }
-
-    private void HandlePersonExpiredEvent(PersonExpiredEventArgs personExpiredEventArgs)
-    {
-        lock (_zoneStateLock) _currentState.OnPersonRemovedFromHazardZone(personExpiredEventArgs.PersonId);
-    }
-
-    private void HandlePersonLocationChangedEvent(PersonLocationChangedEventArgs personLocationChangedEvent)
-    {
-        lock (_zoneStateLock)
-            _currentState.OnPersonChangedLocation(personLocationChangedEvent.PersonId,
-                personLocationChangedEvent.CurrentLocation);
-    }
-
     internal void RaisePersonAddedToHazardZone(Guid personId)
     {
-        var handlers = PersonAddedToHazardZone;
-        handlers?.Invoke(this, new PersonAddedToHazardZoneEventArgs(personId, Name));
+        PersonAddedToHazardZone?.Invoke(this, new PersonAddedToHazardZoneEventArgs(personId, Name));
     }
 
     internal void RaisePersonRemovedFromHazardZone(Guid personId)
     {
-        var handlers = PersonRemovedFromHazardZone;
-        handlers?.Invoke(this, new PersonRemovedFromHazardZoneEventArgs(personId, Name));
+        PersonRemovedFromHazardZone?.Invoke(this, new PersonRemovedFromHazardZoneEventArgs(personId, Name));
+    }
+
+    internal void RaiseHazardZoneStateChanged(ZoneState newState)
+    {
+        HazardZoneStateChanged?.Invoke(this, new HazardZoneStateChangedEventArgs(Name, newState));
+    }
+
+    internal void RaiseHazardZoneAlarmStateChanged(AlarmState newState)
+    {
+        HazardZoneAlarmStateChanged?.Invoke(this, new HazardZoneAlarmStateChangedEventArgs(Name, newState));
     }
 
     public void Dispose()

@@ -2,7 +2,6 @@
 
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Tests.Unit.TestUtilities.Builders;
@@ -46,7 +45,7 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         hazardZone.Name.Should().Be(HazardZoneBuilder.DefaultName);
         hazardZone.Outline.Should().Be(HazardZoneBuilder.DefaultOutline);
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -60,155 +59,156 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRaisePersonAddedEvent_WhenPersonIsCreatedInZone()
+    public void HandlePersonCreated_ShouldRaisePersonAddedEvent_WhenPersonIsCreatedInZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         // Assert
         var personAddedToHazardZoneEvent = personAddedEvents.Single();
-        personAddedToHazardZoneEvent.PersonId.Should().Be(personCreatedEvent.PersonId);
+        personAddedToHazardZoneEvent.PersonId.Should().Be(newPersonId);
         personAddedToHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldNotRaisePersonAddedEvent_WhenPersonIsCreatedOutsideZone()
+    public void HandlePersonCreated_ShouldNotRaisePersonAddedEvent_WhenPersonIsCreatedOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedOutsideHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationOutsideZone = hazardZone.GetLocationOutside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationOutsideZone);
 
         // Assert
         personAddedEvents.Should().BeEmpty();
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldRaisePersonRemovedEvent_WhenPersonExpiresInZone()
+    public void HandlePersonExpired_ShouldRaisePersonRemovedEvent_WhenPersonExpiresInZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
-        hazardZone.Handle(personCreatedEvent);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEventArgs(personCreatedEvent.PersonId));
+        hazardZone.HandlePersonExpired(newPersonId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personCreatedEvent.PersonId);
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(newPersonId);
         personRemovedFromHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldNotRaisePersonRemovedEvent_WhenPersonExpiresOutsideZone()
+    public void HandlePersonExpired_ShouldNotRaisePersonRemovedEvent_WhenPersonExpiresOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedOutsideHazardZone(hazardZone);
-        hazardZone.Handle(personCreatedEvent);
+        var newPersonId = Guid.NewGuid();
+        var locationOutsideZone = hazardZone.GetLocationOutside();
+        hazardZone.HandlePersonCreated(newPersonId, locationOutsideZone);
 
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEventArgs(personCreatedEvent.PersonId));
+        hazardZone.HandlePersonExpired(newPersonId);
 
         // Assert
         personRemovedEvents.Should().BeEmpty();
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldRaisePersonAddedEvent_WhenUnknownPersonMovesIntoZone()
+    public void HandlePersonLocationChanged_ShouldRaisePersonAddedEvent_WhenUnknownPersonMovesIntoZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
+        var personId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personLocationChangedEvent);
+        hazardZone.HandlePersonLocationChanged(personId, locationInsideZone);
 
         // Assert
         var personAddedToHazardZoneEvent = personAddedEvents.Single();
-        personAddedToHazardZoneEvent.PersonId.Should().Be(personLocationChangedEvent.PersonId);
+        personAddedToHazardZoneEvent.PersonId.Should().Be(personId);
         personAddedToHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldNotRaisePersonAddedEvent_WhenUnknownPersonMovesOutsideZone()
+    public void HandlePersonLocationChanged_ShouldNotRaisePersonAddedEvent_WhenUnknownPersonMovesOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personLocationChangedEvent =
-            PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(hazardZone);
+        var personId = Guid.NewGuid();
+        var locationOutsideZone = hazardZone.GetLocationOutside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personLocationChangedEvent);
+        hazardZone.HandlePersonLocationChanged(personId, locationOutsideZone);
 
         // Assert
         personAddedEvents.Should().BeEmpty();
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldRaisePersonRemovedEvent_WhenKnownPersonMovesOutsideZone()
+    public void HandlePersonLocationChanged_ShouldRaisePersonRemovedEvent_WhenKnownPersonMovesOutsideZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var initialPersonLocationChangedEvent =
-            PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
-        hazardZone.Handle(initialPersonLocationChangedEvent);
-
-        var newPersonLocationChangedEvent = PersonHelper.CreatePersonLocationChangedEventLocatedOutsideHazardZone(
-            hazardZone,
-            initialPersonLocationChangedEvent.PersonId);
+        var personId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
+        var locationOutsideZone = hazardZone.GetLocationOutside();
+        hazardZone.HandlePersonLocationChanged(personId, locationInsideZone);
 
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(newPersonLocationChangedEvent);
+        hazardZone.HandlePersonLocationChanged(personId, locationOutsideZone);
 
         // Assert
         var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(initialPersonLocationChangedEvent.PersonId);
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personId);
         personRemovedFromHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldNotRaiseEvents_WhenKnownPersonMovesWithinZone()
+    public void HandlePersonLocationChanged_ShouldNotRaiseEvents_WhenKnownPersonMovesWithinZone()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var initialPersonLocationChangedEvent =
-            PersonHelper.CreatePersonLocationChangedEventLocatedInHazardZone(hazardZone);
+        var personId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
+        hazardZone.HandlePersonLocationChanged(personId, locationInsideZone);
 
-        hazardZone.Handle(initialPersonLocationChangedEvent);
-
-        var newLocation = new Location(3, 3);
+        var newLocation = new Location(locationInsideZone.X + 1, locationInsideZone.Y + 1);
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
@@ -216,7 +216,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(new PersonLocationChangedEventArgs(initialPersonLocationChangedEvent.PersonId, newLocation));
+        hazardZone.HandlePersonLocationChanged(personId, newLocation);
 
         // Assert
         personRemovedEvents.Should().BeEmpty();
@@ -270,7 +270,7 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     //------------------------------------------------------------------------------
-    // Inactive (IsActive=false, AlarmState=None)
+    // Inactive (ZoneState=Inactive, AlarmState=None)
     //------------------------------------------------------------------------------
 
     [Fact]
@@ -283,7 +283,40 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyActivate();
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ManuallyActivate_ShouldTransitionToActivatingState_WhenActivationDurationIsGreaterThanZero()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ManuallyActivate_ShouldTransitionToActive_WhenActivationDurationIsZero()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -297,7 +330,40 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource("ext-src");
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ActivateFromExternalSource_ShouldTransitionToActivatingState_WhenActivationDurationIsGreaterThanZero()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ActivateFromExternalSource_ShouldTransitionToActive_WhenActivationDurationIsZero()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -314,7 +380,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource(sourceId);
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -328,16 +394,293 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
+    [Fact]
+    public void ManuallyActivate_ShouldRaiseHazardZoneStateChangedToActivating_WhenInactiveWithActivationDuration()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.FromSeconds(10))
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Activating);
+    }
+
+    [Fact]
+    public void ActivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToActivating_WhenInactiveWithActivationDuration()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.FromSeconds(10))
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Activating);
+    }
+
+    [Fact]
+    public void ManuallyActivate_ShouldRaiseHazardZoneStateChangedToActive_WhenInactiveWithZeroActivationDuration()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ManuallyActivate();
+
+        // Assert
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Active);
+    }
+
+    [Fact]
+    public void ActivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToActive_WhenInactiveWithZeroActivationDuration()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ActivateFromExternalSource("ext-src");
+
+        // Assert
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Active);
+    }
+
     //------------------------------------------------------------------------------
-    // Active (IsActive=true, AlarmState=None)
+    // Activating (ZoneState=Activating, AlarmState=None)
     //------------------------------------------------------------------------------
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRemainActive_WhenInActiveStateUnderThreshold()
+    public void ActivationTimer_ShouldTransitionToActive_WhenInActivatingStateAndTimerElapses()
+    {
+        // Arrange
+        var testActivationDuration = TimeSpan.FromMilliseconds(10);
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(testActivationDuration)
+            .WithTime(clock, timerFactory)
+            .Build();
+
+        hazardZone.ManuallyActivate();
+
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+
+        // Act
+        clock.AdvanceBy(testActivationDuration);
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ActivationTimer_ShouldRaiseHazardZoneStateChangedToActive_WhenElapsed()
+    {
+        // Arrange
+        var testActivationDuration = TimeSpan.FromMilliseconds(10);
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(testActivationDuration)
+            .WithTime(clock, timerFactory)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ManuallyActivate(); // Transition to Activating
+        stateChangedEvents.Clear(); // Clear the Inactive->Activating event
+
+        // Act
+        clock.AdvanceBy(testActivationDuration);
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Active);
+    }
+
+    [Fact]
+    public void ManuallyDeactivate_ShouldTransitionToInactive_WhenInActivatingState()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        hazardZone.ManuallyActivate();
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ManuallyDeactivate_ShouldRaiseHazardZoneStateChangedToInactive_WhenActivating()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.FromSeconds(10))
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ManuallyActivate(); // Transition to Activating
+        stateChangedEvents.Clear(); // Clear the Inactive->Activating event
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Inactive);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_ShouldTransitionToInactive_WhenInActivatingStateWithKnownSource()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        hazardZone.ActivateFromExternalSource(sourceId);
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToInactive_WhenActivating()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.FromSeconds(10))
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ActivateFromExternalSource(sourceId); // Transition to Activating
+        stateChangedEvents.Clear(); // Clear the Inactive->Activating event
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Inactive);
+    }
+
+    [Fact]
+    public void HandlePersonCreated_ShouldTrackPersonAndRemainActivating_WhenPersonEntersWhileActivating()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
+        var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
+        hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
+
+        hazardZone.ManuallyActivate();
+
+        // Act
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
+
+        // Assert
+        personAddedEvents.Should().HaveCount(1);
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+    }
+
+    [Fact]
+    public void HandlePersonExpired_ShouldRemovePersonAndRemainActivating_WhenPersonExpiresWhileActivating()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        var personId = Guid.NewGuid();
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .WithAllowedNumberOfPersons(1)
+            .Build();
+
+        var locationInsideZone = hazardZone.GetLocationInside();
+        hazardZone.HandlePersonCreated(personId, locationInsideZone);
+
+        hazardZone.ManuallyActivate();
+        var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
+        hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
+
+        // Act
+        hazardZone.HandlePersonExpired(personId);
+
+        // Assert
+        personRemovedEvents.Should().HaveCount(1);
+        hazardZone.ZoneState.Should().Be(ZoneState.Activating);
+    }
+
+    //------------------------------------------------------------------------------
+    // Active (ZoneState=Active, AlarmState=None)
+    //------------------------------------------------------------------------------
+
+    [Fact]
+    public void HandlePersonCreated_ShouldRemainActive_WhenInActiveStateUnderThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -345,17 +688,42 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.Active)
             .Build();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         // Assert
         personAddedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ManuallyDeactivate_ShouldRaiseHazardZoneStateChangedToInactive_WhenActive()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ManuallyActivate(); // Transition to Active
+        stateChangedEvents.Clear(); // Clear the Inactive->Active event
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Inactive);
     }
 
     [Fact]
@@ -367,38 +735,40 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(3)
             .Build();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
         personAddedEvents.Should().HaveCount(1);
 
         // Act
         hazardZone.SetAllowedNumberOfPersons(2);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldTransitionToPreAlarm_WhenInActiveStateOverThresholdWithPreAlarm()
+    public void HandlePersonCreated_ShouldTransitionToPreAlarm_WhenInActiveStateOverThresholdWithPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.Active)
             .Build();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         // Assert
         personAddedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
@@ -411,22 +781,49 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1)
             .Build();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
         personAddedEvents.Should().HaveCount(1);
 
         // Act
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldTransitionToAlarm_WhenInActiveStateOverThresholdWithZeroPreAlarm()
+    public void HandlePersonCreated_ShouldRaiseAlarmStateChangedToPreAlarm_WhenActiveAndOverThreshold()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithPreAlarmDuration(TimeSpan.FromSeconds(10))
+            .Build();
+        hazardZone.ManuallyActivate();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        var locationInsideZone = hazardZone.GetLocationInside();
+
+        // Act
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInsideZone);
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInsideZone);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.PreAlarm);
+    }
+
+    [Fact]
+    public void HandlePersonCreated_ShouldTransitionToAlarm_WhenInActiveStateOverThresholdWithZeroPreAlarm()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -434,17 +831,43 @@ public sealed class HazardZoneTests : IDisposable
             .WithPreAlarmDuration(TimeSpan.Zero)
             .Build();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         // Assert
         personAddedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
+    }
+
+    [Fact]
+    public void HandlePersonCreated_ShouldRaiseAlarmStateChangedToAlarm_WhenActiveAndOverThresholdWithZeroPreAlarmDuration()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithPreAlarmDuration(TimeSpan.Zero)
+            .Build();
+        hazardZone.ManuallyActivate();
+
+        var locationInside = hazardZone.GetLocationInside();
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -458,17 +881,18 @@ public sealed class HazardZoneTests : IDisposable
             .WithPreAlarmDuration(TimeSpan.Zero)
             .Build();
 
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
         personAddedEvents.Should().HaveCount(1);
 
         // Act
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
@@ -484,7 +908,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -502,7 +926,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId);
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -522,8 +946,33 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId2);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void DeactivateFromExternalSource_ShouldRaiseHazardZoneStateChangedToInactive_WhenActive()
+    {
+        // Arrange
+        var sourceId = "ext-src";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(TimeSpan.Zero)
+            .Build();
+
+        var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
+        hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
+
+        hazardZone.ActivateFromExternalSource(sourceId); // Transition to Active
+        stateChangedEvents.Clear(); // Clear the Inactive->Active event
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        stateChangedEvents.Should().ContainSingle();
+        var stateChangedEvent = stateChangedEvents.Single();
+        stateChangedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        stateChangedEvent.NewState.Should().Be(ZoneState.Inactive);
     }
 
     [Fact]
@@ -539,7 +988,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource(sourceId);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
@@ -557,45 +1006,45 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ActivateFromExternalSource(sourceId);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldRemainActive_WhenPersonMovesOutsideInActiveStateUnderThreshold()
+        HandlePersonLocationChanged_ShouldRemainActive_WhenPersonMovesOutsideInActiveStateUnderThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.Active)
             .WithAllowedNumberOfPersons(1)
             .Build();
-        var personId = Guid.NewGuid();
-        var initialEvent = new PersonCreatedEventArgs(personId, new Location(2, 2));
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var addedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => addedEvents.Add(e);
-        hazardZone.Handle(initialEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
         addedEvents.Should().HaveCount(1);
 
-        var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
+        var locationOutsideZone = hazardZone.GetLocationOutside();
         var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(moveEvent);
+        hazardZone.HandlePersonLocationChanged(newPersonId, locationOutsideZone);
 
         // Assert
         removedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     //------------------------------------------------------------------------------
-    // PreAlarm (IsActive=true, AlarmState=PreAlarm)
+    // PreAlarm (ZoneState=Active, AlarmState=PreAlarm)
     //------------------------------------------------------------------------------
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
+    public void HandlePersonExpired_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -603,23 +1052,25 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var secondPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => secondPersonAddedEvents.Add(e);
-        hazardZone.Handle(new PersonCreatedEventArgs(Guid.NewGuid(), new Location(2, 2)));
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         secondPersonAddedEvents.Should().HaveCount(1);
 
-        var firstPersonExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var firstPersonToExpireId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var firstPersonRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => firstPersonRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(firstPersonExpiredEvent);
+        hazardZone.HandlePersonExpired(firstPersonToExpireId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = firstPersonRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(firstPersonExpiredEvent.PersonId);
-        hazardZone.IsActive.Should().BeTrue();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(firstPersonToExpireId);
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
@@ -636,7 +1087,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
@@ -652,12 +1103,12 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource("ext-src");
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldTransitionToActive_WhenInPreAlarmStateUnderThreshold()
+    public void HandlePersonExpired_ShouldTransitionToActive_WhenInPreAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -665,18 +1116,42 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personExpiredEvent);
+        hazardZone.HandlePersonExpired(personId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
-        hazardZone.IsActive.Should().BeTrue();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personId);
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void HandlePersonExpired_ShouldRaiseAlarmStateChangedToNone_WhenPreAlarmAndUnderThreshold()
+    {
+        // Arrange
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm);
+
+        using var hazardZone = hazardZoneBuilder.Build();
+
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.HandlePersonExpired(personId);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -692,8 +1167,29 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(1);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void SetAllowedNumberOfPersons_ShouldRaiseAlarmStateChangedToNone_WhenPreAlarmAndUnderThreshold()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(1);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -714,8 +1210,40 @@ public sealed class HazardZoneTests : IDisposable
         clock.AdvanceBy(testPreAlarmDuration);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
+    }
+
+    [Fact]
+    public void PreAlarmTimer_ShouldRaiseAlarmStateChangedToAlarm_WhenElapsed()
+    {
+        // Arrange
+        var testPreAlarmDuration = TimeSpan.FromMilliseconds(10);
+        var clock = new FakeClock(DateTime.UnixEpoch);
+        var timerFactory = new FakeTimerFactory(clock);
+
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithPreAlarmDuration(testPreAlarmDuration)
+            .WithTime(clock, timerFactory)
+            .Build();
+        hazardZone.ManuallyActivate();
+
+        var locationInside = hazardZone.GetLocationInside();
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        clock.AdvanceBy(testPreAlarmDuration);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
@@ -730,8 +1258,29 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ManuallyDeactivate_ShouldRaiseAlarmStateChangedToNone_WhenPreAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .Build();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -748,34 +1297,59 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId);
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
+    public void DeactivateFromExternalSource_ShouldRaiseAlarmStateChangedToNone_WhenPreAlarm()
+    {
+        // Arrange
+        const string sourceId = "TestSource";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.PreAlarm)
+            .WithExternalActivationSource(sourceId)
+            .Build();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void HandlePersonCreated_ShouldRemainInPreAlarm_WhenInPreAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.PreAlarm)
             .WithAllowedNumberOfPersons(1)
             .Build();
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         // Assert
         personAddedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInPreAlarmStateUnderThreshold()
+        HandlePersonLocationChanged_ShouldTransitionToActive_WhenPersonMovesOutsideInPreAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -783,44 +1357,45 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1);
         using var hazardZone = hazardZoneBuilder.Build();
         var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
-        var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
+        var locationOutsideZone = hazardZone.GetLocationOutside();
         var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(moveEvent);
+        hazardZone.HandlePersonLocationChanged(personId, locationOutsideZone);
 
         // Assert
         removedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldRemainInPreAlarm_WhenPersonMovesOutsideInPreAlarmStateOverThreshold()
+        HandlePersonLocationChanged_ShouldRemainInPreAlarm_WhenPersonMovesOutsideInPreAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.PreAlarm)
             .WithAllowedNumberOfPersons(0)
             .Build();
-        var additionalPersonId = Guid.NewGuid();
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
+        var locationOutsideZone = hazardZone.GetLocationOutside();
         var additionalPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => additionalPersonAddedEvents.Add(e);
-        hazardZone.Handle(new PersonCreatedEventArgs(additionalPersonId, new Location(2, 2)));
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
         additionalPersonAddedEvents.Should().HaveCount(1);
 
-        var moveEvent = new PersonLocationChangedEventArgs(additionalPersonId, new Location(20, 20));
         var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(moveEvent);
+        hazardZone.HandlePersonLocationChanged(newPersonId, locationOutsideZone);
 
         // Assert
         removedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
@@ -836,16 +1411,16 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyActivate();
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.PreAlarm);
     }
 
     //------------------------------------------------------------------------------
-    // Alarm (IsActive=true, AlarmState=Alarm)
+    // Alarm (ZoneState=Active, AlarmState=Alarm)
     //------------------------------------------------------------------------------
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
+    public void HandlePersonExpired_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
@@ -853,18 +1428,19 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
-        hazardZone.Handle(new PersonCreatedEventArgs(newPersonId, new Location(2, 2)));
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         var personAddedToHazardZoneEvent = personAddedEvents.Single();
         personAddedToHazardZoneEvent.PersonId.Should().Be(newPersonId);
 
         // Act
-        hazardZone.Handle(new PersonExpiredEventArgs(newPersonId));
+        hazardZone.HandlePersonExpired(newPersonId);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
@@ -881,7 +1457,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(0);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
@@ -897,12 +1473,12 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource("ext-src");
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
-    public void OnPersonExpiredEvent_ShouldTransitionToActive_WhenInAlarmStateUnderThreshold()
+    public void HandlePersonExpired_ShouldTransitionToActive_WhenInAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -910,18 +1486,42 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var personExpiredEvent = new PersonExpiredEventArgs(hazardZoneBuilder.IdsOfPersonsAdded.First());
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personExpiredEvent);
+        hazardZone.HandlePersonExpired(personId);
 
         // Assert
         var personRemovedFromHazardZoneEvent = personRemovedEvents.Single();
-        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personExpiredEvent.PersonId);
-        hazardZone.IsActive.Should().BeTrue();
+        personRemovedFromHazardZoneEvent.PersonId.Should().Be(personId);
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void HandlePersonExpired_ShouldRaiseAlarmStateChangedToNone_WhenAlarmAndUnderThreshold()
+    {
+        // Arrange
+        var hazardZoneBuilder = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm);
+
+        using var hazardZone = hazardZoneBuilder.Build();
+
+        var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.HandlePersonExpired(personId);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -936,8 +1536,29 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.SetAllowedNumberOfPersons(1);
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void SetAllowedNumberOfPersons_ShouldRaiseAlarmStateChangedToNone_WhenAlarmAndUnderThreshold()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.SetAllowedNumberOfPersons(1);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -952,8 +1573,29 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyDeactivate();
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void ManuallyDeactivate_ShouldRaiseAlarmStateChangedToNone_WhenAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .Build();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.ManuallyDeactivate();
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
     }
 
     [Fact]
@@ -970,34 +1612,58 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.DeactivateFromExternalSource(sourceId);
 
         // Assert
-        hazardZone.IsActive.Should().BeFalse();
+        hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
-    public void OnPersonCreatedEvent_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
+    public void DeactivateFromExternalSource_ShouldRaiseAlarmStateChangedToNone_WhenAlarm()
+    {
+        // Arrange
+        const string sourceId = "TestSource";
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithState(HazardZoneTestState.Alarm)
+            .WithExternalActivationSource(sourceId)
+            .Build();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        // Act
+        hazardZone.DeactivateFromExternalSource(sourceId);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void HandlePersonCreated_ShouldRemainInAlarm_WhenInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.Alarm)
             .WithAllowedNumberOfPersons(1)
             .Build();
-        var personCreatedEvent = PersonHelper.CreatePersonCreatedEventLocatedInHazardZone(hazardZone);
+        var newPersonId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(personCreatedEvent);
+        hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
 
         // Assert
         personAddedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
     [Fact]
     public void
-        OnPersonLocationChangedEvent_ShouldTransitionToActive_WhenPersonMovesOutsideInAlarmStateUnderThreshold()
+        HandlePersonLocationChanged_ShouldTransitionToActive_WhenPersonMovesOutsideInAlarmStateUnderThreshold()
     {
         // Arrange
         var hazardZoneBuilder = HazardZoneBuilder.Create()
@@ -1005,43 +1671,44 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1);
         using var hazardZone = hazardZoneBuilder.Build();
         var personId = hazardZoneBuilder.IdsOfPersonsAdded.First();
-        var moveEvent = new PersonLocationChangedEventArgs(personId, new Location(20, 20));
+        var locationOutsideZone = hazardZone.GetLocationOutside();
         var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(moveEvent);
+        hazardZone.HandlePersonLocationChanged(personId, locationOutsideZone);
 
         // Assert
         removedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 
     [Fact]
-    public void OnPersonLocationChangedEvent_ShouldRemainInAlarm_WhenPersonMovesOutsideInAlarmStateOverThreshold()
+    public void HandlePersonLocationChanged_ShouldRemainInAlarm_WhenPersonMovesOutsideInAlarmStateOverThreshold()
     {
         // Arrange
         using var hazardZone = HazardZoneBuilder.Create()
             .WithState(HazardZoneTestState.Alarm)
             .WithAllowedNumberOfPersons(0)
             .Build();
-        var additionalPersonId = Guid.NewGuid();
+        var personId = Guid.NewGuid();
+        var locationInsideZone = hazardZone.GetLocationInside();
+        var locationOutsideZone = hazardZone.GetLocationOutside();
         var additionalPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => additionalPersonAddedEvents.Add(e);
-        hazardZone.Handle(new PersonCreatedEventArgs(additionalPersonId, new Location(2, 2)));
+        hazardZone.HandlePersonCreated(personId, locationInsideZone);
         additionalPersonAddedEvents.Should().HaveCount(1);
 
-        var moveEvent = new PersonLocationChangedEventArgs(additionalPersonId, new Location(20, 20));
         var removedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => removedEvents.Add(e);
 
         // Act
-        hazardZone.Handle(moveEvent);
+        hazardZone.HandlePersonLocationChanged(personId, locationOutsideZone);
 
         // Assert
         removedEvents.Should().HaveCount(1);
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
@@ -1057,7 +1724,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyActivate();
 
         // Assert
-        hazardZone.IsActive.Should().BeTrue();
+        hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 
@@ -1081,3 +1748,4 @@ public sealed class HazardZoneTests : IDisposable
     {
     }
 }
+
