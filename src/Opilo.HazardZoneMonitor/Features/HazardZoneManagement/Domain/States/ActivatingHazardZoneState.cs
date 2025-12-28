@@ -4,7 +4,7 @@ namespace Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 
 internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
 {
-    private readonly Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer? _activationTimer;
+    private readonly Opilo.HazardZoneMonitor.Shared.Abstractions.ITimer _activationTimer;
     private readonly DateTime _enteredActivatingAtUtc;
 
     public ActivatingHazardZoneState(
@@ -14,13 +14,6 @@ internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
         int allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
-        if (HazardZone.ActivationDuration == TimeSpan.Zero)
-        {
-            HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
-                AllowedNumberOfPersons));
-            return;
-        }
-
         HazardZone.RaiseHazardZoneStateChanged(ZoneState.Activating);
 
         _enteredActivatingAtUtc = HazardZone.Clock.UtcNow;
@@ -59,12 +52,9 @@ internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
 
     protected override void Dispose(bool disposing)
     {
-        if (_activationTimer != null)
-        {
-            _activationTimer.Stop();
-            _activationTimer.Elapsed -= OnActivationTimerElapsed;
-            _activationTimer.Dispose();
-        }
+        _activationTimer.Stop();
+        _activationTimer.Elapsed -= OnActivationTimerElapsed;
+        _activationTimer.Dispose();
 
         base.Dispose(disposing);
     }
