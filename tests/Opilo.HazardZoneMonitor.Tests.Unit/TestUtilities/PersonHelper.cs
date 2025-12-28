@@ -7,10 +7,4 @@ internal static class PersonHelper
 {
     public static PersonLocationChangedEventArgs CreatePersonLocationChangedEventLocatedInHazardZone(HazardZone hazardZone)
         => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetCentroid());
-
-    public static PersonLocationChangedEventArgs CreatePersonLocationChangedEventLocatedOutsideHazardZone(HazardZone hazardZone)
-        => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetPointOutside());
-
-    public static PersonLocationChangedEventArgs CreatePersonLocationChangedEventLocatedOutsideHazardZone(HazardZone hazardZone, Guid personId)
-        => new(personId, hazardZone.Outline.Vertices.GetPointOutside());
 }

@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Domain.States;
 using Opilo.HazardZoneMonitor.Features.HazardZoneManagement.Events;
-using Opilo.HazardZoneMonitor.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Shared.Time;
@@ -73,10 +72,12 @@ public sealed class HazardZone : IDisposable
         }
     }
 
-    public void Handle(PersonLocationChangedEventArgs personLocationChangedEvent)
+    public void HandlePersonLocationChanged(Guid personId, Location location)
     {
-        Guard.Against.Null(personLocationChangedEvent);
-        HandlePersonLocationChangedEvent(personLocationChangedEvent);
+        lock (_zoneStateLock)
+        {
+            _currentState.OnPersonChangedLocation(personId, location);
+        }
     }
 
     public void ManuallyActivate()
@@ -121,13 +122,6 @@ public sealed class HazardZone : IDisposable
     internal void OnPreAlarmTimerElapsed()
     {
         lock (_zoneStateLock) _currentState.OnPreAlarmTimerElapsed();
-    }
-
-    private void HandlePersonLocationChangedEvent(PersonLocationChangedEventArgs personLocationChangedEvent)
-    {
-        lock (_zoneStateLock)
-            _currentState.OnPersonChangedLocation(personLocationChangedEvent.PersonId,
-                personLocationChangedEvent.CurrentLocation);
     }
 
     internal void RaisePersonAddedToHazardZone(Guid personId)
