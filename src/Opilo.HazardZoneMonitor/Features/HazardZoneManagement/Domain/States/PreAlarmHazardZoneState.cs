@@ -14,6 +14,8 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
         int allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
+        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.PreAlarm);
+        
         if (HazardZone.PreAlarmDuration == TimeSpan.Zero)
         {
             HazardZone.OnPreAlarmTimerElapsed();

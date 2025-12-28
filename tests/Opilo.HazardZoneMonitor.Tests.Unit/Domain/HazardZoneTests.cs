@@ -797,6 +797,32 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
+    public void HandlePersonCreated_WhenActiveAndOverThreshold_RaisesAlarmStateChangedToPreAlarm()
+    {
+        // Arrange
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithAllowedNumberOfPersons(1)
+            .WithPreAlarmDuration(TimeSpan.FromSeconds(10))
+            .Build();
+        hazardZone.ManuallyActivate();
+
+        var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
+        hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
+
+        var locationInsideZone = hazardZone.GetLocationInside();
+
+        // Act
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInsideZone);
+        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInsideZone);
+
+        // Assert
+        alarmStateChangedEvents.Should().ContainSingle();
+        var alarmEvent = alarmStateChangedEvents.Single();
+        alarmEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+        alarmEvent.NewState.Should().Be(AlarmState.PreAlarm);
+    }
+
+    [Fact]
     public void HandlePersonCreated_ShouldTransitionToAlarm_WhenInActiveStateOverThresholdWithZeroPreAlarm()
     {
         // Arrange
