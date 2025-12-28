@@ -486,6 +486,26 @@ public sealed class HazardZoneTests : IDisposable
         activationStartedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
     }
 
+    [Fact]
+    public void ActivateFromExternalSource_ShouldRaiseHazardZoneActivationStartedEvent_WhenTransitioningToActivatingState()
+    {
+        // Arrange
+        var activationDuration = TimeSpan.FromSeconds(3);
+        using var hazardZone = HazardZoneBuilder.Create()
+            .WithActivationDuration(activationDuration)
+            .Build();
+
+        var activationStartedEvents = new List<HazardZoneActivationStartedEventArgs>();
+        hazardZone.HazardZoneActivationStarted += (_, e) => activationStartedEvents.Add(e);
+
+        // Act
+        hazardZone.ActivateFromExternalSource("Source1");
+
+        // Assert
+        var activationStartedEvent = activationStartedEvents.Single();
+        activationStartedEvent.HazardZoneName.Should().Be(HazardZoneBuilder.DefaultName);
+    }
+
     //------------------------------------------------------------------------------
     // Active (ZoneState=Active, AlarmState=None)
     //------------------------------------------------------------------------------
