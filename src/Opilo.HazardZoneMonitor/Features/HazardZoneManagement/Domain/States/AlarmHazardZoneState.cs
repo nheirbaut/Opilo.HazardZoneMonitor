@@ -39,6 +39,7 @@ internal sealed class AlarmHazardZoneState : HazardZoneStateBase
         if (PersonsInZone.Count > AllowedNumberOfPersons)
             return;
 
+        HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
             AllowedNumberOfPersons));
     }
@@ -46,7 +47,10 @@ internal sealed class AlarmHazardZoneState : HazardZoneStateBase
     protected override void OnAllowedNumberOfPersonsChanged()
     {
         if (PersonsInZone.Count <= AllowedNumberOfPersons)
+        {
+            HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
             HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,
                 AllowedNumberOfPersons));
+        }
     }
 }
