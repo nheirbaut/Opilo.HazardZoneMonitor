@@ -116,6 +116,7 @@ internal sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMa
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Test");
         builder.ConfigureServices(services =>
         {
             services.AddSingleton(_floorRegistry);

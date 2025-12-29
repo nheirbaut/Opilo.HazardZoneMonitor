@@ -2,13 +2,17 @@ using System.Globalization;
 using Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
 using Serilog;
 
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
-    .CreateBootstrapLogger();
-
-Log.Information("Starting HazardZone Monitor API");
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Only use bootstrap logger in non-test environments to avoid "logger already frozen" errors
+if (!builder.Environment.IsEnvironment("Test"))
+{
+    Log.Logger = new LoggerConfiguration()
+        .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+        .CreateBootstrapLogger();
+
+    Log.Information("Starting HazardZone Monitor API");
+}
 
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
