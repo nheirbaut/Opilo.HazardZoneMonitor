@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
 
-namespace Opilo.HazardZoneMonitor.Tests.Unit.Features.FloorManagement;
+namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.FloorManagement;
 
 public sealed class FloorRegistryTests
 {
