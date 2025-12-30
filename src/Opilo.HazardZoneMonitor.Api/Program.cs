@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
 using Serilog;
 
@@ -18,15 +19,17 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
     .ReadFrom.Services(services));
 
-builder.Services.Configure<FloorConfiguration>(builder.Configuration.GetSection("FloorManagement"));
-builder.Services.AddSingleton<IFloorRegistry, FloorRegistry>();
+builder.Services
+    .AddOptions<FloorOptions>()
+    .BindConfiguration(nameof(FloorOptions));
 
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 
 app.MapGet("/", () => "HazardZone Monitor API");
-app.MapGet("/api/v1/floors", () => new GetFloorResponse([]));
+app.MapGet("/api/v1/floors", (IOptions<FloorOptions> floorConfiguration)
+    => new GetFloorResponse(floorConfiguration.Value.Floors));
 
 await app.RunAsync().ConfigureAwait(false);
 
