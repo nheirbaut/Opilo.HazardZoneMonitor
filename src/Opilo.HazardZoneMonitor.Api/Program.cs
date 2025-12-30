@@ -4,8 +4,8 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Only use bootstrap logger in non-test environments to avoid "logger already frozen" errors
-if (!builder.Environment.IsEnvironment("Test"))
+// Only use bootstrap logger in non-development environments to avoid "logger already frozen" errors
+if (!builder.Environment.IsEnvironment("Development"))
 {
     Log.Logger = new LoggerConfiguration()
         .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
@@ -26,7 +26,6 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 
 app.MapGet("/", () => "HazardZone Monitor API");
-
 app.MapGet("/api/v1/floors", () => new GetFloorResponse([]));
 
 await app.RunAsync().ConfigureAwait(false);
