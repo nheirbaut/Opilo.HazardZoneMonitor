@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,8 @@ app.UseSerilogRequestLogging();
 app.MapGet("/", () => "HazardZone Monitor API");
 app.MapGet("/api/v1/floors", (IOptions<FloorOptions> floorConfiguration)
     => new GetFloorResponse(floorConfiguration.Value.Floors));
+app.MapPost("/api/v1/person-movements", (RegisterPersonMovementRequest request)
+    => Results.Created(new Uri("/api/v1/person-movements/1", UriKind.Relative), null));
 
 await app.RunAsync().ConfigureAwait(false);
 
