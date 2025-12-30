@@ -5,7 +5,7 @@ using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.FloorManagement;
 
-public sealed class GetFloorsEndpointTests : IClassFixture<CustomWebApplicationFactory>, IDisposable
+public sealed class GetFloorsEndpointTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly CustomWebApplicationFactory _factory;
 
@@ -40,10 +40,5 @@ public sealed class GetFloorsEndpointTests : IClassFixture<CustomWebApplicationF
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    public void Dispose()
-    {
-        _factory.Dispose();
     }
 }
