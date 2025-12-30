@@ -27,7 +27,7 @@ app.UseSerilogRequestLogging();
 
 app.MapGet("/", () => "HazardZone Monitor API");
 
-app.MapGet("/api/v1/floors", (IFloorRegistry registry) => Results.Json(registry.GetAllFloors()));
+app.MapGet("/api/v1/floors", () => new GetFloorResponse([]));
 
 await app.RunAsync().ConfigureAwait(false);
 
