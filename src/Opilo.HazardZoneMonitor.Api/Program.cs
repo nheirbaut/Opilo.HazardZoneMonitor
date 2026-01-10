@@ -32,7 +32,7 @@ app.MapGet("/", () => "HazardZone Monitor API");
 app.MapGet("/api/v1/floors", (IOptions<FloorOptions> floorConfiguration)
     => new GetFloorResponse(floorConfiguration.Value.Floors));
 app.MapPost("/api/v1/person-movements", (RegisterPersonMovementRequest request)
-    => Results.Created(new Uri("/api/v1/person-movements/1", UriKind.Relative), null));
+    => TypedResults.Created(new Uri("/api/v1/person-movements/1", UriKind.Relative), new RegisteredPersonMovementDto(request.PersonId)));
 
 await app.RunAsync().ConfigureAwait(false);
 
