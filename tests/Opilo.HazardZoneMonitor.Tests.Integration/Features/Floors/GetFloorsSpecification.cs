@@ -44,28 +44,22 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         // Arrange
         List<FloorConfiguration> expectedFloors =
         [
-            new()
-            {
-                Name = "First Floor",
-                Outline = new List<FloorPointConfiguration>
+            new("First Floor",
+                new List<FloorPointConfiguration>
                 {
                     new() { X = 0, Y = 0 },
                     new() { X = 10, Y = 0 },
                     new() { X = 10, Y = 10 },
                     new() { X = 0, Y = 10 }
-                }
-            },
-            new()
-            {
-                Name = "Second Floor",
-                Outline = new List<FloorPointConfiguration>
+                }),
+            new("Second Floor",
+                new List<FloorPointConfiguration>
                 {
                     new() { X = 0, Y = 0 },
                     new() { X = 15, Y = 0 },
                     new() { X = 15, Y = 15 },
                     new() { X = 0, Y = 15 }
-                }
-            }
+                })
         ];
         var floorOptions = new FloorOptions { Floors = expectedFloors };
 

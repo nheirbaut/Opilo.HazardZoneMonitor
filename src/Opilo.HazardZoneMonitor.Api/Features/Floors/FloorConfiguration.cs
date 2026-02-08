@@ -1,7 +1,4 @@
 namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
 
-public sealed class FloorConfiguration
-{
-    public string Name { get; init; } = string.Empty;
-    public IReadOnlyList<FloorPointConfiguration> Outline { get; init; } = [];
-}
+public sealed record FloorConfiguration(string Name, IReadOnlyList<FloorPointConfiguration> Outline);
+
