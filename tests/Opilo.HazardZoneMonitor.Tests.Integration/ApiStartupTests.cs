@@ -1,3 +1,4 @@
+using System.Net;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration;
@@ -15,6 +16,6 @@ public sealed class ApiStartupTests(CustomWebApplicationFactory factory)
         var response = await client.GetAsync(new Uri("/", UriKind.Relative));
 
         // Assert
-        response.Should().NotBeNull();
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
