@@ -15,11 +15,6 @@
         <NoWarn>$(NoWarn);CA1515</NoWarn>
     </PropertyGroup>
 
-    <!-- Disable CA1515 for test projects - they may need public types for xUnit fixtures -->
-    <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\tests\'))">
-        <NoWarn>$(NoWarn);CA1515</NoWarn>
-    </PropertyGroup>
-
     <ItemGroup Condition="'$(MSBuildProjectExtension)' != '.dcproj'">
         <PackageReference Include="SonarAnalyzer.CSharp">
             <PrivateAssets>all</PrivateAssets>
