@@ -17,7 +17,7 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
         var request = new Command(personId, X: 1, Y: 1);
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/v1/person-movements", request);
+        var response = await client.PostAsJsonAsync("/api/v1/person-movements", request, TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);

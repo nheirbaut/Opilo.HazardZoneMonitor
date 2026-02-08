@@ -58,7 +58,7 @@ An overview of tasks and features to be implemented.
 
 ## Tests
 
-- [ ] Move to xUnit v3.
+- [x] Move to xUnit v3.
 - [ ] Add integration tests for feature workflows
 - [ ] Add performance benchmarks
 - [ ] Add load testing scenarios
