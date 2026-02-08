@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
@@ -13,7 +12,12 @@ public sealed class Feature : IFeature
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/v1/floors", (IOptions<FloorOptions> floorConfiguration)
-            => new Response(floorConfiguration.Value.Floors));
+        app.MapGet("/api/v1/floors", async (
+            IQueryHandler<Query, Response> handler,
+            CancellationToken cancellationToken) =>
+        {
+            var response = await handler.Handle(new Query(), cancellationToken);
+            return Results.Ok(response);
+        });
     }
 }

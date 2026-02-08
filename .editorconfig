@@ -162,6 +162,14 @@ dotnet_diagnostic.CA1040.severity = none;
 # This repo intentionally uses a `Shared` namespace segment; keep the signal but don't fail builds.
 dotnet_diagnostic.CA1716.severity = suggestion
 
+[src/Opilo.HazardZoneMonitor.Api/**.cs]
+
+# CA2007 : ConfigureAwait is unnecessary in ASP.NET Core (no SynchronizationContext)
+dotnet_diagnostic.CA2007.severity = suggestion
+
+# MA0004 : Same rationale — no SynchronizationContext in ASP.NET Core
+dotnet_diagnostic.MA0004.severity = suggestion
+
 [tests/**.cs]
 
 # Error CA1707 : Remove the underscores from member name
