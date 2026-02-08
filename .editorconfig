@@ -8,6 +8,7 @@ root = true
 # Use 4 spaces as indentation
 [*]
 charset = utf-8
+end_of_line = lf
 insert_final_newline = true
 indent_style = space
 indent_size = 4
@@ -158,9 +159,21 @@ csharp_space_between_square_brackets = false
 # CA1040 : Avoid empty interfaces
 dotnet_diagnostic.CA1040.severity = none;
 
+# CA1062 : Validate arguments of public methods
+# Redundant with nullable reference types enabled project-wide; not enabled by default in .NET 10.
+dotnet_diagnostic.CA1062.severity = none
+
 # CA1716 : Identifiers should not match keywords
 # This repo intentionally uses a `Shared` namespace segment; keep the signal but don't fail builds.
 dotnet_diagnostic.CA1716.severity = suggestion
+
+[src/Opilo.HazardZoneMonitor.Api/**.cs]
+
+# CA2007 : ConfigureAwait is unnecessary in ASP.NET Core (no SynchronizationContext)
+dotnet_diagnostic.CA2007.severity = suggestion
+
+# MA0004 : Same rationale — no SynchronizationContext in ASP.NET Core
+dotnet_diagnostic.MA0004.severity = suggestion
 
 [tests/**.cs]
 
@@ -197,9 +210,3 @@ indent_size = 2
 # YAML config files
 [*.{yml,yaml}]
 indent_size = 2
-
-# Shell scripts
-[*.sh]
-end_of_line = lf
-[*.{cmd,bat}]
-end_of_line = crlf

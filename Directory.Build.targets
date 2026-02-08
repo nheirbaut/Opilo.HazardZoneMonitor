@@ -1,0 +1,6 @@
+<Project>
+    <!-- Disable CA1515 for test projects - they may need public types for xUnit fixtures -->
+    <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+        <NoWarn>$(NoWarn);CA1515</NoWarn>
+    </PropertyGroup>
+</Project>
