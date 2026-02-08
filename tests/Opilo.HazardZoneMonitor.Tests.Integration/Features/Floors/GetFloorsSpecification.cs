@@ -63,7 +63,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         ];
         var floorOptions = new FloorOptions { Floors = expectedFloors };
 
-        using var customFactory = factory.WithWebHostBuilder(builder =>
+        await using var customFactory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, config) =>
             {
