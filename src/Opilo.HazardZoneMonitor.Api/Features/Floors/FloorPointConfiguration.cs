@@ -1,4 +1,4 @@
-﻿namespace Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
+namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
 
 public sealed class FloorPointConfiguration
 {

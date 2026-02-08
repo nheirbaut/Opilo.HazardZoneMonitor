@@ -1,7 +1,7 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
+using Opilo.HazardZoneMonitor.Api.Features.Floors;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 

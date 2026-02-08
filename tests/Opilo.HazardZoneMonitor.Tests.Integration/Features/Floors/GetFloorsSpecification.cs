@@ -1,10 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
-using Opilo.HazardZoneMonitor.Api.Features.FloorManagement;
+using Opilo.HazardZoneMonitor.Api.Features.Floors;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
-namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.FloorManagement;
+namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Floors;
 
 public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
     : IClassFixture<CustomWebApplicationFactory>
@@ -29,7 +30,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<GetFloorResponse>(new Uri("/api/v1/floors", UriKind.Relative));
+        var response = await client.GetFromJsonAsync<GetFloorsResponse>(new Uri("/api/v1/floors", UriKind.Relative));
 
         // Assert
         response.Should().NotBeNull();
@@ -79,7 +80,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         var client = customFactory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<GetFloorResponse>(new Uri("/api/v1/floors", UriKind.Relative));
+        var response = await client.GetFromJsonAsync<GetFloorsResponse>(new Uri("/api/v1/floors", UriKind.Relative));
 
         // Assert
         response.Should().NotBeNull();
