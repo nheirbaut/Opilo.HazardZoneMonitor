@@ -13,7 +13,7 @@ public sealed class ApiStartupTests(CustomWebApplicationFactory factory)
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync(new Uri("/", UriKind.Relative));
+        var response = await client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
