@@ -6,6 +6,6 @@ public sealed class Handler : ICommandHandler<Command, Response>
 {
     public Task<Response> Handle(Command command, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new Response(Guid.NewGuid()));
+        return Task.FromResult(new Response(command.PersonId));
     }
 }

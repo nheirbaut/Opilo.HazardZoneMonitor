@@ -159,6 +159,10 @@ csharp_space_between_square_brackets = false
 # CA1040 : Avoid empty interfaces
 dotnet_diagnostic.CA1040.severity = none;
 
+# CA1062 : Validate arguments of public methods
+# Redundant with nullable reference types enabled project-wide; not enabled by default in .NET 10.
+dotnet_diagnostic.CA1062.severity = none
+
 # CA1716 : Identifiers should not match keywords
 # This repo intentionally uses a `Shared` namespace segment; keep the signal but don't fail builds.
 dotnet_diagnostic.CA1716.severity = suggestion
