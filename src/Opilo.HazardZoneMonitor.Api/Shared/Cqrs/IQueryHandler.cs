@@ -1,6 +1,8 @@
 ﻿namespace Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 
-public interface IQueryHandler<in TQuery, TResult>
+public interface IQueryHandler<in TQuery, TResponse>
+    where TQuery : IQuery<TResponse>
+    where TResponse : IResponse
 {
-    Task<TResult> Handle(TQuery query, CancellationToken cancellationToken);
+    Task<TResponse> Handle(TQuery query, CancellationToken cancellationToken);
 }

@@ -1,6 +1,6 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
-using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
@@ -16,7 +16,7 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
         var client = factory.CreateClient();
         var personId = Guid.NewGuid();
         var location = new Location(1, 1);
-        var request = new RegisterPersonMovementRequest(personId, location);
+        var request = new Command(personId, location);
 
         // Act
         var response = await client.PostAsJsonAsync("/api/v1/person-movements", request);
