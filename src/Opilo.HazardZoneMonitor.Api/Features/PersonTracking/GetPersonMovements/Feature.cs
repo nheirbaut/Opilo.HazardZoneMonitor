@@ -17,6 +17,9 @@ public sealed class Feature : IFeature
             IQueryHandler<Query, Response> handler,
             CancellationToken cancellationToken) =>
         {
+            if (!RegisterPersonMovement.Handler.Movements.ContainsKey(id))
+                return Results.NotFound();
+
             var response = await handler.Handle(new Query(id), cancellationToken);
             return Results.Ok(response);
         });
