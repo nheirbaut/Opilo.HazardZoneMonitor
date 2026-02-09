@@ -162,4 +162,4 @@ Central Package Management (`Directory.Packages.props`). When adding packages, a
 - `CA1707` (underscores in names): suppressed in tests — test methods use underscores
 - `CA1515` (public types): suppressed for Web SDK and test projects
 - `CA2007` (ConfigureAwait): suggestion only in API and tests — no SynchronizationContext in ASP.NET Core
-- `MA0004`: suggestion only in API — same rationale as CA2007
+- `MA0004`: suggestion only in API and tests — same rationale as CA2007

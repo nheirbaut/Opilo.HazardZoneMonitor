@@ -5,11 +5,11 @@ namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 public static class ConfigurationExtensions
 {
-    public static Dictionary<string, string?> ToConfigurationDictionary(this FloorOptions floorOptions)
+    public static IDictionary<string, string?> ToConfigurationDictionary(this FloorOptions floorOptions)
     {
         ArgumentNullException.ThrowIfNull(floorOptions);
 
-        var dictionary = new Dictionary<string, string?>();
+        Dictionary<string, string?> dictionary = new(StringComparer.Ordinal);
         var floors = floorOptions.Floors;
 
         for (var floorIndex = 0; floorIndex < floors.Count; floorIndex++)
