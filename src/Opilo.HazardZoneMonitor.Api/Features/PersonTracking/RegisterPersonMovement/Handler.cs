@@ -10,8 +10,9 @@ public sealed class Handler : ICommandHandler<Command, Response>
 
     public Task<Result<Response>> Handle(Command command, CancellationToken cancellationToken)
     {
-        var response = new Response(command.PersonId, command.X, command.Y);
-        Movements[response.Id] = (command.PersonId, command.X, command.Y, DateTime.UtcNow);
+        var registeredAt = DateTime.UtcNow;
+        var response = new Response(command.PersonId, command.X, command.Y, registeredAt);
+        Movements[response.Id] = (command.PersonId, command.X, command.Y, registeredAt);
         return Task.FromResult(Result.Created(response));
     }
 }

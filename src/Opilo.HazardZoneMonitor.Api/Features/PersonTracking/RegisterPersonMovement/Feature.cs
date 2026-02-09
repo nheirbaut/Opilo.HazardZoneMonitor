@@ -20,6 +20,15 @@ public sealed class Feature : IFeature
             CancellationToken cancellationToken) =>
         {
             var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                var response = result.Value;
+                return Results.Created(
+                    new Uri($"/api/v1/person-movements/{response.Id}", UriKind.Relative),
+                    response);
+            }
+
             return result.ToMinimalApiResult();
         });
     }
