@@ -183,6 +183,9 @@ dotnet_diagnostic.CA1707.severity = none
 # Error CA2007 : Consider calling ConfigureAwait on the awaited task
 dotnet_diagnostic.CA2007.severity = suggestion
 
+# MA0004 : Same rationale as CA2007 — no SynchronizationContext in test runners
+dotnet_diagnostic.MA0004.severity = suggestion
+
 # C++ Files
 [*.{cpp,h,in}]
 curly_bracket_next_line = true

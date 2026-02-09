@@ -6,35 +6,47 @@
 
 ## Architecture
 
-This project implements a **Vertical Slice Architecture**, organizing code by features rather than technical layers. Each feature is self-contained with its own domain models, events, and business logic.
+This project implements a **Vertical Slice Architecture** with **DDD** and **CQRS**, organizing code by features rather than technical layers. Each feature is self-contained with its own domain models, events, and business logic.
+
+**Stack:** .NET 10, Minimal API, Dapper + Sqlite, Serilog
 
 ### Structure
 
 ```
-src/Opilo.HazardZoneMonitor/
-├── Features/
-│   ├── PersonTracking/          # Person lifecycle and location tracking
-│   │   ├── Domain/
-│   │   │   └── Person.cs
-│   │   └── Events/
-│   │       ├── PersonCreatedEvent.cs
-│   │       ├── PersonExpiredEvent.cs
-│   │       └── PersonLocationChangedEvent.cs
-│   ├── FloorManagement/         # Floor occupancy management
-│   │   ├── Domain/
-│   │   │   └── Floor.cs
-│   │   └── Events/
-│   │       ├── PersonAddedToFloorEvent.cs
-│   │       └── PersonRemovedFromFloorEvent.cs
-│   └── HazardZoneManagement/    # Hazard zone monitoring with alarm states
-│       ├── Domain/
-│       │   ├── HazardZone.cs
-│       │   └── States/         # State pattern for alarm management
-│       └── Events/
-└── Shared/                      # Shared primitives and infrastructure
-    ├── Abstractions/
-    ├── Events/
-    └── Primitives/
+src/
+├── Opilo.HazardZoneMonitor.Domain/          # Rich domain models, events, state machine
+│   ├── Features/
+│   │   ├── PersonTracking/                  # Person lifecycle and location tracking
+│   │   │   ├── Domain/
+│   │   │   │   └── Person.cs
+│   │   │   └── Events/
+│   │   ├── FloorManagement/                 # Floor occupancy management
+│   │   │   ├── Domain/
+│   │   │   │   └── Floor.cs
+│   │   │   └── Events/
+│   │   └── HazardZoneManagement/            # Hazard zone monitoring with alarm states
+│   │       ├── Domain/
+│   │       │   ├── HazardZone.cs
+│   │       │   └── States/                  # State pattern for alarm management
+│   │       └── Events/
+│   └── Shared/                              # Shared primitives and infrastructure
+│       ├── Abstractions/                    # IClock, ITimer, ITimerFactory
+│       ├── Guards/
+│       ├── Primitives/                      # Location, Outline, ZoneState, AlarmState
+│       └── Time/                            # System implementations
+├── Opilo.HazardZoneMonitor.Api/             # Minimal API, vertical slices, CQRS handlers
+│   ├── Features/
+│   │   ├── Floors/                          # Floor configuration and queries
+│   │   └── PersonTracking/                  # Person movement endpoints
+│   │       ├── RegisterPersonMovement/      # Feature.cs, Handler.cs, Command.cs, Response.cs
+│   │       └── GetPersonMovements/          # Feature.cs, Handler.cs, Query.cs, Response.cs
+│   └── Shared/
+│       ├── Cqrs/                            # ICommandHandler, IQueryHandler, ICommand, IQuery
+│       └── Features/                        # IFeature, auto-discovery
+tests/
+├── Opilo.HazardZoneMonitor.Domain.Tests.Unit/
+├── Opilo.HazardZoneMonitor.Api.Tests.Unit/
+└── Opilo.HazardZoneMonitor.Tests.Integration/
 ```
 
 ### Key Architectural Principles
@@ -42,40 +54,49 @@ src/Opilo.HazardZoneMonitor/
 - **Feature Cohesion:** All code for a feature lives together
 - **Independent Evolution:** Features can evolve independently
 - **Clear Boundaries:** Features communicate through well-defined events
-- **Domain-Driven Design:** Rich domain models with behavior
-- **Event-Driven:** Features coordinate through domain events
+- **Domain-Driven Design:** Rich domain models with behavior — no anemic models
+- **Event-Driven:** Features coordinate through standard .NET domain events
+- **CQRS:** Separate command and query handlers — no MediatR
 
 ### Feature Interactions
 
 - **PersonTracking** → Raises person lifecycle events (created, expired, location changed)
 - **FloorManagement** → Listens to PersonTracking, manages floor occupancy
-- **HazardZoneManagement** → Listens to PersonTracking, manages hazard zones with complex state machine (Inactive → Active → PreAlarm → Alarm)
+- **HazardZoneManagement** → Listens to PersonTracking, manages hazard zones with a state machine for zone activation (Inactive → Activating → Active) and alarm escalation (None → PreAlarm → Alarm)
 
 ## Getting Started
 
 ### Prerequisites
 
-- .NET SDK (9 or higher)
+- .NET 10 SDK
 
 ### Installation
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/yourusername/Opilo.HazardZoneMonitor.git
+   git clone https://github.com/nheirbaut/Opilo.HazardZoneMonitor.git
    ```
 2. **Navigate to the project folder:**
    ```sh
    cd Opilo.HazardZoneMonitor
    ```
-3. **Install dependencies:**
-    - For .Net Components:
-      ```sh
-      dotnet restore
-      ```
-4. **Run the application:**
-     ```sh
-     dotnet run
-     ```
+3. **Restore dependencies:**
+   ```sh
+   dotnet restore
+   ```
+4. **Build:**
+   ```sh
+   dotnet build
+   ```
+5. **Run the API:**
+   ```sh
+   dotnet run --project src/Opilo.HazardZoneMonitor.Api
+   ```
+6. **Run tests:**
+   ```sh
+   dotnet test
+   ```
+
 ## Contributing
 
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
