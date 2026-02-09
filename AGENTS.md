@@ -134,7 +134,7 @@ All projects use: Meziantou.Analyzer, Microsoft.CodeAnalysis.NetAnalyzers (lates
 - **Framework**: xUnit v3 (uses `xunit.v3` package, NOT xunit v2)
 - **Assertions**: AwesomeAssertions (NOT FluentAssertions) — globally imported
 - **Mocking**: NSubstitute for API tests; hand-written fakes (`FakeClock`, `FakeTimer`, `FakeTimerFactory`) for domain tests
-- **Style**: Arrange-Act-Assert with `// Arrange`, `// Act`, `// Assert` comments
+- **Style**: Arrange-Act-Assert with bare `// Arrange`, `// Act`, `// Assert` comments — no extra descriptions after them, the code should speak for itself
 - **Test class naming**: `{ClassUnderTest}Tests` for unit tests, `{Feature}Specification` for integration tests
 - **Test class structure**: `sealed class` implementing `IDisposable` when SUT needs disposal
 - **Builder pattern**: `HazardZoneBuilder.Create().WithState(...).Build()` for complex test setup
