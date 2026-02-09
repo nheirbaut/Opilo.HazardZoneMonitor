@@ -6,6 +6,7 @@
 - **Strict TDD.** Do not generate production code unless explicitly requested. Follow `.copilot/tests-only-agent.prompt.md` for test generation.
 - **No MediatR, no SignalR, no AutoMapper or similar object-mapping libraries (e.g., Mapster).** These are explicitly banned.
 - **Always load the `solid` skill** when delegating code tasks. Use `load_skills=["solid"]` for every `task()` call that writes, refactors, reviews, or architects code.
+- **GitHub issues must be functional, not technical.** When creating issues, describe the desired behavior and the problem from a user/business perspective. Do not prescribe implementation details (specific technologies, libraries, database engines, architectural patterns, etc.) unless the user explicitly requests it.
 
 ## Project Overview
 
