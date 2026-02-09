@@ -4,7 +4,7 @@
 
 - **NEVER install, update, or remove software on the system without explicit user permission.** This includes package managers (winget, choco, npm -g, pip, etc.), CLI tools, SDKs, runtimes, and any other system-level software. Always ask first.
 - **Strict TDD.** Do not generate production code unless explicitly requested. Follow `.copilot/tests-only-agent.prompt.md` for test generation.
-- **No MediatR, no SignalR, no ObjectMapper.** These are explicitly banned.
+- **No MediatR, no SignalR, no AutoMapper or similar object-mapping libraries (e.g., Mapster).** These are explicitly banned.
 - **Always load the `solid` skill** when delegating code tasks. Use `load_skills=["solid"]` for every `task()` call that writes, refactors, reviews, or architects code.
 
 ## Project Overview

@@ -62,7 +62,7 @@ tests/
 
 - **PersonTracking** → Raises person lifecycle events (created, expired, location changed)
 - **FloorManagement** → Listens to PersonTracking, manages floor occupancy
-- **HazardZoneManagement** → Listens to PersonTracking, manages hazard zones with complex state machine (Inactive → Activating → Active → PreAlarm → Alarm)
+- **HazardZoneManagement** → Listens to PersonTracking, manages hazard zones with a state machine for zone activation (Inactive → Activating → Active) and alarm escalation (None → PreAlarm → Alarm)
 
 ## Getting Started
 
