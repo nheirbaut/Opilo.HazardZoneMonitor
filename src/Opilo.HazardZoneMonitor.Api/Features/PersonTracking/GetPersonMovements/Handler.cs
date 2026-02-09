@@ -10,6 +10,6 @@ public sealed class Handler : IQueryHandler<Query, Response>
         if (!RegisterPersonMovement.Handler.Movements.TryGetValue(query.Id, out var movement))
             return Task.FromResult(Result<Response>.NotFound());
 
-        return Task.FromResult(Result.Success(new Response(movement.PersonId, movement.X, movement.Y, movement.RegisteredAt)));
+        return Task.FromResult(Result.Success(new Response(query.Id, movement.PersonId, movement.X, movement.Y, movement.RegisteredAt)));
     }
 }

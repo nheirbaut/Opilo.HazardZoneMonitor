@@ -47,6 +47,7 @@ public class GetPersonMovementsSpecification(CustomWebApplicationFactory factory
 
         // Assert
         movement.Should().NotBeNull();
+        movement.Id.Should().Be(registrationId);
         movement.PersonId.Should().Be(personId);
         movement.X.Should().Be(5);
         movement.Y.Should().Be(10);
