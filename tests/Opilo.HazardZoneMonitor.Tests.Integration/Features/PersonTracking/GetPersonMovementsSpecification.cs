@@ -50,11 +50,26 @@ public class GetPersonMovementsSpecification(CustomWebApplicationFactory factory
         movement.RegisteredAt.Should().NotBe(default(DateTime));
     }
 
+    [Fact]
+    public async Task GetPersonMovement_ShouldReturn404NotFound_WhenMovementDoesNotExist()
+    {
+        // Arrange
+        var client = factory.CreateClient();
+        var nonExistentId = Guid.NewGuid();
+
+        // Act
+        var response = await client.GetAsync(
+            new Uri($"/api/v1/person-movements/{nonExistentId}", UriKind.Relative),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     // ReSharper disable NotAccessedPositionalProperty.Local
 #pragma warning disable CA1812 // Instantiated by JSON deserialization
     private sealed record RegistrationResponse(Guid Id);
     private sealed record PersonMovementResponse(Guid PersonId, double X, double Y, DateTime RegisteredAt);
 #pragma warning restore CA1812
     // ReSharper restore NotAccessedPositionalProperty.Local
-
 }
