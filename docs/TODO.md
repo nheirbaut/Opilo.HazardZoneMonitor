@@ -52,6 +52,7 @@ An overview of tasks and features to be implemented.
 ### Endpoints
 
 - [ ] Person tracking endpoints
+  - [ ] Create GET endpoint to fetch a person movement registration by ID (GET /api/v1/person-movements/{personId})
 - [ ] Floor management endpoints
 - [ ] HazardZone management endpoints
 - [ ] Real-time WebSocket updates
