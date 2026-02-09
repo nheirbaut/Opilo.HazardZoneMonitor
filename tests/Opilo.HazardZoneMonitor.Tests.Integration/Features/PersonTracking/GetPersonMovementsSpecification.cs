@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
-using RegisterMovementResponse = Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement.Response;
 using GetMovementResponse = Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetPersonMovements.Response;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
@@ -19,11 +19,11 @@ public class GetPersonMovementsSpecification(CustomWebApplicationFactory factory
         var personId = Guid.NewGuid();
         var command = new Command(personId, X: 1, Y: 1);
         var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, TestContext.Current.CancellationToken);
-        var registration = await postResponse.Content.ReadFromJsonAsync<RegisterMovementResponse>(TestContext.Current.CancellationToken);
+        var registrationId = await ReadIdFromResponse(postResponse);
 
         // Act
         var response = await client.GetAsync(
-            new Uri($"/api/v1/person-movements/{registration!.Id.ToString()}", UriKind.Relative),
+            new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -38,11 +38,11 @@ public class GetPersonMovementsSpecification(CustomWebApplicationFactory factory
         var personId = Guid.NewGuid();
         var command = new Command(personId, X: 5, Y: 10);
         var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, TestContext.Current.CancellationToken);
-        var registration = await postResponse.Content.ReadFromJsonAsync<RegisterMovementResponse>(TestContext.Current.CancellationToken);
+        var registrationId = await ReadIdFromResponse(postResponse);
 
         // Act
         var movement = await client.GetFromJsonAsync<GetMovementResponse>(
-            new Uri($"/api/v1/person-movements/{registration!.Id.ToString()}", UriKind.Relative),
+            new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -67,5 +67,11 @@ public class GetPersonMovementsSpecification(CustomWebApplicationFactory factory
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private static async Task<Guid> ReadIdFromResponse(HttpResponseMessage response)
+    {
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+        return json.GetProperty("id").GetGuid();
     }
 }

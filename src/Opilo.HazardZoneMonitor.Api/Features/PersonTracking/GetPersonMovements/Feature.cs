@@ -1,3 +1,4 @@
+using Ardalis.Result.AspNetCore;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
@@ -17,11 +18,8 @@ public sealed class Feature : IFeature
             IQueryHandler<Query, Response> handler,
             CancellationToken cancellationToken) =>
         {
-            if (!RegisterPersonMovement.Handler.Movements.ContainsKey(id))
-                return Results.NotFound();
-
-            var response = await handler.Handle(new Query(id), cancellationToken);
-            return Results.Ok(response);
+            var result = await handler.Handle(new Query(id), cancellationToken);
+            return result.ToMinimalApiResult();
         });
     }
 }
