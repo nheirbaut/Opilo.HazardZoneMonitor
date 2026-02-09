@@ -20,7 +20,7 @@ public sealed class Feature : IFeature
         {
             var response = await handler.Handle(command, cancellationToken);
             return TypedResults.Created(
-                new Uri($"/api/v1/person-movements/{response.PersonId}", UriKind.Relative),
+                new Uri($"/api/v1/person-movements/{response.Id}", UriKind.Relative),
                 response);
         });
     }

@@ -12,12 +12,12 @@ public sealed class Feature : IFeature
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/v1/person-movements/{personId:guid}", async (
-            Guid personId,
+        app.MapGet("/api/v1/person-movements/{id:guid}", async (
+            Guid id,
             IQueryHandler<Query, Response> handler,
             CancellationToken cancellationToken) =>
         {
-            var response = await handler.Handle(new Query(personId), cancellationToken);
+            var response = await handler.Handle(new Query(id), cancellationToken);
             return Results.Ok(response);
         });
     }

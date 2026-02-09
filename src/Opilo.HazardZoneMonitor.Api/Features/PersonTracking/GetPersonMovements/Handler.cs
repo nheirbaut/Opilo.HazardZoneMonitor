@@ -6,6 +6,7 @@ public sealed class Handler : IQueryHandler<Query, Response>
 {
     public Task<Response> Handle(Query query, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new Response(query.PersonId));
+        var movement = RegisterPersonMovement.Handler.Movements[query.Id];
+        return Task.FromResult(new Response(movement.PersonId, movement.X, movement.Y, movement.RegisteredAt));
     }
 }
