@@ -54,8 +54,8 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
 
         // Assert
         var registeredPersonMovement = await response.Content.ReadFromJsonAsync<RegisteredPersonMovement>(TestContext.Current.CancellationToken);
-        var id = registeredPersonMovement?.Id;
+        registeredPersonMovement.Should().NotBeNull();
         response.Headers.Location.Should().NotBeNull();
-        response.Headers.Location!.ToString().Should().Be($"/api/v1/person-movements/{id}");
+        response.Headers.Location!.ToString().Should().Be($"/api/v1/person-movements/{registeredPersonMovement.Id}");
     }
 }
