@@ -1,5 +1,7 @@
 using System.Globalization;
+using Microsoft.Data.Sqlite;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 using Serilog;
@@ -25,6 +27,19 @@ try
     builder.Services
         .AddOptions<FloorOptions>()
         .BindConfiguration(nameof(FloorOptions));
+
+    string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? "Data Source=hazardzone.db";
+
+    builder.Services.AddScoped(_ =>
+    {
+        SqliteConnection connection = new(connectionString);
+        connection.Open();
+        return connection;
+    });
+    builder.Services.AddScoped<IMovementsRepository, MovementsRepository>();
+
+    DatabaseInitializer.EnsurePersonMovementsTable(connectionString);
 
     builder.Services.AddFeaturesFromAssembly(typeof(IApiMarker).Assembly);
 
