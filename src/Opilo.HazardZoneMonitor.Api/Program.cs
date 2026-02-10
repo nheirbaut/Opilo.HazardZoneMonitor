@@ -26,7 +26,7 @@ try
         .AddOptions<FloorOptions>()
         .BindConfiguration(nameof(FloorOptions));
 
-    builder.Services.AddFeaturesFromAssembly(typeof(IApiMarker).Assembly);
+    builder.Services.AddFeaturesFromAssembly(typeof(IApiMarker).Assembly, builder.Configuration);
 
     var app = builder.Build();
 

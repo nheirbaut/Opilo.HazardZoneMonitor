@@ -3,7 +3,7 @@ using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration;
 
-public sealed class ApiStartupTests(CustomWebApplicationFactory factory)
+public sealed class ApiStartupSpecification(CustomWebApplicationFactory factory)
     : IClassFixture<CustomWebApplicationFactory>
 {
     [Fact]

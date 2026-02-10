@@ -6,6 +6,7 @@
 - **Strict TDD.** Do not generate production code unless explicitly requested. Follow `.copilot/tests-only-agent.prompt.md` for test generation.
 - **No MediatR, no SignalR, no AutoMapper or similar object-mapping libraries (e.g., Mapster).** These are explicitly banned.
 - **Always load the `solid` skill** when delegating code tasks. Use `load_skills=["solid"]` for every `task()` call that writes, refactors, reviews, or architects code.
+- **GitHub issues must be functional, not technical.** When creating issues, describe the desired behavior and the problem from a user/business perspective. Do not prescribe implementation details (specific technologies, libraries, database engines, architectural patterns, etc.) unless the user explicitly requests it.
 
 ## Project Overview
 
@@ -133,7 +134,7 @@ All projects use: Meziantou.Analyzer, Microsoft.CodeAnalysis.NetAnalyzers (lates
 - **Framework**: xUnit v3 (uses `xunit.v3` package, NOT xunit v2)
 - **Assertions**: AwesomeAssertions (NOT FluentAssertions) — globally imported
 - **Mocking**: NSubstitute for API tests; hand-written fakes (`FakeClock`, `FakeTimer`, `FakeTimerFactory`) for domain tests
-- **Style**: Arrange-Act-Assert with `// Arrange`, `// Act`, `// Assert` comments
+- **Style**: Arrange-Act-Assert with bare `// Arrange`, `// Act`, `// Assert` comments — no extra descriptions after them, the code should speak for itself
 - **Test class naming**: `{ClassUnderTest}Tests` for unit tests, `{Feature}Specification` for integration tests
 - **Test class structure**: `sealed class` implementing `IDisposable` when SUT needs disposal
 - **Builder pattern**: `HazardZoneBuilder.Create().WithState(...).Build()` for complex test setup

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace Opilo.HazardZoneMonitor.Api.Shared.Features;
 
@@ -6,12 +6,14 @@ public static class FeatureExtensions
 {
     public static IServiceCollection AddFeaturesFromAssembly(
         this IServiceCollection services,
-        Assembly assembly)
+        Assembly assembly,
+        IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(assembly);
+        ArgumentNullException.ThrowIfNull(configuration);
 
-        assembly.InvokeFeatureAction(feature => feature.AddServices(services));
+        assembly.InvokeFeatureAction(feature => feature.AddServices(services, configuration));
 
         return services;
     }
