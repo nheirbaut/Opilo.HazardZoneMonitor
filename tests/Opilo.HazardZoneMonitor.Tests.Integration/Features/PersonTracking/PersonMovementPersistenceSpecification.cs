@@ -16,33 +16,43 @@ public sealed class PersonMovementPersistenceSpecification
             Path.GetTempPath(),
             $"hazardzone_persistence_test_{Guid.NewGuid():N}.db");
 
-        await using (CustomWebApplicationFactory firstFactory = new(sharedDatabasePath))
+        try
         {
-            HttpClient client = firstFactory.CreateClient();
+            await using (CustomWebApplicationFactory firstFactory = new(sharedDatabasePath))
+            {
+                HttpClient client = firstFactory.CreateClient();
 
-            HttpResponseMessage postResponse = await client.PostAsJsonAsync(
-                "/api/v1/person-movements",
-                new { PersonId = Guid.NewGuid(), X = 5.0, Y = 10.0 },
+                HttpResponseMessage postResponse = await client.PostAsJsonAsync(
+                    "/api/v1/person-movements",
+                    new { PersonId = Guid.NewGuid(), X = 5.0, Y = 10.0 },
+                    TestContext.Current.CancellationToken);
+
+                postResponse.EnsureSuccessStatusCode();
+
+                RegisteredPersonMovement? movementRegistration = await postResponse.Content
+                    .ReadFromJsonAsync<RegisteredPersonMovement>(TestContext.Current.CancellationToken);
+
+                movementRegistration.Should().NotBeNull();
+                registrationId = movementRegistration.Id;
+            }
+
+            // Act
+            await using CustomWebApplicationFactory secondFactory = new(sharedDatabasePath);
+            HttpClient freshClient = secondFactory.CreateClient();
+
+            HttpResponseMessage response = await freshClient.GetAsync(
+                new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),
                 TestContext.Current.CancellationToken);
 
-            postResponse.EnsureSuccessStatusCode();
-
-            RegisteredPersonMovement? movementRegistration = await postResponse.Content
-                .ReadFromJsonAsync<RegisteredPersonMovement>(TestContext.Current.CancellationToken);
-
-            movementRegistration.Should().NotBeNull();
-            registrationId = movementRegistration.Id;
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
-
-        // Act
-        await using CustomWebApplicationFactory secondFactory = new(sharedDatabasePath);
-        HttpClient freshClient = secondFactory.CreateClient();
-
-        HttpResponseMessage response = await freshClient.GetAsync(
-            new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),
-            TestContext.Current.CancellationToken);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        finally
+        {
+            if (File.Exists(sharedDatabasePath))
+            {
+                File.Delete(sharedDatabasePath);
+            }
+        }
     }
 }
