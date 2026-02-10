@@ -25,10 +25,13 @@ public sealed class PersonMovementPersistenceSpecification
                 new { PersonId = Guid.NewGuid(), X = 5.0, Y = 10.0 },
                 TestContext.Current.CancellationToken);
 
+            postResponse.EnsureSuccessStatusCode();
+
             RegisteredPersonMovement? movementRegistration = await postResponse.Content
                 .ReadFromJsonAsync<RegisteredPersonMovement>(TestContext.Current.CancellationToken);
 
-            registrationId = movementRegistration!.Id;
+            movementRegistration.Should().NotBeNull();
+            registrationId = movementRegistration.Id;
         }
 
         // Act
