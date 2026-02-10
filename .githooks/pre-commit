@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Pre-commit hook: reject staged files that contain a UTF-8 BOM.
+# The .editorconfig specifies charset=utf-8 (without BOM) for all files.
+#
+
+bom_files=""
+
+for file in $(git diff --cached --name-only --diff-filter=ACM); do
+    # Read the first 3 bytes and check for the UTF-8 BOM (EF BB BF)
+    head_bytes=$(head -c 3 "$file" | xxd -p 2>/dev/null)
+    if [ "$head_bytes" = "efbbbf" ]; then
+        bom_files="$bom_files  $file\n"
+    fi
+done
+
+if [ -n "$bom_files" ]; then
+    echo ""
+    echo "ERROR: The following staged files contain a UTF-8 BOM (byte order mark)."
+    echo "The .editorconfig requires charset=utf-8 (without BOM)."
+    echo ""
+    printf "%b" "$bom_files"
+    echo ""
+    echo "Fix: re-save the files as UTF-8 without BOM, then stage again."
+    exit 1
+fi

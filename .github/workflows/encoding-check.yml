@@ -1,0 +1,31 @@
+name: Encoding Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check-bom:
+    name: Reject UTF-8 BOM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for UTF-8 BOM in tracked files
+        run: |
+          bom_files=$(git ls-files -z | xargs -0 -I{} sh -c 'head -c 3 "{}" | xxd -p' | paste -d' ' - <(git ls-files) | grep '^efbbbf ' | cut -d' ' -f2-)
+
+          if [ -n "$bom_files" ]; then
+            echo ""
+            echo "::error::Files with UTF-8 BOM detected. The .editorconfig requires charset=utf-8 (without BOM)."
+            echo ""
+            echo "$bom_files" | while read -r f; do
+              echo "  $f"
+            done
+            echo ""
+            echo "Fix: re-save these files as UTF-8 without BOM."
+            exit 1
+          fi
+
+          echo "All files are UTF-8 without BOM."

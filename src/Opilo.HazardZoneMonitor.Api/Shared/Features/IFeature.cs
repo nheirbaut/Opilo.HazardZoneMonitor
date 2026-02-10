@@ -1,4 +1,4 @@
-﻿namespace Opilo.HazardZoneMonitor.Api.Shared.Features;
+namespace Opilo.HazardZoneMonitor.Api.Shared.Features;
 
 public interface IFeature
 {

@@ -1,3 +1,3 @@
-﻿namespace Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
+namespace Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 
 public interface IResponse;
