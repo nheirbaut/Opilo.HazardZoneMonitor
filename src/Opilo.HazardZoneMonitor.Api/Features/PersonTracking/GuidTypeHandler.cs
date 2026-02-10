@@ -7,7 +7,7 @@ internal sealed class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
 {
     public override Guid Parse(object value)
     {
-        return Guid.Parse((string)value);
+        return Guid.Parse(value as string ?? value.ToString() ?? string.Empty);
     }
 
     public override void SetValue(IDbDataParameter parameter, Guid value)

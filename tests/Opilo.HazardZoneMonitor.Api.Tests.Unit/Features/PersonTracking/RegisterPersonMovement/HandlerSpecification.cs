@@ -21,10 +21,10 @@ public sealed class HandlerSpecification
     {
         // Arrange
         Guid personId = Guid.NewGuid();
-        var x = 1.0;
-        var y = 2.0;
-        var command = new Command(personId, x, y);
-        var expectedMovement = new RegisteredPersonMovement()
+        double x = 1.0;
+        double y = 2.0;
+        Command command = new(personId, x, y);
+        RegisteredPersonMovement expectedMovement = new()
         {
             PersonId = personId,
             X = x,

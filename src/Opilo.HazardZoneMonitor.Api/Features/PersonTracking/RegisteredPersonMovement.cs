@@ -2,7 +2,7 @@ using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 
-public class RegisteredPersonMovement : IResponse
+public sealed class RegisteredPersonMovement : IResponse
 {
     public Guid Id { get; init; } = Guid.CreateVersion7();
     public required Guid PersonId { get; init; }

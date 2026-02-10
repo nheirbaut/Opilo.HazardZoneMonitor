@@ -7,9 +7,17 @@ namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>
 {
-    private static readonly string s_databasePath = Path.Combine(
-        Path.GetTempPath(),
-        $"hazardzone_test_{Guid.NewGuid():N}.db");
+    private readonly string _databasePath;
+
+    public CustomWebApplicationFactory()
+        : this(Path.Combine(Path.GetTempPath(), $"hazardzone_test_{Guid.NewGuid():N}.db"))
+    {
+    }
+
+    internal CustomWebApplicationFactory(string databasePath)
+    {
+        _databasePath = databasePath;
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -21,7 +29,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMark
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.Ordinal)
             {
-                ["ConnectionStrings:DefaultConnection"] = $"Data Source={s_databasePath}",
+                ["ConnectionStrings:DefaultConnection"] = $"Data Source={_databasePath}",
             });
         });
     }

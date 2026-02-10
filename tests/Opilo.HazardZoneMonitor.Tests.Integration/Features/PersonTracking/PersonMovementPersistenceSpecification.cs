@@ -12,8 +12,11 @@ public sealed class PersonMovementPersistenceSpecification
     {
         // Arrange
         Guid registrationId;
+        string sharedDatabasePath = Path.Combine(
+            Path.GetTempPath(),
+            $"hazardzone_persistence_test_{Guid.NewGuid():N}.db");
 
-        await using (CustomWebApplicationFactory firstFactory = new())
+        await using (CustomWebApplicationFactory firstFactory = new(sharedDatabasePath))
         {
             HttpClient client = firstFactory.CreateClient();
 
@@ -29,8 +32,8 @@ public sealed class PersonMovementPersistenceSpecification
         }
 
         // Act
-        await using CustomWebApplicationFactory secondFactory = new();
-        var freshClient = secondFactory.CreateClient();
+        await using CustomWebApplicationFactory secondFactory = new(sharedDatabasePath);
+        HttpClient freshClient = secondFactory.CreateClient();
 
         HttpResponseMessage response = await freshClient.GetAsync(
             new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),

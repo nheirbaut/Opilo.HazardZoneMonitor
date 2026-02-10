@@ -9,8 +9,6 @@ internal static class DatabaseInitializer
     {
         ArgumentNullException.ThrowIfNull(connectionString);
 
-        SqlMapper.AddTypeHandler(new GuidTypeHandler());
-
         using SqliteConnection connection = new(connectionString);
         connection.Open();
 

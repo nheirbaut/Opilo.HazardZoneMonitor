@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.Data.Sqlite;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
@@ -10,10 +11,21 @@ public sealed class Feature : IFeature
         string connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "Data Source=hazardzone.db";
 
+        SqlMapper.AddTypeHandler(new GuidTypeHandler());
+
         services.AddScoped(_ =>
         {
             SqliteConnection connection = new(connectionString);
-            connection.Open();
+            try
+            {
+                connection.Open();
+            }
+            catch
+            {
+                connection.Dispose();
+                throw;
+            }
+
             return connection;
         });
         services.AddScoped<IMovementsRepository, MovementsRepository>();
