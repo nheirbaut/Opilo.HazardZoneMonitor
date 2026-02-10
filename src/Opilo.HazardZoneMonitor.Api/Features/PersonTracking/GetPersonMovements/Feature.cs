@@ -6,7 +6,7 @@ namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetPersonMovements
 
 public sealed class Feature : IFeature
 {
-    public void AddServices(IServiceCollection services)
+    public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IQueryHandler<Query, RegisteredPersonMovement>, Handler>();
     }
