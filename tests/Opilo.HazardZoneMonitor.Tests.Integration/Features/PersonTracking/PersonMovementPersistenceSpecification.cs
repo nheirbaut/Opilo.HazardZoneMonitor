@@ -7,7 +7,7 @@ namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
 
 public sealed class PersonMovementPersistenceSpecification
 {
-    [Fact(Skip = "Movements are stored in a static field, so they survive across factory instances within the same process. This test will become meaningful once persistence is implemented (see issue #22).")]
+    [Fact]
     public async Task GetPersonMovement_ShouldReturnMovement_WhenApplicationIsRestartedAfterRegistration()
     {
         // Arrange
@@ -30,7 +30,7 @@ public sealed class PersonMovementPersistenceSpecification
 
         // Act
         await using CustomWebApplicationFactory secondFactory = new();
-        HttpClient freshClient = secondFactory.CreateClient();
+        var freshClient = secondFactory.CreateClient();
 
         HttpResponseMessage response = await freshClient.GetAsync(
             new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),

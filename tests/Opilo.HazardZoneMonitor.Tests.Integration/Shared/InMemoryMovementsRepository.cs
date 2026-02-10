@@ -6,7 +6,7 @@ namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 public sealed class InMemoryMovementsRepository : IMovementsRepository
 {
-    private static readonly ConcurrentDictionary<Guid, RegisteredPersonMovement> s_movements = new();
+    private readonly ConcurrentDictionary<Guid, RegisteredPersonMovement> _movements = new();
 
     public Task<Result<RegisteredPersonMovement>> RegisterMovementAsync(Guid personId, double x, double y, DateTime registeredAt, CancellationToken cancellationToken)
     {
@@ -18,13 +18,13 @@ public sealed class InMemoryMovementsRepository : IMovementsRepository
             RegisteredAt = registeredAt,
         };
 
-        s_movements[movement.Id] = movement;
+        _movements[movement.Id] = movement;
         return Task.FromResult(Result.Created(movement));
     }
 
     public Task<Result<RegisteredPersonMovement>> GetMovementByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        if (s_movements.TryGetValue(id, out RegisteredPersonMovement? movement))
+        if (_movements.TryGetValue(id, out RegisteredPersonMovement? movement))
         {
             return Task.FromResult(Result.Success(movement));
         }
