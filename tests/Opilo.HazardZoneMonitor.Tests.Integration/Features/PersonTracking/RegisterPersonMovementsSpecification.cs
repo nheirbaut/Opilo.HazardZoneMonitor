@@ -37,8 +37,8 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
 
         // Assert
         var registeredPersonMovement = await response.Content.ReadFromJsonAsync<RegisteredPersonMovement>(TestContext.Current.CancellationToken);
-        var registeredAt = registeredPersonMovement?.RegisteredAt;
-        registeredAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        registeredPersonMovement.Should().NotBeNull();
+        registeredPersonMovement.RegisteredAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
