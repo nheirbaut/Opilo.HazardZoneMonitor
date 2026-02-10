@@ -9,14 +9,14 @@ public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services)
     {
-        services.AddScoped<ICommandHandler<Command, Response>, Handler>();
+        services.AddScoped<ICommandHandler<Command, RegisteredPersonMovement>, Handler>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/v1/person-movements", async (
             [FromBody] Command command,
-            ICommandHandler<Command, Response> handler,
+            ICommandHandler<Command, RegisteredPersonMovement> handler,
             CancellationToken cancellationToken) =>
         {
             var result = await handler.Handle(command, cancellationToken);

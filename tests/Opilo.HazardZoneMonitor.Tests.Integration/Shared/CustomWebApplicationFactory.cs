@@ -1,6 +1,8 @@
-﻿﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Opilo.HazardZoneMonitor.Api;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
@@ -11,5 +13,10 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMark
         ArgumentNullException.ThrowIfNull(builder);
 
         builder.UseEnvironment("Development");
+
+        builder.ConfigureServices(services =>
+        {
+            services.AddSingleton<IMovementsRepository, InMemoryMovementsRepository>();
+        });
     }
 }

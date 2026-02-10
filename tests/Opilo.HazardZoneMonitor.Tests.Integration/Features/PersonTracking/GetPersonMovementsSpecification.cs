@@ -1,10 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
-
-using GetMovementResponse = Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetPersonMovements.Response;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
 
@@ -41,7 +40,7 @@ public class GetPersonMovementsSpecification(CustomWebApplicationFactory factory
         var registrationId = await ReadIdFromResponse(postResponse);
 
         // Act
-        var movement = await client.GetFromJsonAsync<GetMovementResponse>(
+        var movement = await client.GetFromJsonAsync<RegisteredPersonMovement>(
             new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),
             TestContext.Current.CancellationToken);
 

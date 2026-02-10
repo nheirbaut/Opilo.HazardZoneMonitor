@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
@@ -22,10 +22,10 @@ public sealed class PersonMovementPersistenceSpecification
                 new { PersonId = Guid.NewGuid(), X = 5.0, Y = 10.0 },
                 TestContext.Current.CancellationToken);
 
-            JsonElement json = await postResponse.Content
-                .ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+            RegisteredPersonMovement? movementRegistration = await postResponse.Content
+                .ReadFromJsonAsync<RegisteredPersonMovement>(TestContext.Current.CancellationToken);
 
-            registrationId = json.GetProperty("id").GetGuid();
+            registrationId = movementRegistration!.Id;
         }
 
         // Act

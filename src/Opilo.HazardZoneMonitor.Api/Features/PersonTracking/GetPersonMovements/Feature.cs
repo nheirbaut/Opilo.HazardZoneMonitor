@@ -8,14 +8,14 @@ public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services)
     {
-        services.AddScoped<IQueryHandler<Query, Response>, Handler>();
+        services.AddScoped<IQueryHandler<Query, RegisteredPersonMovement>, Handler>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
         app.MapGet("/api/v1/person-movements/{id:guid}", async (
             Guid id,
-            IQueryHandler<Query, Response> handler,
+            IQueryHandler<Query, RegisteredPersonMovement> handler,
             CancellationToken cancellationToken) =>
         {
             var result = await handler.Handle(new Query(id), cancellationToken);
