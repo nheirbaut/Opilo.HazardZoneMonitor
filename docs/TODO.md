@@ -51,7 +51,6 @@ An overview of tasks and features to be implemented.
 
 ## API
 
-- [ ] Wire up OpenAPI/Scalar: `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore` are referenced in the csproj but not called in `Program.cs`. Either integrate or remove the dead dependencies.
 - [ ] Add health check endpoint (`/health`) for container/orchestration readiness (Kubernetes/KubeEdge).
 - [ ] Add API versioning infrastructure (endpoints use `/api/v1/` prefix but no actual versioning strategy exists).
 - [ ] Add structured error responses (RFC 9457 Problem Details) via global error handling middleware.
