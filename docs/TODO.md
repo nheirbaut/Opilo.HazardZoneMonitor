@@ -21,7 +21,6 @@ An overview of tasks and features to be implemented.
 ## Architecture
 
 - [ ] Wire the API layer to the domain model. Currently `RegisterPersonMovement` writes directly to SQLite via Dapper and never touches the domain (`Floor`, `Person`, `HazardZone`). The rich domain model is unreachable from the API. All feature work (hazard zone endpoints, notifications, floor management) is blocked by this gap.
-- [ ] Use `IClock` abstraction in API handlers instead of `DateTime.UtcNow` directly (consistency with domain layer, testability).
 
 ## Features
 
