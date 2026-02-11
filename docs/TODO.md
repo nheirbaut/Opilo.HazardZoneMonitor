@@ -58,6 +58,10 @@ An overview of tasks and features to be implemented.
 - [ ] Add request validation at the API boundary (commands accept arbitrary values with no validation before hitting the handler).
 - [ ] Add correlation/request ID tracking for traceability across logs.
 
+### Root
+
+- [ ] Determine available links when calling "/" dynamically so that they are not hardcoded.
+
 ### Endpoints
 
 - [ ] Floor management endpoints (only `GET /api/v1/floors` exists, no CRUD).
