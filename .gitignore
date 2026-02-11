@@ -631,3 +631,6 @@ FodyWeavers.xsd
 
 # Windows NUL device artifact
 nul
+
+# SQLite database
+hazardzone.db
