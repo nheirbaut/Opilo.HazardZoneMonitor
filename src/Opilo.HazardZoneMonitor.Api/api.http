@@ -5,3 +5,16 @@ GET {{baseUrl}}/
 
 ### Get all floors
 GET {{baseUrl}}/api/v1/floors
+
+### Register a person movement
+POST {{baseUrl}}/api/v1/person-movements
+Content-Type: application/json
+
+{
+  "personId": "{{$guid}}",
+  "x": 1.5,
+  "y": 2.3
+}
+
+### Get a person movement by ID
+GET {{baseUrl}}/api/v1/person-movements/{{$guid}}
