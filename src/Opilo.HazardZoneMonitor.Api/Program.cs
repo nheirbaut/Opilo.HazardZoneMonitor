@@ -1,9 +1,10 @@
 using System.Globalization;
-using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api;
+using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
+using Scalar.AspNetCore;
 using Serilog;
 
 try
@@ -30,11 +31,16 @@ try
 
     builder.Services.AddSingleton<IClock, SystemClock>();
 
+    builder.Services.AddOpenApi();
+
     builder.Services.AddFeaturesFromAssembly(typeof(IApiMarker).Assembly, builder.Configuration);
 
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
+
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 
     app.MapGet("/", () => Results.Json(new
     {
