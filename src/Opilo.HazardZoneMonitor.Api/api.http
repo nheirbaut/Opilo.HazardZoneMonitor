@@ -18,3 +18,9 @@ Content-Type: application/json
 
 ### Get a person movement by ID
 GET {{baseUrl}}/api/v1/person-movements/{{$guid}}
+
+### OpenAPI document
+GET {{baseUrl}}/openapi/v1.json
+
+### Scalar interactive API documentation
+GET {{baseUrl}}/scalar/v1
