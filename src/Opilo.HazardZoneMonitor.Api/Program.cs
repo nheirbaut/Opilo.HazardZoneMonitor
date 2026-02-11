@@ -36,7 +36,16 @@ try
 
     app.UseSerilogRequestLogging();
 
-    app.MapGet("/", () => "HazardZone Monitor API");
+    app.MapGet("/", () => Results.Json(new
+    {
+        Name = "HazardZone Monitor API",
+        Version = "v1",
+        Links = new[]
+        {
+            new { Rel = "floors", Href = "/api/v1/floors" },
+            new { Rel = "person-movements", Href = "/api/v1/person-movements" },
+        },
+    }));
     app.MapFeaturesFromAssembly(typeof(IApiMarker).Assembly);
 
     await app.RunAsync();
