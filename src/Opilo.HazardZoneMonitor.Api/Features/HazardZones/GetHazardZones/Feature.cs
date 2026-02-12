@@ -13,7 +13,7 @@ public sealed class Feature: IFeature
     {
         app.MapGet("api/v1/hazard-zones", () =>
         {
-            return TypedResults.Ok();
+            return TypedResults.Ok(new Response([]));
         });
     }
 }
