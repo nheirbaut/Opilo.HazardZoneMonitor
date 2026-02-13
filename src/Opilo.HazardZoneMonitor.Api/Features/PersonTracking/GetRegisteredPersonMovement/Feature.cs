@@ -2,7 +2,7 @@ using Ardalis.Result.AspNetCore;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetPersonMovements;
+namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 
 public sealed class Feature : IFeature
 {

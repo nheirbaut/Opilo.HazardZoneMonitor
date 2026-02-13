@@ -39,7 +39,7 @@ src/
 │   │   ├── Floors/                          # Floor configuration and queries
 │   │   └── PersonTracking/                  # Person movement endpoints
 │   │       ├── RegisterPersonMovement/      # Feature.cs, Handler.cs, Command.cs, Response.cs
-│   │       └── GetPersonMovements/          # Feature.cs, Handler.cs, Query.cs, Response.cs
+│   │       └── GetRegisteredPersonMovement/  # Feature.cs, Handler.cs, Query.cs
 │   └── Shared/
 │       ├── Cqrs/                            # ICommandHandler, IQueryHandler, ICommand, IQuery
 │       └── Features/                        # IFeature, auto-discovery
