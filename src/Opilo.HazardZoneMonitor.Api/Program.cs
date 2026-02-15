@@ -35,29 +35,14 @@ try
         .BindConfiguration(nameof(HazardZoneOptions));
 
     builder.Services.AddSingleton<IClock, SystemClock>();
-
     builder.Services.AddOpenApi();
-
     builder.Services.AddFeaturesFromAssembly(typeof(IApiMarker).Assembly, builder.Configuration);
 
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
-
     app.MapOpenApi();
     app.MapScalarApiReference();
-
-    app.MapGet("/", () => Results.Json(new
-    {
-        Name = "HazardZone Monitor API",
-        Version = "v1",
-        Links = new[]
-        {
-            new { Rel = "floors", Href = "/api/v1/floors" },
-            new { Rel = "person-movements", Href = "/api/v1/person-movements" },
-            new { Rel = "hazard-zones", Href = "/api/v1/hazard-zones" },
-        },
-    }));
     app.MapFeaturesFromAssembly(typeof(IApiMarker).Assembly);
 
     await app.RunAsync();
