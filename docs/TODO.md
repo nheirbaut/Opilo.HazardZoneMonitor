@@ -69,7 +69,6 @@ An overview of tasks and features to be implemented.
 
 ## Tests
 
-- [ ] Add missing API unit tests for `GetRegisteredPersonMovement`, `GetFloors`, and `GetHazardZones` handlers (only `RegisterPersonMovement` has a handler unit test).
 - [ ] Add performance benchmarks
 - [ ] Add load testing scenarios
 
