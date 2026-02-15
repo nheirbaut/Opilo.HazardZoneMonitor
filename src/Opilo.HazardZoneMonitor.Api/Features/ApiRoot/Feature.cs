@@ -19,12 +19,14 @@ public sealed class Feature : IFeature
             Version = "v1",
             Links = endpointDataSource.Endpoints
                 .OfType<RouteEndpoint>()
-                .Where(endpoint => endpoint.RoutePattern.RawText != null)
-                .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith(ApiRoutePrefix, StringComparison.Ordinal))
-                .Select(endpoint => new
+                .Select(endpoint => endpoint.RoutePattern.RawText)
+                .Where(text => text is not null)
+                .Select(text => text!)
+                .Where(text => text.StartsWith(ApiRoutePrefix, StringComparison.Ordinal))
+                .Select(text => new
                 {
-                    Rel = endpoint.RoutePattern.RawText![ApiRoutePrefix.Length..],
-                    Href = endpoint.RoutePattern.RawText!,
+                    Rel = text[ApiRoutePrefix.Length..],
+                    Href = text,
                 })
                 .OrderBy(link => link.Rel, StringComparer.Ordinal)
                 .ToArray(),
