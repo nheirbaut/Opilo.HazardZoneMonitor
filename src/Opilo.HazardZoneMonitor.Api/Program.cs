@@ -8,6 +8,15 @@ using Opilo.HazardZoneMonitor.Domain.Shared.Time;
 using Scalar.AspNetCore;
 using Serilog;
 
+static string ExtractRelFromRoute(string route)
+{
+    const string prefix = "/api/v1/";
+    string rel = route.StartsWith(prefix, StringComparison.Ordinal)
+        ? route.Substring(prefix.Length)
+        : route;
+    return rel;
+}
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);
@@ -47,18 +56,24 @@ try
     app.MapOpenApi();
     app.MapScalarApiReference();
 
-    app.MapGet("/", () => Results.Json(new
+    app.MapFeaturesFromAssembly(typeof(IApiMarker).Assembly);
+
+    app.MapGet("/", (EndpointDataSource endpointDataSource) => Results.Json(new
     {
         Name = "HazardZone Monitor API",
         Version = "v1",
-        Links = new[]
-        {
-            new { Rel = "floors", Href = "/api/v1/floors" },
-            new { Rel = "person-movements", Href = "/api/v1/person-movements" },
-            new { Rel = "hazard-zones", Href = "/api/v1/hazard-zones" },
-        },
+        Links = endpointDataSource.Endpoints
+            .OfType<RouteEndpoint>()
+            .Where(endpoint => endpoint.RoutePattern.RawText != null)
+            .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith("/api/v1/", StringComparison.Ordinal))
+            .Select(endpoint => new
+            {
+                Rel = ExtractRelFromRoute(endpoint.RoutePattern.RawText!),
+                Href = endpoint.RoutePattern.RawText!,
+            })
+            .OrderBy(link => link.Rel, StringComparer.Ordinal)
+            .ToArray(),
     }));
-    app.MapFeaturesFromAssembly(typeof(IApiMarker).Assembly);
 
     await app.RunAsync();
 }
