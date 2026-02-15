@@ -1,3 +1,5 @@
+using Ardalis.GuardClauses;
+
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 
 public sealed class SiteTests
@@ -17,5 +19,6 @@ public sealed class Site
 {
     public Site(string name)
     {
+        Guard.Against.NullOrWhiteSpace(name);
     }
 }
