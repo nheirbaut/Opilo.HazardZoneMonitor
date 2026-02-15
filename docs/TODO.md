@@ -64,12 +64,12 @@ An overview of tasks and features to be implemented.
 ### Endpoints
 
 - [ ] Floor management endpoints (only `GET /api/v1/floors` exists, no CRUD).
-- [ ] HazardZone management endpoints (none exist).
+- [ ] HazardZone management endpoints (`GET /api/v1/hazard-zones` exists, no CRUD).
 - [ ] Real-time WebSocket updates
 
 ## Tests
 
-- [ ] Add missing API unit tests for `GetRegisteredPersonMovement` and `GetFloors` handlers (only `RegisterPersonMovement` has a handler unit test).
+- [ ] Add missing API unit tests for `GetRegisteredPersonMovement`, `GetFloors`, and `GetHazardZones` handlers (only `RegisterPersonMovement` has a handler unit test).
 - [ ] Add performance benchmarks
 - [ ] Add load testing scenarios
 

@@ -37,6 +37,8 @@ src/
 ├── Opilo.HazardZoneMonitor.Api/             # Minimal API, vertical slices, CQRS handlers
 │   ├── Features/
 │   │   ├── Floors/                          # Floor configuration and queries
+│   │   ├── HazardZones/                     # Hazard zone configuration and queries
+│   │   │   └── GetHazardZones/              # Feature.cs, Handler.cs, Query.cs, Response.cs
 │   │   └── PersonTracking/                  # Person movement endpoints
 │   │       ├── RegisterPersonMovement/      # Feature.cs, Handler.cs, Command.cs, Response.cs
 │   │       └── GetRegisteredPersonMovement/  # Feature.cs, Handler.cs, Query.cs
