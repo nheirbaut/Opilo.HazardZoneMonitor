@@ -139,6 +139,7 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
             .Where(route => !string.IsNullOrWhiteSpace(route))
             .Select(route => route!)
             .Where(route => route.StartsWith("/api/v1/", StringComparison.Ordinal))
+            .Where(route => !route.Contains('{', StringComparison.Ordinal))
             .ToHashSet(StringComparer.Ordinal);
 
         // Act

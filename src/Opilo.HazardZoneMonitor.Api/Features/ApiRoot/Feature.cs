@@ -23,6 +23,7 @@ public sealed class Feature : IFeature
                 .Where(text => text is not null)
                 .Select(text => text!)
                 .Where(text => text.StartsWith(ApiRoutePrefix, StringComparison.Ordinal))
+                .Where(text => !text.Contains('{', StringComparison.Ordinal))
                 .Select(text => new
                 {
                     Rel = text[ApiRoutePrefix.Length..],
