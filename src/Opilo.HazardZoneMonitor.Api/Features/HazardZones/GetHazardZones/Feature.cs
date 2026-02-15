@@ -13,7 +13,7 @@ public sealed class Feature : IFeature
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/v1/hazard-zones", async (
+        app.MapGet("/api/v1/hazard-zones", async (
             IQueryHandler<Query, Response> handler,
             CancellationToken cancellationToken) =>
         {
