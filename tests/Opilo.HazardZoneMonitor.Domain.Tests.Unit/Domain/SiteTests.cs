@@ -1,4 +1,5 @@
 using Ardalis.GuardClauses;
+using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 
@@ -10,6 +11,15 @@ public sealed class SiteTests
         // Act & Assert
         var act = () => new Site(null!);
         act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Theory]
+    [ClassData(typeof(InvalidNames))]
+    public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
+    {
+        // Act & Assert
+        var act = () => new Site(invalidName);
+        act.Should().Throw<ArgumentException>();
     }
 }
 
