@@ -59,7 +59,7 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
                     new(20, 35)
                 ])
         ];
-        var hazardZoneOptions = new HazardZoneOptions(expectedHazardZones);
+        var hazardZoneOptions = new HazardZoneOptions { HazardZones = expectedHazardZones };
 
         await using var customFactory = factory.WithWebHostBuilder(builder =>
         {

@@ -1,6 +1,7 @@
 using System.Globalization;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
@@ -28,6 +29,10 @@ try
     builder.Services
         .AddOptions<FloorOptions>()
         .BindConfiguration(nameof(FloorOptions));
+
+    builder.Services
+        .AddOptions<HazardZoneOptions>()
+        .BindConfiguration(nameof(HazardZoneOptions));
 
     builder.Services.AddSingleton<IClock, SystemClock>();
 
