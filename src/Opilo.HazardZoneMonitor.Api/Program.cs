@@ -1,6 +1,7 @@
 using System.Globalization;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
@@ -29,6 +30,10 @@ try
         .AddOptions<FloorOptions>()
         .BindConfiguration(nameof(FloorOptions));
 
+    builder.Services
+        .AddOptions<HazardZoneOptions>()
+        .BindConfiguration(nameof(HazardZoneOptions));
+
     builder.Services.AddSingleton<IClock, SystemClock>();
 
     builder.Services.AddOpenApi();
@@ -50,6 +55,7 @@ try
         {
             new { Rel = "floors", Href = "/api/v1/floors" },
             new { Rel = "person-movements", Href = "/api/v1/person-movements" },
+            new { Rel = "hazard-zones", Href = "/api/v1/hazard-zones" },
         },
     }));
     app.MapFeaturesFromAssembly(typeof(IApiMarker).Assembly);
