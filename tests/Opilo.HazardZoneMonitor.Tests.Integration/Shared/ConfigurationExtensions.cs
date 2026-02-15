@@ -1,6 +1,7 @@
 using System.Globalization;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
@@ -25,8 +26,8 @@ public static class ConfigurationExtensions
                 var point = floor.Outline[pointIndex];
                 var pointKey = $"{floorKey}:{nameof(FloorConfiguration.Outline)}:{pointIndex}";
 
-                dictionary[$"{pointKey}:{nameof(FloorPointConfiguration.X)}"] = point.X.ToString(CultureInfo.InvariantCulture);
-                dictionary[$"{pointKey}:{nameof(FloorPointConfiguration.Y)}"] = point.Y.ToString(CultureInfo.InvariantCulture);
+                dictionary[$"{pointKey}:{nameof(PointConfiguration.X)}"] = point.X.ToString(CultureInfo.InvariantCulture);
+                dictionary[$"{pointKey}:{nameof(PointConfiguration.Y)}"] = point.Y.ToString(CultureInfo.InvariantCulture);
             }
         }
 
@@ -52,8 +53,8 @@ public static class ConfigurationExtensions
                 var point = hazardZone.Outline[pointIndex];
                 var pointKey = $"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Outline)}:{pointIndex}";
 
-                dictionary[$"{pointKey}:{nameof(HazardZonePointConfiguration.X)}"] = point.X.ToString(CultureInfo.InvariantCulture);
-                dictionary[$"{pointKey}:{nameof(HazardZonePointConfiguration.Y)}"] = point.Y.ToString(CultureInfo.InvariantCulture);
+                dictionary[$"{pointKey}:{nameof(PointConfiguration.X)}"] = point.X.ToString(CultureInfo.InvariantCulture);
+                dictionary[$"{pointKey}:{nameof(PointConfiguration.Y)}"] = point.Y.ToString(CultureInfo.InvariantCulture);
             }
         }
 
