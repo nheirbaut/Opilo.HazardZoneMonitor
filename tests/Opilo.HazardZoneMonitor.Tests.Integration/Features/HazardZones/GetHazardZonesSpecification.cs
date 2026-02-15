@@ -16,7 +16,7 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
         // Arrange
         var client = factory.CreateClient();
 
-        // Arrange
+        // Act
         var response = await client.GetAsync(new Uri("/api/v1/hazard-zones", UriKind.Relative), TestContext.Current.CancellationToken);
 
         // Assert

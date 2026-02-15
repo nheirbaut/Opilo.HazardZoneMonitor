@@ -55,6 +55,7 @@ try
         {
             new { Rel = "floors", Href = "/api/v1/floors" },
             new { Rel = "person-movements", Href = "/api/v1/person-movements" },
+            new { Rel = "hazard-zones", Href = "/api/v1/hazard-zones" },
         },
     }));
     app.MapFeaturesFromAssembly(typeof(IApiMarker).Assembly);

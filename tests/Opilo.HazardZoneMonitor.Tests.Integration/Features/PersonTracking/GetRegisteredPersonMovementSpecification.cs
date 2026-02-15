@@ -7,7 +7,7 @@ using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
 
-public class GetRegisteredPersonMovementSpecification(CustomWebApplicationFactory factory)
+public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicationFactory factory)
     : IClassFixture<CustomWebApplicationFactory>
 {
     [Fact]
