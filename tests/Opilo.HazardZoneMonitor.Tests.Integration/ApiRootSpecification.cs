@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration;
@@ -131,9 +132,7 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         var client = factory.CreateClient();
-        var endpointDataSourceService = factory.Services.GetService(typeof(EndpointDataSource))
-            ?? throw new InvalidOperationException("EndpointDataSource service is not registered.");
-        var endpointDataSource = (EndpointDataSource)endpointDataSourceService;
+        EndpointDataSource endpointDataSource = factory.Services.GetRequiredService<EndpointDataSource>();
         var expectedFeatureRoutes = endpointDataSource.Endpoints
             .OfType<RouteEndpoint>()
             .Select(endpoint => endpoint.RoutePattern.RawText)
