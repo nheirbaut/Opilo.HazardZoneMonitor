@@ -46,6 +46,11 @@ dotnet test --filter "FullyQualifiedName~HazardZoneTests.Constructor_ShouldThrow
 # Run tests matching a pattern
 dotnet test --filter "FullyQualifiedName~HazardZoneTests"
 
+# IMPORTANT: xUnit v3 filter syntax
+# xUnit v3 does NOT support -m/--method or -c/--class filter options.
+# Always use: --filter "FullyQualifiedName~Pattern"
+# The ~ operator means "contains". This is the ONLY supported filter syntax.
+
 # Run the API
 dotnet run --project src/Opilo.HazardZoneMonitor.Api
 ```
