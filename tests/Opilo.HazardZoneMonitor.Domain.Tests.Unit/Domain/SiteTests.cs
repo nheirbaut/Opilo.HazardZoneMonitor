@@ -28,6 +28,17 @@ public sealed class SiteTests
     }
 
     [Fact]
+    public void Constructor_ShouldThrowArgumentNullException_WhenFloorsIsNull()
+    {
+        // Act
+        var act = () => new Site(ValidSiteName, null!);
+
+        // Assert
+        act.Should().ThrowExactly<ArgumentNullException>()
+            .WithParameterName("floors");
+    }
+
+    [Fact]
     public void Constructor_ShouldCreateSite_WhenEmptyFloorsCollection()
     {
         // Act
