@@ -156,6 +156,12 @@ This project uses strict London-style TDD (Red -> Green -> Refactor). When writi
 3. Verify externally observable behavior: returned results, persisted state, emitted events
 4. Avoid asserting implementation details
 
+### TDD Implementation Rule
+
+Before writing production code to pass a failing test, explicitly state:
+1. What the test asserts
+2. What is the minimum production code to satisfy those assertions
+
 ## Package Management
 
 Central Package Management (`Directory.Packages.props`). When adding packages, add `PackageVersion` there and use versionless `PackageReference` in project files.
