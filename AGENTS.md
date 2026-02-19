@@ -83,7 +83,7 @@ All projects use: Meziantou.Analyzer, Microsoft.CodeAnalysis.NetAnalyzers (lates
 - **Nullable reference types**: enabled project-wide — respect them, do not suppress
 - **Implicit usings**: enabled — do not add `using System;` etc.
 - Prefer language keywords over BCL types (`string` not `String`, `int` not `Int32`)
-- Avoid `var` — use explicit types (configured: `csharp_style_var_for_built_in_types = false`)
+- Prefer `var` when the type is apparent or for built-in types (configured in `.editorconfig`)
 - Prefer `readonly` fields
 - Avoid `this.` qualifier
 - Sort `using` directives with `System` first, place outside namespace
