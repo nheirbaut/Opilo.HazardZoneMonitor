@@ -1,11 +1,11 @@
+// ReSharper disable AccessToDisposedClosure
+
 using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Events;
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
-// ReSharper disable AccessToDisposedClosure
-
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 
 public sealed class FloorTests : IDisposable
