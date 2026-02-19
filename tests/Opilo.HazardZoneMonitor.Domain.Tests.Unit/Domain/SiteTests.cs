@@ -1,7 +1,6 @@
 // ReSharper disable AccessToDisposedClosure
 
-using Ardalis.GuardClauses;
-using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
+using Opilo.HazardZoneMonitor.Domain.Features.SiteManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
 
@@ -63,42 +62,5 @@ public sealed class SiteTests
 
         // Assert
         act.Should().Throw<ArgumentException>();
-    }
-}
-
-#pragma warning disable MA0048
-public sealed class Site
-#pragma warning restore MA0048
-{
-    public Site(string name, IList<Floor> floors)
-    {
-        Guard.Against.NullOrWhiteSpace(name);
-
-        var floorList = floors.ToList();
-        Guard.Against.DuplicateFloor(floorList, nameof(floors));
-
-        Name = name;
-    }
-
-    public string Name { get; }
-}
-
-#pragma warning disable MA0048
-public static class FloorGuards
-#pragma warning restore MA0048
-{
-    public static void DuplicateFloor(
-        this IGuardClause guardClause,
-        IReadOnlyCollection<Floor> floors,
-        string parameterName)
-    {
-        ArgumentNullException.ThrowIfNull(floors);
-
-        var names = floors.Select(f => f.Name).ToList();
-        var distinctNames = names.Distinct(StringComparer.OrdinalIgnoreCase).Count();
-        if (distinctNames != names.Count)
-        {
-            throw new ArgumentException("Duplicate Floor names are not allowed.", parameterName);
-        }
     }
 }
