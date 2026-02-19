@@ -7,7 +7,7 @@ namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
 internal sealed class HazardZoneBuilder
 {
     private HazardZoneTestState _desiredState = HazardZoneTestState.Inactive;
-    private readonly List<string> _externalActivationSourceIds = new();
+    private readonly List<string> _externalActivationSourceIds = [];
     private int _allowedNumberOfPersons;
     private TimeSpan _activationDuration = TimeSpan.Zero;
     private TimeSpan _preAlarmDuration = DefaultPreAlarmDuration;
