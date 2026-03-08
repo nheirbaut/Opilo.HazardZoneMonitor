@@ -30,6 +30,26 @@ public static class ConfigurationExtensions
                 dictionary[$"{pointKey}:{nameof(PointConfiguration.X)}"] = point.X.ToString(CultureInfo.InvariantCulture);
                 dictionary[$"{pointKey}:{nameof(PointConfiguration.Y)}"] = point.Y.ToString(CultureInfo.InvariantCulture);
             }
+
+            if (floor.HazardZones is { Count: > 0 })
+            {
+                for (var hazardZoneIndex = 0; hazardZoneIndex < floor.HazardZones.Count; hazardZoneIndex++)
+                {
+                    var hazardZone = floor.HazardZones[hazardZoneIndex];
+                    var hazardZoneKey = $"{floorKey}:{nameof(FloorConfiguration.HazardZones)}:{hazardZoneIndex}";
+
+                    dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Name)}"] = hazardZone.Name;
+
+                    for (var pointIndex = 0; pointIndex < hazardZone.Outline.Count; pointIndex++)
+                    {
+                        var point = hazardZone.Outline[pointIndex];
+                        var pointKey = $"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Outline)}:{pointIndex}";
+
+                        dictionary[$"{pointKey}:{nameof(PointConfiguration.X)}"] = point.X.ToString(CultureInfo.InvariantCulture);
+                        dictionary[$"{pointKey}:{nameof(PointConfiguration.Y)}"] = point.Y.ToString(CultureInfo.InvariantCulture);
+                    }
+                }
+            }
         }
 
         return dictionary;
