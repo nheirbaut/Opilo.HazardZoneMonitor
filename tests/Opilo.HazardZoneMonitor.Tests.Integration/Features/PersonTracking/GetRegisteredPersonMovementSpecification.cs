@@ -42,6 +42,7 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
         // Act
         var movement = await client.GetFromJsonAsync<RegisteredPersonMovement>(
             new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),
+            SerializationOptions.Default,
             TestContext.Current.CancellationToken);
 
         // Assert

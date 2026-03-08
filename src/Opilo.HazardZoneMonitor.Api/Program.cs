@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 using Microsoft.OpenApi;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
@@ -34,6 +35,11 @@ try
     builder.Services
         .AddOptions<HazardZoneOptions>()
         .BindConfiguration(nameof(HazardZoneOptions));
+
+    builder.Services.ConfigureHttpJsonOptions(options =>
+    {
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
     builder.Services.AddSingleton<IClock, SystemClock>();
     builder.Services.AddOpenApi(options =>

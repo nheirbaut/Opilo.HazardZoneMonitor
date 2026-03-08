@@ -30,7 +30,10 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(new Uri("/api/v1/hazard-zones", UriKind.Relative), TestContext.Current.CancellationToken);
+        var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(
+            new Uri("/api/v1/hazard-zones", UriKind.Relative),
+            SerializationOptions.Default,
+            TestContext.Current.CancellationToken);
 
         // Assert
         response.Should().NotBeNull();
@@ -76,7 +79,10 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
         var client = customFactory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(new Uri("/api/v1/hazard-zones", UriKind.Relative), TestContext.Current.CancellationToken);
+        var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(
+            new Uri("/api/v1/hazard-zones", UriKind.Relative),
+            SerializationOptions.Default,
+            TestContext.Current.CancellationToken);
 
         // Assert
         response.Should().NotBeNull();

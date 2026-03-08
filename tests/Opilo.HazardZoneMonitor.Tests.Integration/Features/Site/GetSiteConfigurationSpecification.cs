@@ -51,6 +51,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
         // Act
         var response = await client.GetFromJsonAsync<GetSiteResponse>(
             new Uri("/api/v1/site", UriKind.Relative),
+            SerializationOptions.Default,
             TestContext.Current.CancellationToken
         );
 
@@ -102,6 +103,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
         // Act
         var response = await client.GetFromJsonAsync<GetSiteResponse>(
             new Uri("/api/v1/site", UriKind.Relative),
+            SerializationOptions.Default,
             TestContext.Current.CancellationToken
         );
 
