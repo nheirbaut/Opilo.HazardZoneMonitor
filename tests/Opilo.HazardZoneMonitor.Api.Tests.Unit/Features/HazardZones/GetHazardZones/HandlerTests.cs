@@ -45,7 +45,7 @@ public sealed class HandlerTests
         Query query = new();
 
         // Act
-        Result<Response> result = await handler.Handle(query, TestContext.Current.CancellationToken);
+        Result<GetHazardZonesResponse> result = await handler.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);
@@ -66,7 +66,7 @@ public sealed class HandlerTests
         Query query = new();
 
         // Act
-        Result<Response> result = await handler.Handle(query, TestContext.Current.CancellationToken);
+        Result<GetHazardZonesResponse> result = await handler.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);

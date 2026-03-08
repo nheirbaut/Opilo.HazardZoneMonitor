@@ -30,7 +30,10 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<Response>(new Uri("/api/v1/hazard-zones", UriKind.Relative), TestContext.Current.CancellationToken);
+        var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(
+            new Uri("/api/v1/hazard-zones", UriKind.Relative),
+            SerializationOptions.Default,
+            TestContext.Current.CancellationToken);
 
         // Assert
         response.Should().NotBeNull();
@@ -50,14 +53,18 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
                     new(10, 0),
                     new(10, 10),
                     new(0, 10)
-                ]),
+                ],
+                TimeSpan.Zero,
+                TimeSpan.Zero),
             new("Chemical Storage",
                 [
                     new(20, 20),
                     new(35, 20),
                     new(35, 35),
                     new(20, 35)
-                ])
+                ],
+                TimeSpan.Zero,
+                TimeSpan.Zero)
         ];
         var hazardZoneOptions = new HazardZoneOptions { HazardZones = expectedHazardZones };
 
@@ -72,7 +79,10 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
         var client = customFactory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<Response>(new Uri("/api/v1/hazard-zones", UriKind.Relative), TestContext.Current.CancellationToken);
+        var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(
+            new Uri("/api/v1/hazard-zones", UriKind.Relative),
+            SerializationOptions.Default,
+            TestContext.Current.CancellationToken);
 
         // Assert
         response.Should().NotBeNull();

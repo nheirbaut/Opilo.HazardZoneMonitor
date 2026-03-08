@@ -1,4 +1,5 @@
-using Ardalis.Result.AspNetCore;
+using Ardalis.Result;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
@@ -14,22 +15,21 @@ public sealed class Feature : IFeature
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/v1/person-movements", async (
+        app.MapPost("/api/v1/person-movements", async Task<Results<Created<RegisteredPersonMovement>, StatusCodeHttpResult>> (
             [FromBody] Command command,
             ICommandHandler<Command, RegisteredPersonMovement> handler,
             CancellationToken cancellationToken) =>
         {
             var result = await handler.Handle(command, cancellationToken);
 
-            if (result.IsSuccess)
+            if (result.Status != ResultStatus.Created)
             {
-                var response = result.Value;
-                return Results.Created(
-                    new Uri($"/api/v1/person-movements/{response.Id}", UriKind.Relative),
-                    response);
+                return TypedResults.StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            return result.ToMinimalApiResult();
+            return TypedResults.Created(
+                new Uri($"/api/v1/person-movements/{result.Value.Id}", UriKind.Relative),
+                result.Value);
         });
     }
 }

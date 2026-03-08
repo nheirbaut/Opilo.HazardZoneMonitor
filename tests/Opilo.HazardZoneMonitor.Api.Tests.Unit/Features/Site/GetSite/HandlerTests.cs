@@ -1,0 +1,79 @@
+using Ardalis.Result;
+using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Api.Features.Floors;
+using Opilo.HazardZoneMonitor.Api.Features.Site;
+using Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;
+using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+
+namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Site.GetSite;
+
+public sealed class HandlerTests
+{
+    [Fact]
+    public async Task Handle_ShouldReturnSuccessResultWithSiteNameAndFloors_WhenSiteIsConfigured()
+    {
+        // Arrange
+        PointConfiguration point1 = new(0.0, 0.0);
+        PointConfiguration point2 = new(10.0, 10.0);
+        PointConfiguration point3 = new(10.0, 0.0);
+
+        FloorConfiguration floor1 = new("Floor 1", new[] { point1, point2, point3 });
+        FloorConfiguration floor2 = new("Floor 2", new[] { point1, point2 });
+
+        SiteOptions siteOptions = new() { Name = "Test Site" };
+        FloorOptions floorOptions = new() { Floors = new[] { floor1, floor2 } };
+
+        var siteOpts = Options.Create(siteOptions);
+        var floorOpts = Options.Create(floorOptions);
+        Handler handler = new(siteOpts, floorOpts);
+        Query query = new();
+
+        // Act
+        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Status.Should().Be(ResultStatus.Ok);
+        result.Value.Site.Name.Should().Be("Test Site");
+        result.Value.Site.Floors.Should().BeEquivalentTo(new[] { floor1, floor2 });
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnEmptyName_WhenSiteNameIsNull()
+    {
+        // Arrange
+        SiteOptions siteOptions = new() { Name = null };
+        FloorOptions floorOptions = new() { Floors = Array.Empty<FloorConfiguration>() };
+
+        var siteOpts = Options.Create(siteOptions);
+        var floorOpts = Options.Create(floorOptions);
+        Handler handler = new(siteOpts, floorOpts);
+        Query query = new();
+
+        // Act
+        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Status.Should().Be(ResultStatus.Ok);
+        result.Value.Site.Name.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnSuccessResultWithEmptyFloors_WhenNoFloorsAreConfigured()
+    {
+        // Arrange
+        SiteOptions siteOptions = new() { Name = "Test Site" };
+        FloorOptions floorOptions = new() { Floors = Array.Empty<FloorConfiguration>() };
+
+        var siteOpts = Options.Create(siteOptions);
+        var floorOpts = Options.Create(floorOptions);
+        Handler handler = new(siteOpts, floorOpts);
+        Query query = new();
+
+        // Act
+        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Status.Should().Be(ResultStatus.Ok);
+        result.Value.Site.Floors.Should().BeEmpty();
+    }
+}

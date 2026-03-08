@@ -3,21 +3,21 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
+namespace Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;
 
 public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<FloorOptions>(configuration.GetSection(nameof(FloorOptions)));
+        services.Configure<SiteOptions>(configuration.GetSection(nameof(SiteOptions)));
 
-        services.AddScoped<IQueryHandler<Query, GetFloorsResponse>, Handler>();
+        services.AddScoped<IQueryHandler<Query, GetSiteResponse>, Handler>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/v1/floors", async Task<Results<Ok<GetFloorsResponse>, StatusCodeHttpResult>> (
-            IQueryHandler<Query, GetFloorsResponse> handler,
+        app.MapGet("/api/v1/site", async Task<Results<Ok<GetSiteResponse>, StatusCodeHttpResult>> (
+            IQueryHandler<Query, GetSiteResponse> handler,
             CancellationToken cancellationToken) =>
         {
             var result = await handler.Handle(new Query(), cancellationToken);

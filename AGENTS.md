@@ -35,16 +35,34 @@ dotnet build
 # Run all tests
 dotnet test
 
-# Run a single test project
-dotnet test tests/Opilo.HazardZoneMonitor.Domain.Tests.Unit
-dotnet test tests/Opilo.HazardZoneMonitor.Api.Tests.Unit
-dotnet test tests/Opilo.HazardZoneMonitor.Tests.Integration
+# Run a single test project (MUST use --project flag, bare directory paths fail)
+dotnet test --project tests/Opilo.HazardZoneMonitor.Domain.Tests.Unit
+dotnet test --project tests/Opilo.HazardZoneMonitor.Api.Tests.Unit
+dotnet test --project tests/Opilo.HazardZoneMonitor.Tests.Integration
 
-# Run a single test by fully qualified name
-dotnet test --filter "FullyQualifiedName~HazardZoneTests.Constructor_ShouldThrowArgumentNullException_WhenNameIsNull"
+# IMPORTANT: xUnit v3 + Microsoft.Testing.Platform filter syntax
+# This project uses xUnit v3 with Microsoft.Testing.Platform, which does NOT support
+# the dotnet test --filter "FullyQualifiedName~Pattern" syntax. That is VSTest syntax
+# and will produce "Unknown option '--filter'" errors.
+#
+# Instead, pass xUnit v3 native filter options AFTER the -- separator:
+#   dotnet test [--project <path>] -- --filter-class|--filter-method|--filter-namespace "<pattern>"
+#
+# Wildcard '*' is supported at the beginning and/or end of each filter value.
+# Multiple values of the same filter type are OR'd together.
+# Different filter types are AND'd together.
 
-# Run tests matching a pattern
-dotnet test --filter "FullyQualifiedName~HazardZoneTests"
+# Filter by test class name (wildcard match)
+dotnet test -- --filter-class "*HazardZoneTests"
+
+# Filter by test method name (wildcard match)
+dotnet test -- --filter-method "*ShouldThrowArgumentNullException*"
+
+# Filter by namespace (wildcard match)
+dotnet test -- --filter-namespace "*FloorManagement*"
+
+# Combine: run a specific method in a specific class
+dotnet test --project tests/Opilo.HazardZoneMonitor.Domain.Tests.Unit -- --filter-class "*HazardZoneTests" --filter-method "*Constructor_ShouldThrowArgumentNullException_WhenNameIsNull*"
 
 # Run the API
 dotnet run --project src/Opilo.HazardZoneMonitor.Api
@@ -150,6 +168,12 @@ This project uses strict London-style TDD (Red -> Green -> Refactor). When writi
 2. Mock at boundaries (ports/interfaces), not internal domain objects
 3. Verify externally observable behavior: returned results, persisted state, emitted events
 4. Avoid asserting implementation details
+
+### TDD Implementation Rule
+
+Before writing production code to pass a failing test, explicitly state:
+1. What the test asserts
+2. What is the minimum production code to satisfy those assertions
 
 ## Package Management
 
