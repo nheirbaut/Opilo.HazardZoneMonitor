@@ -116,8 +116,10 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
                     new(20, 0),
                     new(20, 20),
                     new(0, 20),
-                },
-                expectedHazardZones),
+                })
+            {
+                HazardZones = expectedHazardZones,
+            },
         ];
 
         var floorOptions = new FloorOptions { Floors = expectedFloors };
