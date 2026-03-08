@@ -2,8 +2,6 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi;
 using Opilo.HazardZoneMonitor.Api;
-using Opilo.HazardZoneMonitor.Api.Features.Floors;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
@@ -27,14 +25,6 @@ try
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services));
-
-    builder.Services
-        .AddOptions<FloorOptions>()
-        .BindConfiguration(nameof(FloorOptions));
-
-    builder.Services
-        .AddOptions<HazardZoneOptions>()
-        .BindConfiguration(nameof(HazardZoneOptions));
 
     builder.Services.ConfigureHttpJsonOptions(options =>
     {
