@@ -39,6 +39,8 @@ try
             if (context.JsonTypeInfo.Type == typeof(TimeSpan))
             {
                 schema.Properties?.Clear();
+                schema.Properties = null;
+                schema.Required = null;
                 schema.Type = JsonSchemaType.String;
                 schema.Format = "duration";
             }
