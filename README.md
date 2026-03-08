@@ -99,6 +99,22 @@ tests/
    dotnet test
    ```
 
+## API Documentation
+
+Once the API is running, you can explore and test the endpoints using the built-in tools:
+
+- **Scalar API Reference** — Interactive API documentation UI:
+  ```
+  http://localhost:5000/scalar/v1
+  ```
+
+- **OpenAPI Specification** — Raw OpenAPI JSON schema:
+  ```
+  http://localhost:5000/openapi/v1.json
+  ```
+
+Scalar provides a modern, interactive interface for browsing endpoints, viewing request/response schemas, and sending test requests directly from the browser. The OpenAPI spec can be imported into tools like Postman, Insomnia, or any OpenAPI-compatible client.
+
 ## Contributing
 
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
