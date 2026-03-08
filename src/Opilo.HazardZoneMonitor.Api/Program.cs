@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.OpenApi;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
@@ -35,7 +36,20 @@ try
         .BindConfiguration(nameof(HazardZoneOptions));
 
     builder.Services.AddSingleton<IClock, SystemClock>();
-    builder.Services.AddOpenApi();
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddSchemaTransformer((schema, context, _) =>
+        {
+            if (context.JsonTypeInfo.Type == typeof(TimeSpan))
+            {
+                schema.Properties?.Clear();
+                schema.Type = JsonSchemaType.String;
+                schema.Format = "duration";
+            }
+
+            return Task.CompletedTask;
+        });
+    });
     builder.Services.AddFeaturesFromAssembly(typeof(IApiMarker).Assembly, builder.Configuration);
 
     var app = builder.Build();

@@ -6,8 +6,8 @@ namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 public sealed record HazardZoneConfiguration(
     string Name,
     IReadOnlyList<PointConfiguration> Outline,
-    TimeSpan ActivationDuration = default,
-    TimeSpan PreAlarmDuration = default,
+    TimeSpan ActivationDuration,
+    TimeSpan PreAlarmDuration,
     ZoneState ZoneState = default,
     AlarmState AlarmState = default,
     int AllowedNumberOfPersons = 0);

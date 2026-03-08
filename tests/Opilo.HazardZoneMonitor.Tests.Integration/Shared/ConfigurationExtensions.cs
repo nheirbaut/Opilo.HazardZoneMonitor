@@ -39,6 +39,8 @@ public static class ConfigurationExtensions
                     var hazardZoneKey = $"{floorKey}:{nameof(FloorConfiguration.HazardZones)}:{hazardZoneIndex}";
 
                     dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Name)}"] = hazardZone.Name;
+                    dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.ActivationDuration)}"] = hazardZone.ActivationDuration.ToString("c", CultureInfo.InvariantCulture);
+                    dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.PreAlarmDuration)}"] = hazardZone.PreAlarmDuration.ToString("c", CultureInfo.InvariantCulture);
 
                     for (var pointIndex = 0; pointIndex < hazardZone.Outline.Count; pointIndex++)
                     {
@@ -78,6 +80,8 @@ public static class ConfigurationExtensions
             var hazardZoneKey = $"{nameof(HazardZoneOptions)}:{nameof(HazardZoneOptions.HazardZones)}:{hazardZoneIndex}";
 
             dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Name)}"] = hazardZone.Name;
+            dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.ActivationDuration)}"] = hazardZone.ActivationDuration.ToString("c", CultureInfo.InvariantCulture);
+            dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.PreAlarmDuration)}"] = hazardZone.PreAlarmDuration.ToString("c", CultureInfo.InvariantCulture);
 
             for (var pointIndex = 0; pointIndex < hazardZone.Outline.Count; pointIndex++)
             {

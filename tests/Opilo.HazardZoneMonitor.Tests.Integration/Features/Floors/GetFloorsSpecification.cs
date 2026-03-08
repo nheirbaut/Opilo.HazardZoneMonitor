@@ -96,7 +96,9 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
                 new(8, 2),
                 new(8, 8),
                 new(2, 8),
-            ]),
+            ],
+            TimeSpan.Zero,
+            TimeSpan.Zero),
         ];
 
         List<FloorConfiguration> expectedFloors =

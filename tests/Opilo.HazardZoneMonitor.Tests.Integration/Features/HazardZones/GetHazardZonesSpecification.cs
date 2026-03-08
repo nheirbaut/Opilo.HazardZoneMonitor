@@ -50,14 +50,18 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
                     new(10, 0),
                     new(10, 10),
                     new(0, 10)
-                ]),
+                ],
+                TimeSpan.Zero,
+                TimeSpan.Zero),
             new("Chemical Storage",
                 [
                     new(20, 20),
                     new(35, 20),
                     new(35, 35),
                     new(20, 35)
-                ])
+                ],
+                TimeSpan.Zero,
+                TimeSpan.Zero)
         ];
         var hazardZoneOptions = new HazardZoneOptions { HazardZones = expectedHazardZones };
 
