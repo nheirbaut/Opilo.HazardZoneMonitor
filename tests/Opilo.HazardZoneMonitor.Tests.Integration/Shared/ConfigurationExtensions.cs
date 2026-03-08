@@ -1,6 +1,7 @@
 using System.Globalization;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+using Opilo.HazardZoneMonitor.Api.Features.Site;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
@@ -32,6 +33,16 @@ public static class ConfigurationExtensions
         }
 
         return dictionary;
+    }
+
+    public static IDictionary<string, string?> ToConfigurationDictionary(this SiteOptions siteOptions)
+    {
+        ArgumentNullException.ThrowIfNull(siteOptions);
+
+        return new Dictionary<string, string?>(StringComparer.Ordinal)
+        {
+            [$"{nameof(SiteOptions)}:{nameof(SiteOptions.Name)}"] = siteOptions.Name,
+        };
     }
 
     public static IDictionary<string, string?> ToConfigurationDictionary(this HazardZoneOptions hazardZoneOptions)
