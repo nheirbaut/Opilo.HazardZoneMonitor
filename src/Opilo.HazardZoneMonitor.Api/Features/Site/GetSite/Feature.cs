@@ -15,7 +15,7 @@ public sealed class Feature : IFeature
         app.MapGet("/api/v1/site", (IOptions<SiteOptions> options) =>
         {
             var siteOptions = options.Value;
-            var site = new SiteConfiguration(siteOptions.Name ?? string.Empty);
+            var site = new SiteConfiguration(siteOptions.Name ?? string.Empty, []);
             return Results.Ok(new Response(site));
         });
     }
