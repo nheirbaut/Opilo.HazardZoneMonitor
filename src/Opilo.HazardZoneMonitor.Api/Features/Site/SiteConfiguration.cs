@@ -1,5 +1,5 @@
-using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
+using Opilo.HazardZoneMonitor.Api.Features.Floors;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.Site;
 
-public sealed record SiteConfiguration(string Name, IReadOnlyCollection<Floor> Floors);
+public sealed record SiteConfiguration(string Name, IReadOnlyList<FloorConfiguration> Floors);
