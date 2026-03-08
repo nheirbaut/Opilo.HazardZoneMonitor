@@ -7,9 +7,7 @@ public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services
-            .AddOptions<FloorOptions>()
-            .BindConfiguration(nameof(FloorOptions));
+        services.Configure<FloorOptions>(configuration.GetSection(nameof(FloorOptions)));
 
         services.AddScoped<IQueryHandler<Query, GetFloorsResponse>, Handler>();
     }

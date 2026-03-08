@@ -7,9 +7,7 @@ public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services
-            .AddOptions<HazardZoneOptions>()
-            .BindConfiguration(nameof(HazardZoneOptions));
+        services.Configure<HazardZoneOptions>(configuration.GetSection(nameof(HazardZoneOptions)));
 
         services.AddScoped<IQueryHandler<Query, GetHazardZonesResponse>, Handler>();
     }
