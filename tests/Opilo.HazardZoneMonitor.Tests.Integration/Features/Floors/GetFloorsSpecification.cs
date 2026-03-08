@@ -32,7 +32,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<Response>(new Uri("/api/v1/floors", UriKind.Relative), TestContext.Current.CancellationToken);
+        var response = await client.GetFromJsonAsync<GetFloorsResponse>(new Uri("/api/v1/floors", UriKind.Relative), TestContext.Current.CancellationToken);
 
         // Assert
         response.Should().NotBeNull();
@@ -76,7 +76,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         var client = customFactory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<Response>(new Uri("/api/v1/floors", UriKind.Relative), TestContext.Current.CancellationToken);
+        var response = await client.GetFromJsonAsync<GetFloorsResponse>(new Uri("/api/v1/floors", UriKind.Relative), TestContext.Current.CancellationToken);
 
         // Assert
         response.Should().NotBeNull();
@@ -127,7 +127,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         var client = customFactory.CreateClient();
 
         // Act
-        var response = await client.GetFromJsonAsync<Response>(
+        var response = await client.GetFromJsonAsync<GetFloorsResponse>(
             new Uri("/api/v1/floors", UriKind.Relative),
             TestContext.Current.CancellationToken
         );

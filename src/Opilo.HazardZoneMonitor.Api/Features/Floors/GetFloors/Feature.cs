@@ -7,13 +7,13 @@ public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IQueryHandler<Query, Response>, Handler>();
+        services.AddScoped<IQueryHandler<Query, GetFloorsResponse>, Handler>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
         app.MapGet("/api/v1/floors", async (
-            IQueryHandler<Query, Response> handler,
+            IQueryHandler<Query, GetFloorsResponse> handler,
             CancellationToken cancellationToken) =>
         {
             var result = await handler.Handle(new Query(), cancellationToken);
