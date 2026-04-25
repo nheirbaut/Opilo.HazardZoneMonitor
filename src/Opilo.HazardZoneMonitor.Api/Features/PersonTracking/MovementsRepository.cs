@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using Dapper;
-using Microsoft.Data.Sqlite;
+using Opilo.HazardZoneMonitor.Api.Shared.Database;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 
-internal sealed class MovementsRepository(SqliteConnection connection) : IMovementsRepository
+internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory) : IMovementsRepository
 {
     public async Task<Result<RegisteredPersonMovement>> RegisterMovementAsync(
         Guid personId,
@@ -13,6 +13,9 @@ internal sealed class MovementsRepository(SqliteConnection connection) : IMoveme
         DateTime registeredAt,
         CancellationToken cancellationToken)
     {
+        using var connection = connectionFactory.Create();
+        connection.Open();
+
         RegisteredPersonMovement movement = new()
         {
             PersonId = personId,
@@ -36,6 +39,9 @@ internal sealed class MovementsRepository(SqliteConnection connection) : IMoveme
         Guid id,
         CancellationToken cancellationToken)
     {
+        using var connection = connectionFactory.Create();
+        connection.Open();
+
         const string sql = """
             SELECT Id, PersonId, X, Y, RegisteredAt
             FROM PersonMovements

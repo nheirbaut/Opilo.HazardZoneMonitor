@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi;
 using Opilo.HazardZoneMonitor.Api;
+using Opilo.HazardZoneMonitor.Api.Shared.Database;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
@@ -51,6 +52,12 @@ try
     builder.Services.AddFeaturesFromAssembly(typeof(IApiMarker).Assembly, builder.Configuration);
 
     var app = builder.Build();
+
+    var initializers = app.Services.GetServices<ISchemaInitializer>();
+    foreach (var initializer in initializers)
+    {
+        await initializer.InitializeAsync();
+    }
 
     app.UseSerilogRequestLogging();
     app.MapOpenApi();

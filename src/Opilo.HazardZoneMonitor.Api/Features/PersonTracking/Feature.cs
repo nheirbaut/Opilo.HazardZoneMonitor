@@ -1,5 +1,5 @@
 using Dapper;
-using Microsoft.Data.Sqlite;
+using Opilo.HazardZoneMonitor.Api.Shared.Database;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
@@ -13,24 +13,9 @@ public sealed class Feature : IFeature
 
         SqlMapper.AddTypeHandler(new GuidTypeHandler());
 
-        services.AddScoped(_ =>
-        {
-            SqliteConnection connection = new(connectionString);
-            try
-            {
-                connection.Open();
-            }
-            catch
-            {
-                connection.Dispose();
-                throw;
-            }
-
-            return connection;
-        });
+        services.AddSingleton<IDbConnectionFactory>(_ => new SqliteDbConnectionFactory(connectionString));
         services.AddScoped<IMovementsRepository, MovementsRepository>();
-
-        DatabaseInitializer.EnsurePersonMovementsTable(connectionString);
+        services.AddSingleton<ISchemaInitializer, PersonTrackingSchemaInitializer>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
