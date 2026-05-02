@@ -20,4 +20,21 @@ public sealed class FloorOptionsValidatorTests
         result.Succeeded.Should().BeTrue();
         result.Failures.Should().BeNullOrEmpty();
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Validate_ShouldReturnFailure_WhenFloorNameIsEmptyOrWhitespace(string invalidName)
+    {
+        // Arrange
+        var floor = new FloorConfiguration(invalidName, []);
+        var options = new FloorOptions { Floors = [floor] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }
