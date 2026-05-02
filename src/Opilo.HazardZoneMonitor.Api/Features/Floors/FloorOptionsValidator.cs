@@ -26,6 +26,14 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             return ValidateOptionsResult.Fail("Each hazard zone must have a non-empty name.");
         }
 
+        foreach (var floor in options.Floors)
+        {
+            if (floor.HazardZones.Select(hazardZone => hazardZone.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != floor.HazardZones.Count)
+            {
+                return ValidateOptionsResult.Fail($"Hazard zone names must be unique within floor '{floor.Name}'.");
+            }
+        }
+
         return ValidateOptionsResult.Success;
     }
 }
