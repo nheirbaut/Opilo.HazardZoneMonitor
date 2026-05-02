@@ -49,6 +49,11 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             return ValidateOptionsResult.Fail("Each hazard zone's pre-alarm duration must not be negative.");
         }
 
+        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.AllowedNumberOfPersons < 0))
+        {
+            return ValidateOptionsResult.Fail("Each hazard zone's allowed number of persons must not be negative.");
+        }
+
         return ValidateOptionsResult.Success;
     }
 }
