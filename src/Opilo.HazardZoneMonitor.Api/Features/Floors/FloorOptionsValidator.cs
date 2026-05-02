@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
 
@@ -21,37 +22,16 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             return ValidateOptionsResult.Fail("Each floor's outline must have at least 3 points.");
         }
 
-        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => string.IsNullOrWhiteSpace(hazardZone.Name)))
-        {
-            return ValidateOptionsResult.Fail("Each hazard zone must have a non-empty name.");
-        }
+        var hazardZoneValidator = new HazardZoneOptionsValidator();
 
         foreach (var floor in options.Floors)
         {
-            if (floor.HazardZones.Select(hazardZone => hazardZone.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != floor.HazardZones.Count)
+            var hazardZoneOptions = new HazardZoneOptions { HazardZones = floor.HazardZones };
+            var result = hazardZoneValidator.Validate(null, hazardZoneOptions);
+            if (!result.Succeeded)
             {
-                return ValidateOptionsResult.Fail($"Hazard zone names must be unique within floor '{floor.Name}'.");
+                return ValidateOptionsResult.Fail($"Floor '{floor.Name}': {string.Join(", ", result.Failures ?? [])}");
             }
-        }
-
-        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.Outline.Count < 3))
-        {
-            return ValidateOptionsResult.Fail("Each hazard zone's outline must have at least 3 points.");
-        }
-
-        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.ActivationDuration < TimeSpan.Zero))
-        {
-            return ValidateOptionsResult.Fail("Each hazard zone's activation duration must not be negative.");
-        }
-
-        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.PreAlarmDuration < TimeSpan.Zero))
-        {
-            return ValidateOptionsResult.Fail("Each hazard zone's pre-alarm duration must not be negative.");
-        }
-
-        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.AllowedNumberOfPersons < 0))
-        {
-            return ValidateOptionsResult.Fail("Each hazard zone's allowed number of persons must not be negative.");
         }
 
         return ValidateOptionsResult.Success;

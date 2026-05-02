@@ -42,4 +42,28 @@ public sealed class HazardZoneOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZoneNamesAreNotUnique()
+    {
+        // Arrange
+        var hazardZone1 = new HazardZoneConfiguration(
+            "Zone",
+            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)],
+            TimeSpan.Zero,
+            TimeSpan.Zero);
+        var hazardZone2 = new HazardZoneConfiguration(
+            "Zone",
+            [new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)],
+            TimeSpan.Zero,
+            TimeSpan.Zero);
+        var options = new HazardZoneOptions { HazardZones = [hazardZone1, hazardZone2] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }
