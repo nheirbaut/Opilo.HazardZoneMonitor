@@ -85,4 +85,23 @@ public sealed class FloorOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnSuccess_WhenFloorOutlineHasExactlyThreePoints()
+    {
+        // Arrange
+        var floor = new FloorConfiguration("Floor", [
+            new PointConfiguration(0, 0),
+            new PointConfiguration(1, 0),
+            new PointConfiguration(0, 1)
+        ]);
+        var options = new FloorOptions { Floors = [floor] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeTrue();
+        result.Failures.Should().BeNullOrEmpty();
+    }
 }
