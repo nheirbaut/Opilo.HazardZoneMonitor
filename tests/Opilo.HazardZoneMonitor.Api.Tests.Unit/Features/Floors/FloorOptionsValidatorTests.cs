@@ -348,4 +348,29 @@ public sealed class FloorOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZoneIsOutsideFloorOutline()
+    {
+        // Arrange
+        var hazardZone = new HazardZoneConfiguration(
+            "Zone",
+            [new PointConfiguration(15, 15), new PointConfiguration(20, 15), new PointConfiguration(20, 20), new PointConfiguration(15, 20)],
+            TimeSpan.Zero,
+            TimeSpan.Zero);
+        var floor = new FloorConfiguration(
+            "Floor",
+            [new PointConfiguration(0, 0), new PointConfiguration(10, 0), new PointConfiguration(10, 10), new PointConfiguration(0, 10)])
+        {
+            HazardZones = [hazardZone]
+        };
+        var options = new FloorOptions { Floors = [floor] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }
