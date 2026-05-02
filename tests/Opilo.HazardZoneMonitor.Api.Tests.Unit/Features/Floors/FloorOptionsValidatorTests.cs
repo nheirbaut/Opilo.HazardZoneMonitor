@@ -37,4 +37,20 @@ public sealed class FloorOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenFloorNamesAreNotUnique()
+    {
+        // Arrange
+        var floor1 = new FloorConfiguration("Floor", []);
+        var floor2 = new FloorConfiguration("Floor", []);
+        var options = new FloorOptions { Floors = [floor1, floor2] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }
