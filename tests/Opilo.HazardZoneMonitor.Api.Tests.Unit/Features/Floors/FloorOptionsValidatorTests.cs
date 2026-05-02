@@ -267,4 +267,29 @@ public sealed class FloorOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZonePreAlarmDurationIsNegative()
+    {
+        // Arrange
+        var hazardZone = new HazardZoneConfiguration(
+            "Zone",
+            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)],
+            TimeSpan.Zero,
+            TimeSpan.FromMilliseconds(-1));
+        var floor = new FloorConfiguration(
+            "Floor",
+            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])
+        {
+            HazardZones = [hazardZone]
+        };
+        var options = new FloorOptions { Floors = [floor] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }

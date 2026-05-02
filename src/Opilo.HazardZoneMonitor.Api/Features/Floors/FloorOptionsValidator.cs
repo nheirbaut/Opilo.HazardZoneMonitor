@@ -39,6 +39,16 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             return ValidateOptionsResult.Fail("Each hazard zone's outline must have at least 3 points.");
         }
 
+        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.ActivationDuration < TimeSpan.Zero))
+        {
+            return ValidateOptionsResult.Fail("Each hazard zone's activation duration must not be negative.");
+        }
+
+        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.PreAlarmDuration < TimeSpan.Zero))
+        {
+            return ValidateOptionsResult.Fail("Each hazard zone's pre-alarm duration must not be negative.");
+        }
+
         return ValidateOptionsResult.Success;
     }
 }
