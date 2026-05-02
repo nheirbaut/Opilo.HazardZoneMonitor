@@ -34,6 +34,11 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             }
         }
 
+        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => hazardZone.Outline.Count < 3))
+        {
+            return ValidateOptionsResult.Fail("Each hazard zone's outline must have at least 3 points.");
+        }
+
         return ValidateOptionsResult.Success;
     }
 }
