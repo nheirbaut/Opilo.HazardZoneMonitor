@@ -1,6 +1,8 @@
 using System.Net;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
@@ -8,8 +10,10 @@ using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
 
 public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplicationFactory factory)
-    : IClassFixture<CustomWebApplicationFactory>
+    : IClassFixture<CustomWebApplicationFactory>, IDisposable
 {
+    private WebApplicationFactory<IApiMarker>? _customFactory;
+
     [Fact]
     public async Task Api_ShouldStart_WhenHazardZoneConfigurationIsValid()
     {
@@ -34,7 +38,7 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
             HazardZones = [new HazardZoneConfiguration(string.Empty, [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)], TimeSpan.Zero, TimeSpan.Zero)]
         };
 
-        var customFactory = factory.WithWebHostBuilder(builder =>
+        _customFactory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, config) =>
             {
@@ -43,7 +47,7 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
         });
 
         // Act
-        Action act = () => customFactory.CreateClient();
+        Action act = () => _customFactory.CreateClient();
 
         // Assert
         act.Should().Throw<OptionsValidationException>();
@@ -62,7 +66,7 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
             ]
         };
 
-        var customFactory = factory.WithWebHostBuilder(builder =>
+        _customFactory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, config) =>
             {
@@ -71,9 +75,14 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
         });
 
         // Act
-        Action act = () => customFactory.CreateClient();
+        Action act = () => _customFactory.CreateClient();
 
         // Assert
         act.Should().Throw<OptionsValidationException>();
+    }
+
+    public void Dispose()
+    {
+        _customFactory?.Dispose();
     }
 }
