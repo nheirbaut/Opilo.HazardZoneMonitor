@@ -21,6 +21,11 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             return ValidateOptionsResult.Fail("Each floor's outline must have at least 3 points.");
         }
 
+        if (options.Floors.SelectMany(floor => floor.HazardZones).Any(hazardZone => string.IsNullOrWhiteSpace(hazardZone.Name)))
+        {
+            return ValidateOptionsResult.Fail("Each hazard zone must have a non-empty name.");
+        }
+
         return ValidateOptionsResult.Success;
     }
 }

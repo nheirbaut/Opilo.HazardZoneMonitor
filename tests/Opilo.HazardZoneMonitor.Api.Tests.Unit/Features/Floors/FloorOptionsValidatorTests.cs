@@ -117,7 +117,9 @@ public sealed class FloorOptionsValidatorTests
             [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)],
             TimeSpan.Zero,
             TimeSpan.Zero);
-        var floor = new FloorConfiguration("Floor", [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])
+        var floor = new FloorConfiguration(
+            "Floor",
+            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])
         {
             HazardZones = [hazardZone]
         };
