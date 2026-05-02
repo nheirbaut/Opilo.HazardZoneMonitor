@@ -224,12 +224,12 @@ public sealed class FloorOptionsValidatorTests
         // Arrange
         var hazardZone = new HazardZoneConfiguration(
             "Zone",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)],
+            [new PointConfiguration(1, 1), new PointConfiguration(2, 1), new PointConfiguration(1, 2)],
             TimeSpan.Zero,
             TimeSpan.Zero);
         var floor = new FloorConfiguration(
             "Floor",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])
+            [new PointConfiguration(0, 0), new PointConfiguration(10, 0), new PointConfiguration(0, 10)])
         {
             HazardZones = [hazardZone]
         };
@@ -249,12 +249,12 @@ public sealed class FloorOptionsValidatorTests
         // Arrange
         var hazardZone = new HazardZoneConfiguration(
             "Zone",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)],
+            [new PointConfiguration(1, 1), new PointConfiguration(2, 1), new PointConfiguration(1, 2)],
             TimeSpan.FromMilliseconds(-1),
             TimeSpan.Zero);
         var floor = new FloorConfiguration(
             "Floor",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])
+            [new PointConfiguration(0, 0), new PointConfiguration(10, 0), new PointConfiguration(0, 10)])
         {
             HazardZones = [hazardZone]
         };
@@ -274,12 +274,12 @@ public sealed class FloorOptionsValidatorTests
         // Arrange
         var hazardZone = new HazardZoneConfiguration(
             "Zone",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)],
+            [new PointConfiguration(1, 1), new PointConfiguration(2, 1), new PointConfiguration(1, 2)],
             TimeSpan.Zero,
             TimeSpan.FromMilliseconds(-1));
         var floor = new FloorConfiguration(
             "Floor",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])
+            [new PointConfiguration(0, 0), new PointConfiguration(10, 0), new PointConfiguration(0, 10)])
         {
             HazardZones = [hazardZone]
         };
@@ -299,13 +299,13 @@ public sealed class FloorOptionsValidatorTests
         // Arrange
         var hazardZone = new HazardZoneConfiguration(
             "Zone",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)],
+            [new PointConfiguration(1, 1), new PointConfiguration(2, 1), new PointConfiguration(1, 2)],
             TimeSpan.Zero,
             TimeSpan.Zero,
             AllowedNumberOfPersons: -1);
         var floor = new FloorConfiguration(
             "Floor",
-            [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])
+            [new PointConfiguration(0, 0), new PointConfiguration(10, 0), new PointConfiguration(0, 10)])
         {
             HazardZones = [hazardZone]
         };

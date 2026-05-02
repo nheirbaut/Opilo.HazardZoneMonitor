@@ -53,6 +53,19 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             }
         }
 
+        foreach (var floor in options.Floors)
+        {
+            var floorOutline = ToOutline(floor.Outline);
+            foreach (var hazardZone in floor.HazardZones)
+            {
+                var hazardZoneOutline = ToOutline(hazardZone.Outline);
+                if (!hazardZoneOutline.IsWithin(floorOutline))
+                {
+                    return ValidateOptionsResult.Fail($"HazardZone '{hazardZone.Name}' is not within floor '{floor.Name}'.");
+                }
+            }
+        }
+
         return ValidateOptionsResult.Success;
     }
 
