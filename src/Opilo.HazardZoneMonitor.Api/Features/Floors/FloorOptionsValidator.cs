@@ -1,5 +1,7 @@
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
 
@@ -34,6 +36,29 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             }
         }
 
+        foreach (var floor in options.Floors)
+        {
+            var hazardZoneList = floor.HazardZones.ToList();
+            for (var i = 0; i < hazardZoneList.Count; i++)
+            {
+                for (var j = i + 1; j < hazardZoneList.Count; j++)
+                {
+                    var outline1 = ToOutline(hazardZoneList[i].Outline);
+                    var outline2 = ToOutline(hazardZoneList[j].Outline);
+                    if (outline1.Overlaps(outline2))
+                    {
+                        return ValidateOptionsResult.Fail($"HazardZone '{hazardZoneList[i].Name}' overlaps with '{hazardZoneList[j].Name}'.");
+                    }
+                }
+            }
+        }
+
         return ValidateOptionsResult.Success;
+    }
+
+    private static Outline ToOutline(IReadOnlyList<Shared.Configuration.PointConfiguration> points)
+    {
+        var locations = points.Select(p => new Location(p.X, p.Y)).ToList();
+        return new Outline(new ReadOnlyCollection<Location>(locations));
     }
 }
