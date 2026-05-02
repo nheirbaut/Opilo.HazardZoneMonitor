@@ -318,4 +318,34 @@ public sealed class FloorOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZonesOverlapWithinFloor()
+    {
+        // Arrange
+        var hazardZone1 = new HazardZoneConfiguration(
+            "Zone A",
+            [new PointConfiguration(0, 0), new PointConfiguration(4, 0), new PointConfiguration(4, 4), new PointConfiguration(0, 4)],
+            TimeSpan.Zero,
+            TimeSpan.Zero);
+        var hazardZone2 = new HazardZoneConfiguration(
+            "Zone B",
+            [new PointConfiguration(2, 2), new PointConfiguration(6, 2), new PointConfiguration(6, 6), new PointConfiguration(2, 6)],
+            TimeSpan.Zero,
+            TimeSpan.Zero);
+        var floor = new FloorConfiguration(
+            "Floor",
+            [new PointConfiguration(0, 0), new PointConfiguration(10, 0), new PointConfiguration(10, 10), new PointConfiguration(0, 10)])
+        {
+            HazardZones = [hazardZone1, hazardZone2]
+        };
+        var options = new FloorOptions { Floors = [floor] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }
