@@ -70,6 +70,27 @@ public sealed class SiteConfigurationStartupSpecification(CustomWebApplicationFa
         act.Should().Throw<OptionsValidationException>();
     }
 
+    [Fact]
+    public void Api_ShouldThrowOptionsValidationException_WhenSiteNameIsWhitespace()
+    {
+        // Arrange
+        var siteOptions = new SiteOptions { Name = "   " };
+
+        _customFactory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(siteOptions.ToConfigurationDictionary());
+            });
+        });
+
+        // Act
+        Action act = () => _customFactory.CreateClient();
+
+        // Assert
+        act.Should().Throw<OptionsValidationException>();
+    }
+
     public void Dispose()
     {
         _customFactory?.Dispose();
