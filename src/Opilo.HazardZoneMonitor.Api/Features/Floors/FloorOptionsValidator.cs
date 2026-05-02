@@ -10,6 +10,11 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         {
             return ValidateOptionsResult.Fail("Each floor must have a non-empty name.");
         }
+
+        if (options.Floors.Select(f => f.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != options.Floors.Count)
+        {
+            return ValidateOptionsResult.Fail("Floor names must be unique (case-insensitive).");
+        }
         return ValidateOptionsResult.Success;
     }
 }
