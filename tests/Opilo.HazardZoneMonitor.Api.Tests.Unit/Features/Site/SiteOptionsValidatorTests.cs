@@ -17,7 +17,7 @@ public sealed class SiteOptionsValidatorTests
 
         // Assert
         result.Succeeded.Should().BeTrue();
-        result.Failures.Should().BeEmpty();
+        result.Failures.Should().BeNullOrEmpty();
     }
 
     [Theory]
