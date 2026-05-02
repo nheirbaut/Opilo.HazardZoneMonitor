@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;

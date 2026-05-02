@@ -66,4 +66,23 @@ public sealed class HazardZoneOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZoneOutlineHasFewerThanThreePoints()
+    {
+        // Arrange
+        var hazardZone = new HazardZoneConfiguration(
+            "Zone",
+            [new PointConfiguration(0, 0), new PointConfiguration(1, 1)],
+            TimeSpan.Zero,
+            TimeSpan.Zero);
+        var options = new HazardZoneOptions { HazardZones = [hazardZone] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }
