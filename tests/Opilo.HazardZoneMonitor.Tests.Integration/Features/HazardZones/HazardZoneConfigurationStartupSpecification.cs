@@ -48,4 +48,32 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
         // Assert
         act.Should().Throw<OptionsValidationException>();
     }
+
+    [Fact]
+    public void Api_ShouldThrowOptionsValidationException_WhenHazardZoneNamesAreDuplicate()
+    {
+        // Arrange
+        var hazardZoneOptions = new HazardZoneOptions
+        {
+            HazardZones =
+            [
+                new HazardZoneConfiguration("Zone", [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)], TimeSpan.Zero, TimeSpan.Zero),
+                new HazardZoneConfiguration("Zone", [new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)], TimeSpan.Zero, TimeSpan.Zero)
+            ]
+        };
+
+        var customFactory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(hazardZoneOptions.ToConfigurationDictionary());
+            });
+        });
+
+        // Act
+        Action act = () => customFactory.CreateClient();
+
+        // Assert
+        act.Should().Throw<OptionsValidationException>();
+    }
 }

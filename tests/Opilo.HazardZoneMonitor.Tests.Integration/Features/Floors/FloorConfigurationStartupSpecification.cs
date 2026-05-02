@@ -76,4 +76,28 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         // Assert
         act.Should().Throw<OptionsValidationException>();
     }
+
+    [Fact]
+    public void Api_ShouldThrowOptionsValidationException_WhenFloorOutlineHasFewerThanThreePoints()
+    {
+        // Arrange
+        var floorOptions = new FloorOptions
+        {
+            Floors = [new FloorConfiguration("Floor", [new PointConfiguration(0, 0), new PointConfiguration(1, 1)])]
+        };
+
+        var customFactory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
+            });
+        });
+
+        // Act
+        Action act = () => customFactory.CreateClient();
+
+        // Assert
+        act.Should().Throw<OptionsValidationException>();
+    }
 }
