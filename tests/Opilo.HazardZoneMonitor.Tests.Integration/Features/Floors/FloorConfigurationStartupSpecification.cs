@@ -48,4 +48,32 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         // Assert
         act.Should().Throw<OptionsValidationException>();
     }
+
+    [Fact]
+    public void Api_ShouldThrowOptionsValidationException_WhenFloorNamesAreDuplicate()
+    {
+        // Arrange
+        var floorOptions = new FloorOptions
+        {
+            Floors =
+            [
+                new FloorConfiguration("Floor", [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)]),
+                new FloorConfiguration("Floor", [new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)])
+            ]
+        };
+
+        var customFactory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
+            });
+        });
+
+        // Act
+        Action act = () => customFactory.CreateClient();
+
+        // Assert
+        act.Should().Throw<OptionsValidationException>();
+    }
 }
