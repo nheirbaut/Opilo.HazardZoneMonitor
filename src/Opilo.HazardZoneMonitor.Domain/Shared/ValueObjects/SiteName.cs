@@ -10,5 +10,8 @@ public partial struct SiteName
     public static bool operator <=(SiteName left, SiteName right) => left.CompareTo(right) <= 0;
     public static bool operator >=(SiteName left, SiteName right) => left.CompareTo(right) >= 0;
 
+    private static Validation Validate(string value) =>
+        string.IsNullOrWhiteSpace(value) ? Validation.Invalid("SiteName cannot be empty.") : Validation.Ok;
+
     private static string NormalizeInput(string input) => input.ToUpperInvariant();
 }
