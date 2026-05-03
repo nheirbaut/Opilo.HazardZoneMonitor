@@ -1,6 +1,7 @@
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
 
@@ -27,7 +28,7 @@ internal sealed class HazardZoneBuilder
 
     public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline, DefaultPreAlarmDuration);
 
-    public IReadOnlyCollection<Guid> IdsOfPersonsAdded { get; private set; } = [];
+    public IReadOnlyCollection<PersonId> IdsOfPersonsAdded { get; private set; } = [];
 
     public static HazardZoneBuilder Create() => new();
 
@@ -119,7 +120,7 @@ internal sealed class HazardZoneBuilder
 
         foreach (var _ in Enumerable.Range(0, personsToAdd))
         {
-            var personId = Guid.NewGuid();
+            var personId = PersonId.From(Guid.NewGuid());
             var insideLocation = new Location(2, 2);
             hazardZone.HandlePersonCreated(personId, insideLocation);
         }

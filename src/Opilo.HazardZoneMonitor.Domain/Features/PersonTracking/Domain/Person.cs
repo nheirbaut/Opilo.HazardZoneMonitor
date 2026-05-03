@@ -2,6 +2,7 @@ using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Domain;
 
@@ -9,13 +10,13 @@ public sealed class Person : IDisposable
 {
     private readonly Shared.Abstractions.ITimer _expiryTimer;
 
-    public Guid Id { get; }
+    public PersonId Id { get; }
     public Location Location { get; private set; }
 
     public event EventHandler<PersonLocationChangedEventArgs>? LocationChanged;
     public event EventHandler<PersonExpiredEventArgs>? Expired;
 
-    public static Person Create(Guid id, Location location, TimeSpan lifespanTimeout, ITimerFactory timerFactory)
+    public static Person Create(PersonId id, Location location, TimeSpan lifespanTimeout, ITimerFactory timerFactory)
     {
         ArgumentNullException.ThrowIfNull(timerFactory);
 
@@ -40,7 +41,7 @@ public sealed class Person : IDisposable
         return true;
     }
 
-    private Person(Guid id, Location initialLocation, TimeSpan timeout, ITimerFactory timerFactory)
+    private Person(PersonId id, Location initialLocation, TimeSpan timeout, ITimerFactory timerFactory)
     {
         Id = id;
         Location = initialLocation;

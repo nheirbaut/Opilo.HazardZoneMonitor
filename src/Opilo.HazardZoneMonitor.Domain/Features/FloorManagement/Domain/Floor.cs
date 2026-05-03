@@ -7,6 +7,7 @@ using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Guards;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
 
@@ -64,7 +65,7 @@ public sealed class Floor : IDisposable
         }
 
         bool isNewPerson;
-        Guid personId;
+        PersonId personId;
         Location location;
 
         lock (_personsOnFloorLock)
@@ -95,7 +96,7 @@ public sealed class Floor : IDisposable
         return true;
     }
 
-    private void NotifyHazardZonesOfPersonCreated(Guid personId, Location location)
+    private void NotifyHazardZonesOfPersonCreated(PersonId personId, Location location)
     {
         if (_disposed)
             return;
@@ -130,7 +131,7 @@ public sealed class Floor : IDisposable
         }
     }
 
-    private void RemovePersonFromFloorIfPersonIsOnFloor(Guid personId)
+    private void RemovePersonFromFloorIfPersonIsOnFloor(PersonId personId)
     {
         Person? personToRemove;
 

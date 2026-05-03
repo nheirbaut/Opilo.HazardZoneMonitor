@@ -1,8 +1,10 @@
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+
 namespace Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Events;
 
-public sealed class PersonRemovedFromFloorEventArgs(string floorName, Guid personId) : EventArgs
+public sealed class PersonRemovedFromFloorEventArgs(string floorName, PersonId personId) : EventArgs
 {
     public string FloorName { get; } = floorName;
-    public Guid PersonId { get; } = personId;
+    public PersonId PersonId { get; } = personId;
 }
 

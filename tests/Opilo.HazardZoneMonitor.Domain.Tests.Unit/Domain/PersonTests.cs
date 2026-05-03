@@ -41,7 +41,7 @@ public sealed class PersonTests : IDisposable
     {
         // Arrange
         _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);
-        var differentPersonId = Guid.NewGuid();
+        var differentPersonId = PersonId.From(Guid.NewGuid());
         var personLocationUpdate = new PersonLocationUpdate(differentPersonId, new Location(1, 1));
 
         // Act

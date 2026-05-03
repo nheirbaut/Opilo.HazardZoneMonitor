@@ -1,10 +1,11 @@
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain.States;
 
 internal abstract class HazardZoneStateBase(
     HazardZone hazardZone,
-    HashSet<Guid> personsInZone,
+    HashSet<PersonId> personsInZone,
     HashSet<string> registeredActivationSourceIds,
     int allowedNumberOfPersons) : IDisposable
 {
@@ -13,7 +14,7 @@ internal abstract class HazardZoneStateBase(
     public int AllowedNumberOfPersons { get; private set; } = allowedNumberOfPersons;
 
     protected HazardZone HazardZone => hazardZone;
-    protected HashSet<Guid> PersonsInZone => personsInZone;
+    protected HashSet<PersonId> PersonsInZone => personsInZone;
     protected readonly HashSet<string> RegisteredActivationSourceIds = registeredActivationSourceIds;
 
     public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
@@ -22,7 +23,7 @@ internal abstract class HazardZoneStateBase(
         OnAllowedNumberOfPersonsChanged();
     }
 
-    public void OnPersonAddedToHazardZone(Guid personId)
+    public void OnPersonAddedToHazardZone(PersonId personId)
     {
         if (PersonsInZone.Add(personId))
             HazardZone.RaisePersonAddedToHazardZone(personId);
@@ -30,7 +31,7 @@ internal abstract class HazardZoneStateBase(
         OnPersonAddedToHazardZone();
     }
 
-    public void OnPersonRemovedFromHazardZone(Guid personId)
+    public void OnPersonRemovedFromHazardZone(PersonId personId)
     {
         if (PersonsInZone.Remove(personId))
             HazardZone.RaisePersonRemovedFromHazardZone(personId);
@@ -38,7 +39,7 @@ internal abstract class HazardZoneStateBase(
         OnPersonRemovedFromHazardZone();
     }
 
-    public void OnPersonChangedLocation(Guid personId, Location location)
+    public void OnPersonChangedLocation(PersonId personId, Location location)
     {
         if (PersonsInZone.Contains(personId))
         {

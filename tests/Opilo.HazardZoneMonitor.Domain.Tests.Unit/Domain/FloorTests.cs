@@ -6,6 +6,7 @@ using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 
 public sealed class FloorTests : IDisposable
@@ -180,7 +181,7 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline, []);
-        var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(8, 8));
+        var personMovement = new PersonLocationUpdate(PersonId.From(Guid.NewGuid()), new Location(8, 8));
 
         // Act
         var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -194,7 +195,7 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         _testFloor = new Floor(ValidFloorName, s_validOutline, []);
-        var personMovement = new PersonLocationUpdate(Guid.NewGuid(), new Location(2, 2));
+        var personMovement = new PersonLocationUpdate(PersonId.From(Guid.NewGuid()), new Location(2, 2));
 
         // Act
         var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -208,7 +209,7 @@ public sealed class FloorTests : IDisposable
         TryAddPersonLocationUpdate_ShouldRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsNew()
     {
         // Arrange
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var location = new Location(2, 2);
         _testFloor = new Floor(ValidFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(personId, location);
@@ -230,7 +231,7 @@ public sealed class FloorTests : IDisposable
         TryAddPersonLocationUpdate_ShouldNotRaisePersonAddedToFloorEvent_WhenPersonLocationUpdateIsOnFloorAndPersonIsKnown()
     {
         // Arrange
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var location = new Location(2, 2);
         _testFloor = new Floor(ValidFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(personId, location);
@@ -249,7 +250,7 @@ public sealed class FloorTests : IDisposable
     public void TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonExpires()
     {
         // Arrange
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var location = new Location(2, 2);
         var personTimeout = TimeSpan.FromMilliseconds(10);
         _testFloor = new Floor(ValidFloorName, s_validOutline, [], personTimeout, _timerFactory);
@@ -272,7 +273,7 @@ public sealed class FloorTests : IDisposable
         TryAddPersonLocationUpdate_ShouldRaisePersonRemovedFromFloorEvent_WhenPersonMovesOffFloorAndPersonIsKnown()
     {
         // Arrange
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var locationOnFloor = new Location(2, 2);
         var locationOffFloor = new Location(200, 200);
         _testFloor = new Floor(ValidFloorName, s_validOutline, []);
@@ -301,7 +302,7 @@ public sealed class FloorTests : IDisposable
         using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
         _testFloor = new Floor("Test Floor", floorOutline, [hazardZone]);
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var location = new Location(20, 20); // Inside hazard zone
         var personLocationUpdate = new PersonLocationUpdate(personId, location);
 
@@ -327,7 +328,7 @@ public sealed class FloorTests : IDisposable
         using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
         _testFloor = new Floor("Test Floor", floorOutline, [hazardZone]);
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var initialLocation = new Location(50, 50); // Outside hazard zone
         var newLocation = new Location(20, 20); // Inside hazard zone
 
@@ -356,7 +357,7 @@ public sealed class FloorTests : IDisposable
         var personTimeout = TimeSpan.FromMilliseconds(10);
         _testFloor = new Floor("Test Floor", floorOutline, [hazardZone], personTimeout, _timerFactory);
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var location = new Location(20, 20); // Inside hazard zone
 
         // Add person first

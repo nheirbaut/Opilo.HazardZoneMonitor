@@ -1,4 +1,5 @@
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain.States;
 
@@ -6,7 +7,7 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
 {
     public ActiveHazardZoneState(
         HazardZone hazardZone,
-        HashSet<Guid> personsInZone,
+        HashSet<PersonId> personsInZone,
         HashSet<string> registeredActivationSourceIds,
         int allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)

@@ -3,6 +3,7 @@
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
 
@@ -64,7 +65,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -84,7 +85,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationOutsideZone = hazardZone.GetLocationOutside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -102,7 +103,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         hazardZone.HandlePersonCreated(newPersonId, locationInsideZone);
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
@@ -123,7 +124,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationOutsideZone = hazardZone.GetLocationOutside();
         hazardZone.HandlePersonCreated(newPersonId, locationOutsideZone);
 
@@ -143,7 +144,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -163,7 +164,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var locationOutsideZone = hazardZone.GetLocationOutside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -181,7 +182,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var locationOutsideZone = hazardZone.GetLocationOutside();
         hazardZone.HandlePersonLocationChanged(personId, locationInsideZone);
@@ -204,7 +205,7 @@ public sealed class HazardZoneTests : IDisposable
         // Arrange
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         hazardZone.HandlePersonLocationChanged(personId, locationInsideZone);
 
@@ -634,7 +635,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -654,7 +655,7 @@ public sealed class HazardZoneTests : IDisposable
     {
         // Arrange
         var activationDuration = TimeSpan.FromSeconds(3);
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         using var hazardZone = HazardZoneBuilder.Create()
             .WithActivationDuration(activationDuration)
             .WithAllowedNumberOfPersons(1)
@@ -688,7 +689,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.Active)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -735,7 +736,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(3)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -758,7 +759,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.Active)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -781,7 +782,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -812,8 +813,8 @@ public sealed class HazardZoneTests : IDisposable
         var locationInsideZone = hazardZone.GetLocationInside();
 
         // Act
-        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInsideZone);
-        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInsideZone);
+        hazardZone.HandlePersonCreated(PersonId.From(Guid.NewGuid()), locationInsideZone);
+        hazardZone.HandlePersonCreated(PersonId.From(Guid.NewGuid()), locationInsideZone);
 
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
@@ -831,7 +832,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithPreAlarmDuration(TimeSpan.Zero)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -860,8 +861,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
 
         // Act
-        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
-        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+        hazardZone.HandlePersonCreated(PersonId.From(Guid.NewGuid()), locationInside);
+        hazardZone.HandlePersonCreated(PersonId.From(Guid.NewGuid()), locationInside);
 
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
@@ -881,7 +882,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithPreAlarmDuration(TimeSpan.Zero)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -1019,7 +1020,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.Active)
             .WithAllowedNumberOfPersons(1)
             .Build();
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var addedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => addedEvents.Add(e);
@@ -1052,7 +1053,7 @@ public sealed class HazardZoneTests : IDisposable
 
         using var hazardZone = hazardZoneBuilder.Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var secondPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => secondPersonAddedEvents.Add(e);
@@ -1230,8 +1231,8 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.ManuallyActivate();
 
         var locationInside = hazardZone.GetLocationInside();
-        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
-        hazardZone.HandlePersonCreated(Guid.NewGuid(), locationInside);
+        hazardZone.HandlePersonCreated(PersonId.From(Guid.NewGuid()), locationInside);
+        hazardZone.HandlePersonCreated(PersonId.From(Guid.NewGuid()), locationInside);
 
         var alarmStateChangedEvents = new List<HazardZoneAlarmStateChangedEventArgs>();
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
@@ -1333,7 +1334,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithAllowedNumberOfPersons(1)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -1379,7 +1380,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.PreAlarm)
             .WithAllowedNumberOfPersons(0)
             .Build();
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var locationOutsideZone = hazardZone.GetLocationOutside();
         var additionalPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
@@ -1427,7 +1428,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.Alarm)
             .Build();
 
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -1647,7 +1648,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.Alarm)
             .WithAllowedNumberOfPersons(1)
             .Build();
-        var newPersonId = Guid.NewGuid();
+        var newPersonId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
         hazardZone.PersonAddedToHazardZone += (_, e) => personAddedEvents.Add(e);
@@ -1692,7 +1693,7 @@ public sealed class HazardZoneTests : IDisposable
             .WithState(HazardZoneTestState.Alarm)
             .WithAllowedNumberOfPersons(0)
             .Build();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var locationInsideZone = hazardZone.GetLocationInside();
         var locationOutsideZone = hazardZone.GetLocationOutside();
         var additionalPersonAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();

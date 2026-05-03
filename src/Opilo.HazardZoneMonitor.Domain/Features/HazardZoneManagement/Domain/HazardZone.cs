@@ -5,6 +5,7 @@ using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 
@@ -61,7 +62,7 @@ public sealed class HazardZone : IDisposable
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
     }
 
-    public void HandlePersonCreated(Guid personId, Location location)
+    public void HandlePersonCreated(PersonId personId, Location location)
     {
         Guard.Against.Null(location);
 
@@ -74,7 +75,7 @@ public sealed class HazardZone : IDisposable
         }
     }
 
-    public void HandlePersonExpired(Guid personId)
+    public void HandlePersonExpired(PersonId personId)
     {
         lock (_zoneStateLock)
         {
@@ -82,7 +83,7 @@ public sealed class HazardZone : IDisposable
         }
     }
 
-    public void HandlePersonLocationChanged(Guid personId, Location location)
+    public void HandlePersonLocationChanged(PersonId personId, Location location)
     {
         lock (_zoneStateLock)
         {
@@ -134,12 +135,12 @@ public sealed class HazardZone : IDisposable
         lock (_zoneStateLock) _currentState.OnPreAlarmTimerElapsed();
     }
 
-    internal void RaisePersonAddedToHazardZone(Guid personId)
+    internal void RaisePersonAddedToHazardZone(PersonId personId)
     {
         PersonAddedToHazardZone?.Invoke(this, new PersonAddedToHazardZoneEventArgs(personId, Name));
     }
 
-    internal void RaisePersonRemovedFromHazardZone(Guid personId)
+    internal void RaisePersonRemovedFromHazardZone(PersonId personId)
     {
         PersonRemovedFromHazardZone?.Invoke(this, new PersonRemovedFromHazardZoneEventArgs(personId, Name));
     }

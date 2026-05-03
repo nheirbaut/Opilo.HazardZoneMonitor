@@ -1,10 +1,11 @@
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Events;
 
-public sealed class PersonCreatedEventArgs(Guid personId, Location location) : EventArgs
+public sealed class PersonCreatedEventArgs(PersonId personId, Location location) : EventArgs
 {
-    public Guid PersonId { get; } = personId;
+    public PersonId PersonId { get; } = personId;
     public Location Location { get; } = location;
 }
 
