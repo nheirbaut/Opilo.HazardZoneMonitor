@@ -1,4 +1,5 @@
 using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.ValueObjects;
 
@@ -17,11 +18,12 @@ public sealed class HazardZoneNameTests
         hazardZoneName.Value.Should().Be(name);
     }
 
-    [Fact]
-    public void From_ShouldThrowValueObjectValidationException_WhenNameIsEmpty()
+    [Theory]
+    [ClassData(typeof(InvalidNames))]
+    public void From_ShouldThrowValueObjectValidationException_WhenNameIsInvalid(string invalidName)
     {
         // Act
-        var act = () => HazardZoneName.From(string.Empty);
+        var act = () => HazardZoneName.From(invalidName);
 
         // Assert
         act.Should().Throw<Vogen.ValueObjectValidationException>();

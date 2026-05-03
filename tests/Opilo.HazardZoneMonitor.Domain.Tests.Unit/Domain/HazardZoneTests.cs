@@ -12,23 +12,6 @@ namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 public sealed class HazardZoneTests : IDisposable
 {
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
-    {
-        // Act & Assert
-        var act = () => new HazardZone(null!, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
-        act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Theory]
-    [ClassData(typeof(InvalidNames))]
-    public void Constructor_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
-    {
-        // Act & Assert
-        var act = () => new HazardZone(invalidName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
