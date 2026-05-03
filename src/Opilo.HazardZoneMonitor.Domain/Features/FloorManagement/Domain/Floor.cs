@@ -20,7 +20,7 @@ public sealed class Floor : IDisposable
     private readonly Lock _personsOnFloorLock = new();
     private readonly ITimerFactory _timerFactory;
 
-    public readonly static TimeSpan DefaultPersonLifespan = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan s_defaultPersonLifespan = TimeSpan.FromMilliseconds(200);
 
     public string Name { get; }
     public Outline Outline { get; }
@@ -48,7 +48,7 @@ public sealed class Floor : IDisposable
         Name = name;
         Outline = outline;
         _hazardZones = hazardZoneList;
-        _personLifespan = personLifespan ?? DefaultPersonLifespan;
+        _personLifespan = personLifespan ?? s_defaultPersonLifespan;
         _timerFactory = timerFactory ?? new SystemTimerFactory();
     }
 

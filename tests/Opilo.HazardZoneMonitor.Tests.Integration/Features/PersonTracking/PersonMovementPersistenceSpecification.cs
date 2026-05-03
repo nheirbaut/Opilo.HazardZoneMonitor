@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
@@ -24,7 +25,7 @@ public sealed class PersonMovementPersistenceSpecification
 
                 HttpResponseMessage postResponse = await client.PostAsJsonAsync(
                     "/api/v1/person-movements",
-                    new { PersonId = Guid.NewGuid(), X = 5.0, Y = 10.0 },
+                    new { PersonId = PersonId.From(Guid.NewGuid()), X = 5.0, Y = 10.0 },
                     TestContext.Current.CancellationToken);
 
                 postResponse.EnsureSuccessStatusCode();
