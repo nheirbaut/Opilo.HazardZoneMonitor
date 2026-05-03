@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
@@ -35,7 +36,7 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
         // Arrange
         var hazardZoneOptions = new HazardZoneOptions
         {
-            HazardZones = [new HazardZoneConfiguration(string.Empty, [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)], TimeSpan.Zero, TimeSpan.Zero)]
+            HazardZones = [HazardZoneConfigurationBuilder.Create().WithName(string.Empty).Build()]
         };
 
         _customFactory = factory.WithWebHostBuilder(builder =>
@@ -61,8 +62,8 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
         {
             HazardZones =
             [
-                new HazardZoneConfiguration("Zone", [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)], TimeSpan.Zero, TimeSpan.Zero),
-                new HazardZoneConfiguration("Zone", [new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)], TimeSpan.Zero, TimeSpan.Zero)
+                HazardZoneConfigurationBuilder.BuildSimple(),
+                HazardZoneConfigurationBuilder.Create().WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build()
             ]
         };
 
