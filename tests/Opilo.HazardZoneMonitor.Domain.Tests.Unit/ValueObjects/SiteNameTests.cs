@@ -57,4 +57,14 @@ public sealed class SiteNameTests
         deserialized.Should().Be(name);
         json.Should().Be("\"TESTSITE\"");
     }
+
+    [Fact]
+    public void JsonDeserialize_ShouldThrow_WhenNameIsEmpty()
+    {
+        // Act
+        var act = () => System.Text.Json.JsonSerializer.Deserialize<SiteName>("\"\"");
+
+        // Assert
+        act.Should().Throw<System.Text.Json.JsonException>();
+    }
 }
