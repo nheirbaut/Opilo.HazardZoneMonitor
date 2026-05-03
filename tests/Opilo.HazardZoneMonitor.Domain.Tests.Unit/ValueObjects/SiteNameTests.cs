@@ -28,4 +28,18 @@ public sealed class SiteNameTests
         // Assert
         act.Should().Throw<Vogen.ValueObjectValidationException>();
     }
+
+    [Fact]
+    public void From_ShouldBeCaseInsensitive_WhenNamesDifferOnlyByCase()
+    {
+        // Arrange
+        var lowerCase = SiteName.From("reactorfacility");
+        var upperCase = SiteName.From("REACTORFACILITY");
+        var mixedCase = SiteName.From("ReactorFacility");
+
+        // Assert
+        lowerCase.Should().Be(upperCase);
+        upperCase.Should().Be(mixedCase);
+        lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
+    }
 }
