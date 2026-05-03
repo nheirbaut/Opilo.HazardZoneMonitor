@@ -50,7 +50,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         // Arrange
         List<FloorConfiguration> expectedFloors =
         [
-            new("First Floor",
+            new(FloorName.From("First Floor"),
                 new List<PointConfiguration>
                 {
                     new(0, 0),
@@ -58,7 +58,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
                     new(10, 10),
                     new(0, 10)
                 }),
-            new("Second Floor",
+            new(FloorName.From("Second Floor"),
                 new List<PointConfiguration>
                 {
                     new(0, 0),
@@ -110,7 +110,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
 
         List<FloorConfiguration> expectedFloors =
         [
-            new("Ground Floor",
+            new(FloorName.From("Ground Floor"),
                 new List<PointConfiguration>
                 {
                     new(0, 0),

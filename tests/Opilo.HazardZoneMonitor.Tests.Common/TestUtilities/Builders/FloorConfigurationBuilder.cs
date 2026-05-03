@@ -1,12 +1,13 @@
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 internal sealed class FloorConfigurationBuilder
 {
-    public const string DefaultName = "Floor";
+    public static readonly FloorName DefaultName = FloorName.From("Floor");
 
     public static readonly IReadOnlyList<PointConfiguration> DefaultOutline =
     [
@@ -15,7 +16,7 @@ internal sealed class FloorConfigurationBuilder
         new PointConfiguration(0, 10)
     ];
 
-    private string _name = DefaultName;
+    private FloorName _name = DefaultName;
     private IReadOnlyList<PointConfiguration> _outline = DefaultOutline;
     private IReadOnlyList<HazardZoneConfiguration> _hazardZones = [];
 
@@ -24,7 +25,7 @@ internal sealed class FloorConfigurationBuilder
     public static FloorConfiguration BuildSimple() =>
         new(DefaultName, DefaultOutline);
 
-    public FloorConfigurationBuilder WithName(string name)
+    public FloorConfigurationBuilder WithName(FloorName name)
     {
         _name = name;
         return this;

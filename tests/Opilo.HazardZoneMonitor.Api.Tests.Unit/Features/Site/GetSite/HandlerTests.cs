@@ -4,6 +4,7 @@ using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.Site;
 using Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Site.GetSite;
 
@@ -17,8 +18,8 @@ public sealed class HandlerTests
         PointConfiguration point2 = new(10.0, 10.0);
         PointConfiguration point3 = new(10.0, 0.0);
 
-        FloorConfiguration floor1 = new("Floor 1", new[] { point1, point2, point3 });
-        FloorConfiguration floor2 = new("Floor 2", new[] { point1, point2 });
+        FloorConfiguration floor1 = new(FloorName.From("Floor 1"), new[] { point1, point2, point3 });
+        FloorConfiguration floor2 = new(FloorName.From("Floor 2"), new[] { point1, point2 });
 
         SiteOptions siteOptions = new() { Name = "Test Site" };
         FloorOptions floorOptions = new() { Floors = new[] { floor1, floor2 } };

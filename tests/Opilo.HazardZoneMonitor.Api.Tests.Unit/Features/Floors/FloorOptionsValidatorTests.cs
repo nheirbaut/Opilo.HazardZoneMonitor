@@ -36,23 +36,6 @@ public sealed class FloorOptionsValidatorTests
         result.Failures.Should().BeNullOrEmpty();
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Validate_ShouldReturnFailure_WhenFloorNameIsEmptyOrWhitespace(string invalidName)
-    {
-        // Arrange
-        var floor = FloorConfigurationBuilder.Create().WithName(invalidName).WithOutline().Build();
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
     [Fact]
     public void Validate_ShouldReturnFailure_WhenFloorNamesAreNotUnique()
     {
@@ -73,8 +56,8 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenFloorNamesAreNotUniqueWhenCaseIgnored()
     {
         // Arrange
-        var floor1 = FloorConfigurationBuilder.Create().WithName("FlOoR").WithOutline().Build();
-        var floor2 = FloorConfigurationBuilder.Create().WithName("fLoOr").WithOutline().Build();
+        var floor1 = FloorConfigurationBuilder.Create().WithName(FloorName.From("FlOoR")).WithOutline().Build();
+        var floor2 = FloorConfigurationBuilder.Create().WithName(FloorName.From("fLoOr")).WithOutline().Build();
         var options = new FloorOptions { Floors = [floor1, floor2] };
 
         // Act
@@ -174,7 +157,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenFloorOutlineIsNull()
     {
         // Arrange
-        var floor = new FloorConfiguration("Floor", null!);
+        var floor = new FloorConfiguration(FloorName.From("Floor"), null!);
         var options = new FloorOptions { Floors = [floor] };
 
         // Act
@@ -189,7 +172,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZonesIsNull()
     {
         // Arrange
-        var floor = new FloorConfiguration("Floor", FloorConfigurationBuilder.DefaultOutline)
+        var floor = new FloorConfiguration(FloorName.From("Floor"), FloorConfigurationBuilder.DefaultOutline)
         {
             HazardZones = null!
         };

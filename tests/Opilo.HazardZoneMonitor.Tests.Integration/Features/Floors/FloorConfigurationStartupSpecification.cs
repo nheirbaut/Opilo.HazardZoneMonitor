@@ -31,30 +31,6 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
     }
 
     [Fact]
-    public void Api_ShouldThrowOptionsValidationException_WhenFloorNameIsEmpty()
-    {
-        // Arrange
-        var floorOptions = new FloorOptions
-        {
-            Floors = [FloorConfigurationBuilder.Create().WithName(string.Empty).Build()]
-        };
-
-        _customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-            });
-        });
-
-        // Act
-        Action act = () => _customFactory.CreateClient();
-
-        // Assert
-        act.Should().Throw<OptionsValidationException>();
-    }
-
-    [Fact]
     public void Api_ShouldThrowOptionsValidationException_WhenFloorNamesAreDuplicate()
     {
         // Arrange

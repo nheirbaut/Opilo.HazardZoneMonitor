@@ -15,10 +15,7 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             return ValidateOptionsResult.Fail("Floors configuration is missing.");
         }
 
-        var result = ValidateFloorNamesAreNotEmpty(options.Floors);
-        if (!result.Succeeded) return result;
-
-        result = ValidateFloorNamesAreUnique(options.Floors);
+        var result = ValidateFloorNamesAreUnique(options.Floors);
         if (!result.Succeeded) return result;
 
         result = ValidateFloorOutlinesHaveMinimumPoints(options.Floors);
@@ -36,19 +33,9 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateFloorNamesAreNotEmpty(IReadOnlyList<FloorConfiguration> floors)
-    {
-        if (floors.Any(floor => string.IsNullOrWhiteSpace(floor.Name)))
-        {
-            return ValidateOptionsResult.Fail("Each floor must have a non-empty name.");
-        }
-
-        return ValidateOptionsResult.Success;
-    }
-
     private static ValidateOptionsResult ValidateFloorNamesAreUnique(IReadOnlyList<FloorConfiguration> floors)
     {
-        var distinctCount = floors.Select(floor => floor.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        var distinctCount = floors.Select(floor => floor.Name).Distinct().Count();
         if (distinctCount != floors.Count)
         {
             return ValidateOptionsResult.Fail("Floor names must be unique (case-insensitive).");
