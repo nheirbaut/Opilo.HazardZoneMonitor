@@ -47,7 +47,7 @@ internal static class HazardZoneHelperExtensions
 
         foreach (var location in locations)
         {
-            double distanceSquared = DistanceSquared(location, centroid);
+            var distanceSquared = DistanceSquared(location, centroid);
 
             if (distanceSquared <= maxDistanceSquared)
                 continue;

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Opilo.HazardZoneMonitor.Api.Tests.Unit" />
+    <InternalsVisibleTo Include="Opilo.HazardZoneMonitor.Tests.Integration" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Opilo.HazardZoneMonitor.Api\Opilo.HazardZoneMonitor.Api.csproj" />
+  </ItemGroup>
+
+</Project>

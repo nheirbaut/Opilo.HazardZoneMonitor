@@ -37,6 +37,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMark
             config.AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.Ordinal)
             {
                 ["ConnectionStrings:DefaultConnection"] = $"Data Source={_databasePath}",
+                ["SiteOptions:Name"] = "Test Site",
             });
         });
     }

@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
@@ -10,6 +11,8 @@ public sealed class Feature : IFeature
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<FloorOptions>(configuration.GetSection(nameof(FloorOptions)));
+        services.AddSingleton<IValidateOptions<FloorOptions>, FloorOptionsValidator>();
+        services.AddOptions<FloorOptions>().ValidateOnStart();
 
         services.AddScoped<IQueryHandler<Query, GetFloorsResponse>, Handler>();
     }
