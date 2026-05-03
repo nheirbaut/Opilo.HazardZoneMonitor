@@ -104,142 +104,6 @@ public sealed class FloorOptionsValidatorTests
         result.Failures.Should().BeNullOrEmpty();
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Validate_ShouldReturnFailure_WhenHazardZoneNameIsEmptyOrWhitespace(string invalidName)
-    {
-        // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.Create().WithName(invalidName).Build();
-        var floor = FloorConfigurationBuilder.Create().WithHazardZones(hazardZone).Build();
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
-    [Fact]
-    public void Validate_ShouldReturnFailure_WhenHazardZoneNamesAreNotUniqueWithinFloor()
-    {
-        // Arrange
-        var hazardZone1 = HazardZoneConfigurationBuilder.Create().WithName("Zone A").Build();
-        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("Zone A").WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build();
-        var floor = FloorConfigurationBuilder.Create().WithHazardZones(hazardZone1, hazardZone2).Build();
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
-    [Fact]
-    public void Validate_ShouldReturnFailure_WhenHazardZoneNamesAreNotUniqueWithinFloorWhenCaseIgnored()
-    {
-        // Arrange
-        var hazardZone1 = HazardZoneConfigurationBuilder.Create().WithName("ZoNe A").Build();
-        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("zOnE a").WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build();
-        var floor = FloorConfigurationBuilder.Create().WithHazardZones(hazardZone1, hazardZone2).Build();
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
-    [Fact]
-    public void Validate_ShouldReturnFailure_WhenHazardZoneOutlineHasFewerThanThreePoints()
-    {
-        // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.Create().WithOutline(new PointConfiguration(0, 0), new PointConfiguration(1, 1)).Build();
-        var floor = FloorConfigurationBuilder.Create().WithHazardZones(hazardZone).Build();
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
-    [Fact]
-    public void Validate_ShouldReturnSuccess_WhenHazardZoneOutlineHasExactlyThreePoints()
-    {
-        // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.BuildSimple();
-        var floor = FloorConfigurationBuilder.BuildSimple();
-        floor = floor with { HazardZones = [hazardZone] };
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeTrue();
-        result.Failures.Should().BeNullOrEmpty();
-    }
-
-    [Fact]
-    public void Validate_ShouldReturnFailure_WhenHazardZoneActivationDurationIsNegative()
-    {
-        // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.Create().WithActivationDuration(TimeSpan.FromMilliseconds(-1)).Build();
-        var floor = FloorConfigurationBuilder.BuildSimple();
-        floor = floor with { HazardZones = [hazardZone] };
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
-    [Fact]
-    public void Validate_ShouldReturnFailure_WhenHazardZonePreAlarmDurationIsNegative()
-    {
-        // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.Create().WithPreAlarmDuration(TimeSpan.FromMilliseconds(-1)).Build();
-        var floor = FloorConfigurationBuilder.BuildSimple();
-        floor = floor with { HazardZones = [hazardZone] };
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
-    [Fact]
-    public void Validate_ShouldReturnFailure_WhenHazardZoneAllowedNumberOfPersonsIsNegative()
-    {
-        // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.Create().WithAllowedNumberOfPersons(-1).Build();
-        var floor = FloorConfigurationBuilder.BuildSimple();
-        floor = floor with { HazardZones = [hazardZone] };
-        var options = new FloorOptions { Floors = [floor] };
-
-        // Act
-        var result = _validator.Validate(string.Empty, options);
-
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
-    }
-
     [Fact]
     public void Validate_ShouldReturnFailure_WhenHazardZonesOverlapWithinFloor()
     {
@@ -268,6 +132,53 @@ public sealed class FloorOptionsValidatorTests
         var hazardZone = HazardZoneConfigurationBuilder.Create().WithOutline(new PointConfiguration(15, 15), new PointConfiguration(20, 15), new PointConfiguration(20, 20), new PointConfiguration(15, 20)).Build();
         var floor = FloorConfigurationBuilder.BuildSimple();
         floor = floor with { HazardZones = [hazardZone] };
+        var options = new FloorOptions { Floors = [floor] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenFloorsIsNull()
+    {
+        // Arrange
+        var options = new FloorOptions { Floors = null! };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenFloorOutlineIsNull()
+    {
+        // Arrange
+        var floor = new FloorConfiguration("Floor", null!);
+        var options = new FloorOptions { Floors = [floor] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZonesIsNull()
+    {
+        // Arrange
+        var floor = new FloorConfiguration("Floor", FloorConfigurationBuilder.DefaultOutline)
+        {
+            HazardZones = null!
+        };
         var options = new FloorOptions { Floors = [floor] };
 
         // Act

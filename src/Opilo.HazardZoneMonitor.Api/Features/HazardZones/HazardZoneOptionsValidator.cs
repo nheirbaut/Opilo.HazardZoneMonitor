@@ -6,30 +6,35 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
 {
     public ValidateOptionsResult Validate(string? name, HazardZoneOptions options)
     {
-        var result = ValidateHazardZoneNamesAreNotEmpty(options);
+        if (ReferenceEquals(options.HazardZones, null))
+        {
+            return ValidateOptionsResult.Fail("HazardZones configuration is missing.");
+        }
+
+        var result = ValidateHazardZoneNamesAreNotEmpty(options.HazardZones);
         if (!result.Succeeded) return result;
 
-        result = ValidateHazardZoneNamesAreUnique(options);
+        result = ValidateHazardZoneNamesAreUnique(options.HazardZones);
         if (!result.Succeeded) return result;
 
-        result = ValidateHazardZoneOutlinesHaveMinimumPoints(options);
+        result = ValidateHazardZoneOutlinesHaveMinimumPoints(options.HazardZones);
         if (!result.Succeeded) return result;
 
-        result = ValidateHazardZoneActivationDurationsAreNotNegative(options);
+        result = ValidateHazardZoneActivationDurationsAreNotNegative(options.HazardZones);
         if (!result.Succeeded) return result;
 
-        result = ValidateHazardZonePreAlarmDurationsAreNotNegative(options);
+        result = ValidateHazardZonePreAlarmDurationsAreNotNegative(options.HazardZones);
         if (!result.Succeeded) return result;
 
-        result = ValidateHazardZoneAllowedNumberOfPersonsAreNotNegative(options);
+        result = ValidateHazardZoneAllowedNumberOfPersonsAreNotNegative(options.HazardZones);
         if (!result.Succeeded) return result;
 
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateHazardZoneNamesAreNotEmpty(HazardZoneOptions options)
+    private static ValidateOptionsResult ValidateHazardZoneNamesAreNotEmpty(IReadOnlyList<HazardZoneConfiguration> hazardZones)
     {
-        if (options.HazardZones.Any(hazardZone => string.IsNullOrWhiteSpace(hazardZone.Name)))
+        if (hazardZones.Any(hazardZone => string.IsNullOrWhiteSpace(hazardZone.Name)))
         {
             return ValidateOptionsResult.Fail("Each hazard zone must have a non-empty name.");
         }
@@ -37,9 +42,10 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateHazardZoneNamesAreUnique(HazardZoneOptions options)
+    private static ValidateOptionsResult ValidateHazardZoneNamesAreUnique(IReadOnlyList<HazardZoneConfiguration> hazardZones)
     {
-        if (options.HazardZones.Select(hazardZone => hazardZone.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != options.HazardZones.Count)
+        var distinctCount = hazardZones.Select(hazardZone => hazardZone.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        if (distinctCount != hazardZones.Count)
         {
             return ValidateOptionsResult.Fail("Hazard zone names must be unique (case-insensitive).");
         }
@@ -47,19 +53,35 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateHazardZoneOutlinesHaveMinimumPoints(HazardZoneOptions options)
+    private static ValidateOptionsResult ValidateHazardZoneOutlinesHaveMinimumPoints(IReadOnlyList<HazardZoneConfiguration> hazardZones)
     {
-        if (options.HazardZones.Any(hazardZone => hazardZone.Outline.Count < 3))
+        var invalidHazardZone = hazardZones.FirstOrDefault(HasInvalidOutline);
+        if (invalidHazardZone is not null)
         {
+            if (ReferenceEquals(invalidHazardZone.Outline, null))
+            {
+                return ValidateOptionsResult.Fail("Each hazard zone must have an outline.");
+            }
+
             return ValidateOptionsResult.Fail("Each hazard zone's outline must have at least 3 points.");
         }
 
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateHazardZoneActivationDurationsAreNotNegative(HazardZoneOptions options)
+    private static bool HasInvalidOutline(HazardZoneConfiguration hazardZone)
     {
-        if (options.HazardZones.Any(hazardZone => hazardZone.ActivationDuration < TimeSpan.Zero))
+        if (ReferenceEquals(hazardZone.Outline, null))
+        {
+            return true;
+        }
+
+        return hazardZone.Outline.Count < 3;
+    }
+
+    private static ValidateOptionsResult ValidateHazardZoneActivationDurationsAreNotNegative(IReadOnlyList<HazardZoneConfiguration> hazardZones)
+    {
+        if (hazardZones.Any(hazardZone => hazardZone.ActivationDuration < TimeSpan.Zero))
         {
             return ValidateOptionsResult.Fail("Each hazard zone's activation duration must not be negative.");
         }
@@ -67,9 +89,9 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateHazardZonePreAlarmDurationsAreNotNegative(HazardZoneOptions options)
+    private static ValidateOptionsResult ValidateHazardZonePreAlarmDurationsAreNotNegative(IReadOnlyList<HazardZoneConfiguration> hazardZones)
     {
-        if (options.HazardZones.Any(hazardZone => hazardZone.PreAlarmDuration < TimeSpan.Zero))
+        if (hazardZones.Any(hazardZone => hazardZone.PreAlarmDuration < TimeSpan.Zero))
         {
             return ValidateOptionsResult.Fail("Each hazard zone's pre-alarm duration must not be negative.");
         }
@@ -77,9 +99,9 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateHazardZoneAllowedNumberOfPersonsAreNotNegative(HazardZoneOptions options)
+    private static ValidateOptionsResult ValidateHazardZoneAllowedNumberOfPersonsAreNotNegative(IReadOnlyList<HazardZoneConfiguration> hazardZones)
     {
-        if (options.HazardZones.Any(hazardZone => hazardZone.AllowedNumberOfPersons < 0))
+        if (hazardZones.Any(hazardZone => hazardZone.AllowedNumberOfPersons < 0))
         {
             return ValidateOptionsResult.Fail("Each hazard zone's allowed number of persons must not be negative.");
         }
