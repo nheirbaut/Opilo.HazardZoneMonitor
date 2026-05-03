@@ -18,9 +18,9 @@ An overview of tasks and features to be implemented.
 
 - [ ] Fix `Outline` constructor: `Vertices` is assigned before the null guard, and assigned twice.
 
-## Architecture
+## Critical Blockers
 
-- [ ] Wire the API layer to the domain model. Currently `RegisterPersonMovement` writes directly to SQLite via Dapper and never touches the domain (`Floor`, `Person`, `HazardZone`). The rich domain model is unreachable from the API. All feature work (hazard zone endpoints, notifications, floor management) is blocked by this gap.
+- [ ] Wire the API layer to the domain model. `RegisterPersonMovement` writes directly to SQLite via Dapper and never touches `Floor`, `Person`, or `HazardZone`. All feature work is blocked until this gap is closed.
 
 ## Features
 
@@ -56,10 +56,6 @@ An overview of tasks and features to be implemented.
 - [ ] Add structured error responses (RFC 9457 Problem Details) via global error handling middleware.
 - [ ] Add request validation at the API boundary (commands accept arbitrary values with no validation before hitting the handler).
 - [ ] Add correlation/request ID tracking for traceability across logs.
-
-### Root
-
-- [ ] Determine available links when calling "/" dynamically so that they are not hardcoded.
 
 ### Endpoints
 
