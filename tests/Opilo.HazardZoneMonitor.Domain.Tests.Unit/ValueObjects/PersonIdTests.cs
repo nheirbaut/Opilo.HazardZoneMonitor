@@ -41,4 +41,18 @@ public sealed class PersonIdTests
         // Assert
         result.Should().BeTrue();
     }
+
+    [Fact]
+    public void Equals_ShouldReturnFalse_WhenPersonIdsHaveDifferentGuidValue()
+    {
+        // Arrange
+        var personId1 = PersonId.From(Guid.NewGuid());
+        var personId2 = PersonId.From(Guid.NewGuid());
+
+        // Act
+        var result = personId1 == personId2;
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }
