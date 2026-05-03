@@ -16,4 +16,14 @@ public sealed class HazardZoneNameTests
         // Assert
         hazardZoneName.Value.Should().Be(name);
     }
+
+    [Fact]
+    public void From_ShouldThrowValueObjectValidationException_WhenNameIsEmpty()
+    {
+        // Act
+        var act = () => HazardZoneName.From(string.Empty);
+
+        // Assert
+        act.Should().Throw<Vogen.ValueObjectValidationException>();
+    }
 }
