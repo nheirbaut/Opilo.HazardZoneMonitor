@@ -21,7 +21,7 @@ public sealed class HandlerTests
         FloorConfiguration floor1 = new(FloorName.From("Floor 1"), new[] { point1, point2, point3 });
         FloorConfiguration floor2 = new(FloorName.From("Floor 2"), new[] { point1, point2 });
 
-        SiteOptions siteOptions = new() { Name = "Test Site" };
+        SiteOptions siteOptions = new() { Name = SiteName.From("Test Site") };
         FloorOptions floorOptions = new() { Floors = new[] { floor1, floor2 } };
 
         var siteOpts = Options.Create(siteOptions);
@@ -34,35 +34,15 @@ public sealed class HandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);
-        result.Value.Site.Name.Should().Be("Test Site");
+        result.Value.Site.Name.Should().Be(SiteName.From("Test Site"));
         result.Value.Site.Floors.Should().BeEquivalentTo(new[] { floor1, floor2 });
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnEmptyName_WhenSiteNameIsNull()
-    {
-        // Arrange
-        SiteOptions siteOptions = new() { Name = null };
-        FloorOptions floorOptions = new() { Floors = Array.Empty<FloorConfiguration>() };
-
-        var siteOpts = Options.Create(siteOptions);
-        var floorOpts = Options.Create(floorOptions);
-        Handler handler = new(siteOpts, floorOpts);
-        Query query = new();
-
-        // Act
-        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
-
-        // Assert
-        result.Status.Should().Be(ResultStatus.Ok);
-        result.Value.Site.Name.Should().BeEmpty();
     }
 
     [Fact]
     public async Task Handle_ShouldReturnSuccessResultWithEmptyFloors_WhenNoFloorsAreConfigured()
     {
         // Arrange
-        SiteOptions siteOptions = new() { Name = "Test Site" };
+        SiteOptions siteOptions = new() { Name = SiteName.From("Test Site") };
         FloorOptions floorOptions = new() { Floors = Array.Empty<FloorConfiguration>() };
 
         var siteOpts = Options.Create(siteOptions);

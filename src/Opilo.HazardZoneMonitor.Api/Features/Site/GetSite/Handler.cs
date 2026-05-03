@@ -10,7 +10,7 @@ public sealed class Handler(IOptions<SiteOptions> siteOptions, IOptions<FloorOpt
 {
     public Task<Result<GetSiteResponse>> Handle(Query query, CancellationToken cancellationToken)
     {
-        var site = new SiteConfiguration(siteOptions.Value.Name ?? string.Empty, floorOptions.Value.Floors);
+        var site = new SiteConfiguration(siteOptions.Value.Name, floorOptions.Value.Floors);
         return Task.FromResult(Result.Success(new GetSiteResponse(site)));
     }
 }
