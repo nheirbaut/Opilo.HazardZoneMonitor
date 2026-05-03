@@ -3,6 +3,7 @@ using NSubstitute;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.PersonTracking.RegisterPersonMovement;
 
@@ -23,7 +24,7 @@ public sealed class HandlerSpecification
     public async Task Handle_ShouldReturnCreatedResult_WhenMovementIsRegisteredSuccessfully()
     {
         // Arrange
-        Guid personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         double x = 1.0;
         double y = 2.0;
         Command command = new(personId, x, y);
