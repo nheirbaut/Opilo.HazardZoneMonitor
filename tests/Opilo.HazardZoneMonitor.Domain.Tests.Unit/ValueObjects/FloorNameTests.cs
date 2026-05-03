@@ -57,4 +57,14 @@ public sealed class FloorNameTests
         deserialized.Should().Be(name);
         json.Should().Be("\"TESTFLOOR\"");
     }
+
+    [Fact]
+    public void JsonDeserialize_ShouldThrow_WhenNameIsEmpty()
+    {
+        // Act
+        var act = () => System.Text.Json.JsonSerializer.Deserialize<FloorName>("\"\"");
+
+        // Assert
+        act.Should().Throw<System.Text.Json.JsonException>();
+    }
 }
