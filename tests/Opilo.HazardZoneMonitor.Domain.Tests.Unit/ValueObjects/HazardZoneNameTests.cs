@@ -42,4 +42,30 @@ public sealed class HazardZoneNameTests
         // Assert
         act.Should().Throw<Vogen.ValueObjectValidationException>();
     }
+
+    [Fact]
+    public void JsonSerialize_ShouldRoundTrip_WhenNameIsValid()
+    {
+        // Arrange
+        var name = HazardZoneName.From("TestZone");
+
+        // Act
+        var json = System.Text.Json.JsonSerializer.Serialize(name);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<HazardZoneName>(json);
+
+        // Assert
+        deserialized.Should().Be(name);
+        json.Should().Be("\"TESTZONE\"");
+    }
+
+    [Fact]
+    public void JsonDeserialize_ShouldThrow_WhenNameIsEmpty()
+    {
+        // Act
+        var act = () => System.Text.Json.JsonSerializer.Deserialize<HazardZoneName>("\"\"");
+
+        // Assert
+        act.Should().Throw<System.Text.Json.JsonException>();
+    }
+
 }

@@ -11,10 +11,7 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
             return ValidateOptionsResult.Fail("HazardZones configuration is missing.");
         }
 
-        var result = ValidateHazardZoneNamesAreNotEmpty(options.HazardZones);
-        if (!result.Succeeded) return result;
-
-        result = ValidateHazardZoneNamesAreUnique(options.HazardZones);
+        var result = ValidateHazardZoneNamesAreUnique(options.HazardZones);
         if (!result.Succeeded) return result;
 
         result = ValidateHazardZoneOutlinesHaveMinimumPoints(options.HazardZones);
@@ -32,19 +29,9 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateHazardZoneNamesAreNotEmpty(IReadOnlyList<HazardZoneConfiguration> hazardZones)
-    {
-        if (hazardZones.Any(hazardZone => string.IsNullOrWhiteSpace(hazardZone.Name)))
-        {
-            return ValidateOptionsResult.Fail("Each hazard zone must have a non-empty name.");
-        }
-
-        return ValidateOptionsResult.Success;
-    }
-
     private static ValidateOptionsResult ValidateHazardZoneNamesAreUnique(IReadOnlyList<HazardZoneConfiguration> hazardZones)
     {
-        var distinctCount = hazardZones.Select(hazardZone => hazardZone.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        var distinctCount = hazardZones.Select(hazardZone => hazardZone.Name).Distinct().Count();
         if (distinctCount != hazardZones.Count)
         {
             return ValidateOptionsResult.Fail("Hazard zone names must be unique (case-insensitive).");

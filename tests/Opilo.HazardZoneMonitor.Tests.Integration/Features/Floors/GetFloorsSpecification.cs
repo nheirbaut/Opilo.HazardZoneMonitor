@@ -5,6 +5,7 @@ using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Floors;
@@ -96,7 +97,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         // Arrange
         List<HazardZoneConfiguration> expectedHazardZones =
         [
-            new("Reactor Room",
+            new(HazardZoneName.From("Reactor Room"),
             [
                 new(2, 2),
                 new(8, 2),

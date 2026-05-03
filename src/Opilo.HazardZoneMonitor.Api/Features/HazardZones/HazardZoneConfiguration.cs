@@ -1,10 +1,11 @@
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 
 public sealed record HazardZoneConfiguration(
-    string Name,
+    HazardZoneName Name,
     IReadOnlyList<PointConfiguration> Outline,
     TimeSpan ActivationDuration,
     TimeSpan PreAlarmDuration,

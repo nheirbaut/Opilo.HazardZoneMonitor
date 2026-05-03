@@ -31,30 +31,6 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
     }
 
     [Fact]
-    public void Api_ShouldThrowOptionsValidationException_WhenHazardZoneNameIsEmpty()
-    {
-        // Arrange
-        var hazardZoneOptions = new HazardZoneOptions
-        {
-            HazardZones = [HazardZoneConfigurationBuilder.Create().WithName(string.Empty).Build()]
-        };
-
-        _customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(hazardZoneOptions.ToConfigurationDictionary());
-            });
-        });
-
-        // Act
-        Action act = () => _customFactory.CreateClient();
-
-        // Assert
-        act.Should().Throw<OptionsValidationException>();
-    }
-
-    [Fact]
     public void Api_ShouldThrowOptionsValidationException_WhenHazardZoneNamesAreDuplicate()
     {
         // Arrange

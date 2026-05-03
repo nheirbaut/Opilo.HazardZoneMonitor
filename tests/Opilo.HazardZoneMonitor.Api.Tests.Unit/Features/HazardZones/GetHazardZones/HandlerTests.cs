@@ -4,6 +4,7 @@ using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones.GetHazardZones;
 
@@ -18,7 +19,7 @@ public sealed class HandlerTests
         PointConfiguration point3 = new(10.0, 0.0);
 
         HazardZoneConfiguration zone1 = new(
-            "Hazard Zone 1",
+            HazardZoneName.From("Hazard Zone 1"),
             new[] { point1, point2, point3 },
             TimeSpan.FromSeconds(30),
             TimeSpan.FromSeconds(10),
@@ -27,7 +28,7 @@ public sealed class HandlerTests
             5);
 
         HazardZoneConfiguration zone2 = new(
-            "Hazard Zone 2",
+            HazardZoneName.From("Hazard Zone 2"),
             new[] { point1, point2 },
             TimeSpan.FromSeconds(60),
             TimeSpan.FromSeconds(20),
