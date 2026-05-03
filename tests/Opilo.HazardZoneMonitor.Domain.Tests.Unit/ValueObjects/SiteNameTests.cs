@@ -67,4 +67,18 @@ public sealed class SiteNameTests
         // Assert
         act.Should().Throw<System.Text.Json.JsonException>();
     }
+
+    [Fact]
+    public void Equals_ShouldReturnFalse_WhenSiteNamesHaveDifferentValues()
+    {
+        // Arrange
+        var siteName1 = SiteName.From("SiteOne");
+        var siteName2 = SiteName.From("SiteTwo");
+
+        // Act
+        var result = siteName1 == siteName2;
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }
