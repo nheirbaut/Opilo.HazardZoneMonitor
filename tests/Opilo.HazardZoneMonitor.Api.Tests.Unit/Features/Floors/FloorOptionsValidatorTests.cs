@@ -1,5 +1,6 @@
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Floors;
@@ -7,6 +8,19 @@ namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Floors;
 public sealed class FloorOptionsValidatorTests
 {
     private readonly FloorOptionsValidator _validator = new();
+
+    [Fact]
+    public void Constructor_ShouldAcceptFloorName_WhenNameIsValid()
+    {
+        // Arrange
+        var floorName = FloorName.From("TestFloor");
+
+        // Act
+        var floor = new FloorConfiguration(floorName, FloorConfigurationBuilder.DefaultOutline);
+
+        // Assert
+        floor.Name.Should().Be(floorName);
+    }
 
     [Fact]
     public void Validate_ShouldReturnSuccess_WhenNoFloorsAreConfigured()
