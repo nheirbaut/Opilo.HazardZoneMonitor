@@ -28,4 +28,18 @@ public sealed class FloorNameTests
         // Assert
         act.Should().Throw<Vogen.ValueObjectValidationException>();
     }
+
+    [Fact]
+    public void From_ShouldBeCaseInsensitive_WhenNamesDifferOnlyByCase()
+    {
+        // Arrange
+        var lowerCase = FloorName.From("groundfloor");
+        var upperCase = FloorName.From("GROUNDFLOOR");
+        var mixedCase = FloorName.From("GroundFloor");
+
+        // Assert
+        lowerCase.Should().Be(upperCase);
+        upperCase.Should().Be(mixedCase);
+        lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
+    }
 }
