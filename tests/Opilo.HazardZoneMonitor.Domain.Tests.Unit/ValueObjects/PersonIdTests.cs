@@ -70,4 +70,20 @@ public sealed class PersonIdTests
         // Assert
         result.Should().Be(guid.ToString(null, CultureInfo.InvariantCulture));
     }
+
+    [Fact]
+    public void GetHashCode_ShouldReturnSameValue_WhenPersonIdsAreEqual()
+    {
+        // Arrange
+        var guid = Guid.NewGuid();
+        var personId1 = PersonId.From(guid);
+        var personId2 = PersonId.From(guid);
+
+        // Act
+        var hashCode1 = personId1.GetHashCode();
+        var hashCode2 = personId2.GetHashCode();
+
+        // Assert
+        hashCode1.Should().Be(hashCode2);
+    }
 }
