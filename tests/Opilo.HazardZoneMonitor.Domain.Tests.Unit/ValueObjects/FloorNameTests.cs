@@ -67,4 +67,18 @@ public sealed class FloorNameTests
         // Assert
         act.Should().Throw<System.Text.Json.JsonException>();
     }
+
+    [Fact]
+    public void Equals_ShouldReturnFalse_WhenFloorNamesHaveDifferentValues()
+    {
+        // Arrange
+        var floorName1 = FloorName.From("FloorOne");
+        var floorName2 = FloorName.From("FloorTwo");
+
+        // Act
+        var result = floorName1 == floorName2;
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }
