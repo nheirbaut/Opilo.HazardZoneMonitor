@@ -1,3 +1,4 @@
+using System.Globalization;
 using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.ValueObjects;
@@ -54,5 +55,19 @@ public sealed class PersonIdTests
 
         // Assert
         result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ToString_ShouldReturnGuidStringRepresentation_WhenPersonIdIsValid()
+    {
+        // Arrange
+        var guid = Guid.NewGuid();
+        var personId = PersonId.From(guid);
+
+        // Act
+        var result = personId.ToString(null, CultureInfo.InvariantCulture);
+
+        // Assert
+        result.Should().Be(guid.ToString(null, CultureInfo.InvariantCulture));
     }
 }
