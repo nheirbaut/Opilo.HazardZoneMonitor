@@ -1,13 +1,14 @@
 using Ardalis.Result;
 using Dapper;
 using Opilo.HazardZoneMonitor.Api.Shared.Database;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 
 internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory) : IMovementsRepository
 {
     public async Task<Result<RegisteredPersonMovement>> RegisterMovementAsync(
-        Guid personId,
+        PersonId personId,
         double x,
         double y,
         DateTime registeredAt,

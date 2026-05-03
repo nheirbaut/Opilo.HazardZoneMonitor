@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
@@ -15,7 +16,7 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
     {
         // Arrange
         var client = factory.CreateClient();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var command = new Command(personId, X: 1, Y: 1);
         var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, TestContext.Current.CancellationToken);
         var registrationId = await ReadIdFromResponse(postResponse);
@@ -34,7 +35,7 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
     {
         // Arrange
         var client = factory.CreateClient();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var command = new Command(personId, X: 5, Y: 10);
         var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, TestContext.Current.CancellationToken);
         var registrationId = await ReadIdFromResponse(postResponse);

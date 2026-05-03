@@ -55,11 +55,11 @@ public sealed class HandlerSpecification
         DateTime fixedTime = new(2025, 6, 15, 10, 30, 0, DateTimeKind.Utc);
         _clock.UtcNow.Returns(fixedTime);
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         Command command = new(personId, 1.0, 2.0);
 
         _movementsRepository
-            .RegisterMovementAsync(Arg.Any<Guid>(), Arg.Any<double>(), Arg.Any<double>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .RegisterMovementAsync(personId, Arg.Any<double>(), Arg.Any<double>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
             .Returns(Result.Created(new RegisteredPersonMovement
             {
                 PersonId = personId,

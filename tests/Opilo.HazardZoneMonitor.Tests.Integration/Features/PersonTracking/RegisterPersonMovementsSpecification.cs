@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
@@ -14,7 +15,7 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
     {
         // Arrange
         var client = factory.CreateClient();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, X: 1, Y: 1);
 
         // Act
@@ -29,7 +30,7 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
     {
         // Arrange
         var client = factory.CreateClient();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, X: 1, Y: 1);
 
         // Act
@@ -46,7 +47,7 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
     {
         // Arrange
         var client = factory.CreateClient();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, X: 1, Y: 1);
 
         // Act
