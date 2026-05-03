@@ -2,7 +2,7 @@
 
 **Opilo HazardZone Monitor** is a safety application designed to monitor and alert when individuals are present in restricted or hazardous areas. This project serves dual purposes:
 - **Primary Goal:** Enhance safety by providing real-time monitoring and alerts for unauthorized or dangerous zone entries.
-- **Learning Objective:** To explore and learn modern web technologies including Blazor, React, and Microsoft Aspire, Kubernetes and KubeEdge.
+- **Learning Objective:** To explore and learn modern web technologies including Blazor, React, Microsoft Aspire, Kubernetes, and KubeEdge. *(Note: Kubernetes and KubeEdge integration is a future goal — not yet implemented.)*
 
 ## Architecture
 
@@ -24,10 +24,14 @@ src/
 │   │   │   ├── Domain/
 │   │   │   │   └── Floor.cs
 │   │   │   └── Events/
-│   │   └── HazardZoneManagement/            # Hazard zone monitoring with alarm states
+│   │   ├── HazardZoneManagement/            # Hazard zone monitoring with alarm states
+│   │   │   ├── Domain/
+│   │   │   │   ├── HazardZone.cs
+│   │   │   │   └── States/                  # State pattern for alarm management
+│   │   │   └── Events/
+│   │   └── SiteManagement/                  # Site configuration and management
 │   │       ├── Domain/
-│   │       │   ├── HazardZone.cs
-│   │       │   └── States/                  # State pattern for alarm management
+│   │       │   └── Site.cs
 │   │       └── Events/
 │   └── Shared/                              # Shared primitives and infrastructure
 │       ├── Abstractions/                    # IClock, ITimer, ITimerFactory
@@ -39,15 +43,18 @@ src/
 │   │   ├── Floors/                          # Floor configuration and queries
 │   │   ├── HazardZones/                     # Hazard zone configuration and queries
 │   │   │   └── GetHazardZones/              # Feature.cs, Handler.cs, Query.cs, Response.cs
-│   │   └── PersonTracking/                  # Person movement endpoints
-│   │       ├── RegisterPersonMovement/      # Feature.cs, Handler.cs, Command.cs, Response.cs
-│   │       └── GetRegisteredPersonMovement/  # Feature.cs, Handler.cs, Query.cs
+│   │   ├── PersonTracking/                  # Person movement endpoints
+│   │   │   ├── RegisterPersonMovement/      # Feature.cs, Handler.cs, Command.cs, Response.cs
+│   │   │   └── GetRegisteredPersonMovement/  # Feature.cs, Handler.cs, Query.cs
+│   │   └── Site/                            # Site configuration and queries
+│   │       └── GetSite/                     # Feature.cs, Handler.cs, Query.cs, Response.cs
 │   └── Shared/
 │       ├── Cqrs/                            # ICommandHandler, IQueryHandler, ICommand, IQuery
 │       └── Features/                        # IFeature, auto-discovery
 tests/
 ├── Opilo.HazardZoneMonitor.Domain.Tests.Unit/
 ├── Opilo.HazardZoneMonitor.Api.Tests.Unit/
+├── Opilo.HazardZoneMonitor.Tests.Common/    # Shared test utilities and helpers
 └── Opilo.HazardZoneMonitor.Tests.Integration/
 ```
 
