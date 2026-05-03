@@ -40,6 +40,19 @@ public sealed class SiteTests
     }
 
     [Fact]
+    public void Constructor_ShouldAcceptSiteName_WhenValidNameIsProvided()
+    {
+        // Arrange
+        var siteName = SiteName.From("TestSite");
+
+        // Act
+        var site = new Site(siteName, []);
+
+        // Assert
+        site.Name.Should().Be(siteName);
+    }
+
+    [Fact]
     public void Constructor_ShouldCreateSite_WhenEmptyFloorsCollection()
     {
         // Act
