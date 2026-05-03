@@ -2,6 +2,7 @@ using Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Events;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 
@@ -10,13 +11,13 @@ public sealed class PersonTests : IDisposable
     Person? _testPerson;
     private readonly FakeClock _clock;
     private readonly FakeTimerFactory _timerFactory;
-    private readonly Guid _personId;
+    private readonly PersonId _personId;
     private readonly Location _location;
     private readonly TimeSpan _timeout;
 
     public PersonTests()
     {
-        _personId = Guid.NewGuid();
+        _personId = PersonId.From(Guid.NewGuid());
         _location = new Location(0, 0);
         _timeout = TimeSpan.FromSeconds(1);
         _clock = new FakeClock(DateTime.UnixEpoch);
