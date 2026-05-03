@@ -26,4 +26,19 @@ public sealed class PersonIdTests
         // Assert
         act.Should().Throw<Vogen.ValueObjectValidationException>();
     }
+
+    [Fact]
+    public void Equals_ShouldReturnTrue_WhenPersonIdsHaveSameGuidValue()
+    {
+        // Arrange
+        var guid = Guid.NewGuid();
+        var personId1 = PersonId.From(guid);
+        var personId2 = PersonId.From(guid);
+
+        // Act
+        var result = personId1 == personId2;
+
+        // Assert
+        result.Should().BeTrue();
+    }
 }
