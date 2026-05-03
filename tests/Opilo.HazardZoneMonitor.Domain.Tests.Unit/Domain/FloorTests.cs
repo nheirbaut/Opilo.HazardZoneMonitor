@@ -68,6 +68,19 @@ public sealed class FloorTests : IDisposable
     }
 
     [Fact]
+    public void Constructor_ShouldAcceptFloorName_WhenValidNameIsProvided()
+    {
+        // Arrange
+        var floorName = FloorName.From("TestFloor");
+
+        // Act
+        _testFloor = new Floor(floorName, s_validOutline, []);
+
+        // Assert
+        _testFloor.Name.Should().Be(floorName);
+    }
+
+    [Fact]
     public void Constructor_ShouldCreateInstance_WhenEmptyHazardZonesCollectionIsProvided()
     {
         // Act
