@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Floors;
@@ -35,7 +36,7 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         // Arrange
         var floorOptions = new FloorOptions
         {
-            Floors = [new FloorConfiguration(string.Empty, [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)])]
+            Floors = [FloorConfigurationBuilder.Create().WithName(string.Empty).Build()]
         };
 
         _customFactory = factory.WithWebHostBuilder(builder =>
@@ -61,8 +62,8 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         {
             Floors =
             [
-                new FloorConfiguration("Floor", [new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)]),
-                new FloorConfiguration("Floor", [new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)])
+                FloorConfigurationBuilder.Create().WithOutline(new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)).Build(),
+                FloorConfigurationBuilder.Create().WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build()
             ]
         };
 
@@ -87,7 +88,7 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         // Arrange
         var floorOptions = new FloorOptions
         {
-            Floors = [new FloorConfiguration("Floor", [new PointConfiguration(0, 0), new PointConfiguration(1, 1)])]
+            Floors = [FloorConfigurationBuilder.Create().WithOutline(new PointConfiguration(0, 0), new PointConfiguration(1, 1)).Build()]
         };
 
         _customFactory = factory.WithWebHostBuilder(builder =>
