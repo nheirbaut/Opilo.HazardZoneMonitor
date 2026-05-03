@@ -15,7 +15,7 @@ internal sealed class HazardZoneBuilder
     private IClock? _clock;
     private ITimerFactory? _timerFactory;
 
-    public const string DefaultName = "HazardZone";
+    public static readonly HazardZoneName DefaultName = HazardZoneName.From("HazardZone");
 
     public static readonly Outline DefaultOutline = new(new([
         new Location(0, 0),

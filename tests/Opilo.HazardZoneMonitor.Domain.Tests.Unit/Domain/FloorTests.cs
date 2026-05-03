@@ -87,7 +87,7 @@ public sealed class FloorTests : IDisposable
             new Location(12, 12),
             new Location(10, 12)
         ]));
-        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+        using var hazardZone = new HazardZone(HazardZoneName.From("TestZone"), hazardZoneOutline, TimeSpan.FromSeconds(5));
 
         // Act
         var act = () => new Floor(ValidFloorName, s_validOutline, [hazardZone]);
@@ -106,7 +106,7 @@ public sealed class FloorTests : IDisposable
             new Location(3, 3),
             new Location(1, 3)
         ]));
-        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+        using var hazardZone = new HazardZone(HazardZoneName.From("TestZone"), hazardZoneOutline, TimeSpan.FromSeconds(5));
 
         // Act
         var act = () => new Floor(ValidFloorName, s_validOutline, [hazardZone, hazardZone]);
@@ -132,8 +132,8 @@ public sealed class FloorTests : IDisposable
             new Location(2.5, 3.5)
         ]));
 
-        using var hazardZone1 = new HazardZone("SameName", outline1, TimeSpan.FromSeconds(5));
-        using var hazardZone2 = new HazardZone("SameName", outline2, TimeSpan.FromSeconds(5));
+        using var hazardZone1 = new HazardZone(HazardZoneName.From("SameName"), outline1, TimeSpan.FromSeconds(5));
+        using var hazardZone2 = new HazardZone(HazardZoneName.From("SameName"), outline2, TimeSpan.FromSeconds(5));
 
         // Act
         var act = () => new Floor(ValidFloorName, s_validOutline, [hazardZone1, hazardZone2]);
@@ -153,8 +153,8 @@ public sealed class FloorTests : IDisposable
         var overlappingOutline1 = new Outline([new(10, 10), new(60, 10), new(60, 60), new(10, 60)]);
         var overlappingOutline2 = new Outline([new(40, 40), new(90, 40), new(90, 90), new(40, 90)]);
 
-        using var hazardZone1 = new HazardZone("Zone1", overlappingOutline1, TimeSpan.FromSeconds(5));
-        using var hazardZone2 = new HazardZone("Zone2", overlappingOutline2, TimeSpan.FromSeconds(5));
+        using var hazardZone1 = new HazardZone(HazardZoneName.From("Zone1"), overlappingOutline1, TimeSpan.FromSeconds(5));
+        using var hazardZone2 = new HazardZone(HazardZoneName.From("Zone2"), overlappingOutline2, TimeSpan.FromSeconds(5));
 
         // Act
         var act = () => new Floor("Test Floor", floorOutline, [hazardZone1, hazardZone2]);
@@ -299,7 +299,7 @@ public sealed class FloorTests : IDisposable
         var floorOutline = new Outline([new(0, 0), new(100, 0), new(100, 100), new(0, 100)]);
         var hazardZoneOutline = new Outline([new(10, 10), new(40, 10), new(40, 40), new(10, 40)]);
 
-        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+        using var hazardZone = new HazardZone(HazardZoneName.From("TestZone"), hazardZoneOutline, TimeSpan.FromSeconds(5));
         _testFloor = new Floor("Test Floor", floorOutline, [hazardZone]);
 
         var personId = PersonId.From(Guid.NewGuid());
@@ -315,7 +315,7 @@ public sealed class FloorTests : IDisposable
         // Assert
         var personAddedToHazardZoneEvent = personAddedEvents.Single();
         personAddedToHazardZoneEvent.PersonId.Should().Be(personId);
-        personAddedToHazardZoneEvent.HazardZoneName.Should().Be("TestZone");
+        personAddedToHazardZoneEvent.HazardZoneName.Should().Be(HazardZoneName.From("TestZone"));
     }
 
     [Fact]
@@ -325,7 +325,7 @@ public sealed class FloorTests : IDisposable
         var floorOutline = new Outline([new(0, 0), new(100, 0), new(100, 100), new(0, 100)]);
         var hazardZoneOutline = new Outline([new(10, 10), new(40, 10), new(40, 40), new(10, 40)]);
 
-        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+        using var hazardZone = new HazardZone(HazardZoneName.From("TestZone"), hazardZoneOutline, TimeSpan.FromSeconds(5));
         _testFloor = new Floor("Test Floor", floorOutline, [hazardZone]);
 
         var personId = PersonId.From(Guid.NewGuid());
@@ -353,7 +353,7 @@ public sealed class FloorTests : IDisposable
         var floorOutline = new Outline([new(0, 0), new(100, 0), new(100, 100), new(0, 100)]);
         var hazardZoneOutline = new Outline([new(10, 10), new(40, 10), new(40, 40), new(10, 40)]);
 
-        using var hazardZone = new HazardZone("TestZone", hazardZoneOutline, TimeSpan.FromSeconds(5));
+        using var hazardZone = new HazardZone(HazardZoneName.From("TestZone"), hazardZoneOutline, TimeSpan.FromSeconds(5));
         var personTimeout = TimeSpan.FromMilliseconds(10);
         _testFloor = new Floor("Test Floor", floorOutline, [hazardZone], personTimeout, _timerFactory);
 

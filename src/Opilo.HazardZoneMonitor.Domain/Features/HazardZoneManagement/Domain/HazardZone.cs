@@ -15,7 +15,7 @@ public sealed class HazardZone : IDisposable
     private readonly Lock _zoneStateLock = new();
     private HazardZoneStateBase _currentState;
 
-    public string Name { get; }
+    public HazardZoneName Name { get; }
     public Outline Outline { get; }
     public TimeSpan ActivationDuration { get; }
     public TimeSpan PreAlarmDuration { get; }
@@ -32,19 +32,18 @@ public sealed class HazardZone : IDisposable
 
     internal ITimerFactory TimerFactory { get; }
 
-    public HazardZone(string name, Outline outline, TimeSpan preAlarmDuration)
+    public HazardZone(HazardZoneName name, Outline outline, TimeSpan preAlarmDuration)
         : this(name, outline, TimeSpan.Zero, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
     {
     }
 
-    public HazardZone(string name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration)
+    public HazardZone(HazardZoneName name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration)
         : this(name, outline, activationDuration, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
     {
     }
 
-    public HazardZone(string name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
+    public HazardZone(HazardZoneName name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
     {
-        Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
         Guard.Against.Negative(activationDuration);
         Guard.Against.Negative(preAlarmDuration);

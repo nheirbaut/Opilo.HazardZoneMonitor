@@ -12,4 +12,6 @@ public partial struct HazardZoneName
 
     private static Validation Validate(string value) =>
         string.IsNullOrWhiteSpace(value) ? Validation.Invalid("HazardZoneName cannot be empty.") : Validation.Ok;
+
+    private static string NormalizeInput(string input) => input.ToUpperInvariant();
 }

@@ -24,10 +24,10 @@ public sealed class HazardZoneTests : IDisposable
     {
         // Act
         using var hazardZone =
-            new HazardZone(HazardZoneName.From(HazardZoneBuilder.DefaultName), HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
+            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
 
         // Assert
-        hazardZone.Name.Should().Be(HazardZoneName.From(HazardZoneBuilder.DefaultName));
+        hazardZone.Name.Should().Be(HazardZoneBuilder.DefaultName);
         hazardZone.Outline.Should().Be(HazardZoneBuilder.DefaultOutline);
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
