@@ -42,4 +42,19 @@ public sealed class SiteNameTests
         upperCase.Should().Be(mixedCase);
         lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
     }
+
+    [Fact]
+    public void JsonSerialize_ShouldRoundTrip_WhenNameIsValid()
+    {
+        // Arrange
+        var name = SiteName.From("TestSite");
+
+        // Act
+        var json = System.Text.Json.JsonSerializer.Serialize(name);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<SiteName>(json);
+
+        // Assert
+        deserialized.Should().Be(name);
+        json.Should().Be("\"TESTSITE\"");
+    }
 }
