@@ -22,7 +22,7 @@ public sealed class Floor : IDisposable
 
     private static readonly TimeSpan s_defaultPersonLifespan = TimeSpan.FromMilliseconds(200);
 
-    public string Name { get; }
+    public FloorName Name { get; }
     public Outline Outline { get; }
     public IReadOnlyCollection<HazardZone> HazardZones => _hazardZones.AsReadOnly();
 
@@ -30,13 +30,12 @@ public sealed class Floor : IDisposable
     public event EventHandler<PersonRemovedFromFloorEventArgs>? PersonRemovedFromFloor;
 
     public Floor(
-        string name,
+        FloorName name,
         Outline outline,
         IList<HazardZone> hazardZones,
         TimeSpan? personLifespan = null,
         ITimerFactory? timerFactory = null)
     {
-        Guard.Against.NullOrWhiteSpace(name);
         Guard.Against.Null(outline);
         Guard.Against.Null(hazardZones);
 

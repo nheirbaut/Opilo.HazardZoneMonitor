@@ -13,7 +13,7 @@ public static class FloorGuards
         ArgumentNullException.ThrowIfNull(floors);
 
         var names = floors.Select(f => f.Name).ToList();
-        var distinctNames = names.Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        var distinctNames = names.Distinct().Count();
         if (distinctNames != names.Count)
         {
             throw new ArgumentException("Duplicate Floor names are not allowed.", parameterName);

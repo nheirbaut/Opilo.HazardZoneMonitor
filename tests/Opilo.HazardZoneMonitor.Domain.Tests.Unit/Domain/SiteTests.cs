@@ -3,6 +3,7 @@
 using Opilo.HazardZoneMonitor.Domain.Features.SiteManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 
@@ -65,8 +66,8 @@ public sealed class SiteTests
     public void Constructor_ShouldThrowArgumentException_WhenFloorsHaveSameName()
     {
         // Arrange
-        using var floor1 = FloorBuilder.Create().WithName("FloorA").Build();
-        using var floor2 = FloorBuilder.Create().WithName("FloorA").Build();
+        using var floor1 = FloorBuilder.Create().WithName(FloorName.From("FloorA")).Build();
+        using var floor2 = FloorBuilder.Create().WithName(FloorName.From("FloorA")).Build();
 
         // Act
         var act = () => new Site(ValidSiteName, [floor1, floor2]);

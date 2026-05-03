@@ -2,18 +2,19 @@ using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
 
 internal sealed class FloorBuilder
 {
-    private string _name = DefaultName;
+    private FloorName _name = DefaultName;
     private Outline _outline = DefaultOutline;
     private readonly List<HazardZone> _hazardZones = [];
     private TimeSpan? _personLifespan;
     private ITimerFactory? _timerFactory;
 
-    public const string DefaultName = "TestFloor";
+    public static readonly FloorName DefaultName = FloorName.From("TestFloor");
 
     public static readonly Outline DefaultOutline = new(new([
         new Location(0, 0),
@@ -26,7 +27,7 @@ internal sealed class FloorBuilder
 
     public static FloorBuilder Create() => new();
 
-    public FloorBuilder WithName(string name)
+    public FloorBuilder WithName(FloorName name)
     {
         _name = name;
         return this;
