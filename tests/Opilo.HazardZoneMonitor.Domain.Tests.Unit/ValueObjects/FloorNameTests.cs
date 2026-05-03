@@ -1,3 +1,5 @@
+using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.ValueObjects;
 
 public sealed class FloorNameTests
