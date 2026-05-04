@@ -19,13 +19,13 @@ public sealed class PersonIdTests
     }
 
     [Fact]
-    public void From_ShouldThrowValueObjectValidationException_WhenGuidIsEmpty()
+    public void From_ShouldThrowArgumentException_WhenGuidIsEmpty()
     {
         // Act
         var act = () => PersonId.From(Guid.Empty);
 
         // Assert
-        act.Should().Throw<Vogen.ValueObjectValidationException>();
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]

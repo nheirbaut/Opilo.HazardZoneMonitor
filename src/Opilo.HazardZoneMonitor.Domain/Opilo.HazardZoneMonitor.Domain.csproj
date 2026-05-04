@@ -7,6 +7,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" />
-    <PackageReference Include="Vogen" />
+
   </ItemGroup>
 </Project>

@@ -34,13 +34,13 @@ public sealed class HazardZoneNameTests
 
     [Theory]
     [ClassData(typeof(InvalidNames))]
-    public void From_ShouldThrowValueObjectValidationException_WhenNameIsInvalid(string invalidName)
+    public void From_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
         // Act
         var act = () => HazardZoneName.From(invalidName);
 
         // Assert
-        act.Should().Throw<Vogen.ValueObjectValidationException>();
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
