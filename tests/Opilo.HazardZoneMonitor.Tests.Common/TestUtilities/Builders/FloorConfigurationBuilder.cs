@@ -6,7 +6,7 @@ namespace Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 internal sealed class FloorConfigurationBuilder
 {
-    public const string DefaultName = "Floor";
+    public static readonly FloorName DefaultName = FloorName.From("Floor");
 
     public static readonly IReadOnlyList<Coordinate> DefaultOutline =
     [
@@ -15,7 +15,7 @@ internal sealed class FloorConfigurationBuilder
         new(0, 10)
     ];
 
-    private string _name = DefaultName;
+    private FloorName _name = DefaultName;
     private IReadOnlyList<Coordinate> _outline = DefaultOutline;
     private IReadOnlyList<HazardZoneConfiguration> _hazardZones = [];
 
@@ -26,7 +26,7 @@ internal sealed class FloorConfigurationBuilder
 
     public FloorConfigurationBuilder WithName(string name)
     {
-        _name = name;
+        _name = FloorName.From(name);
         return this;
     }
 

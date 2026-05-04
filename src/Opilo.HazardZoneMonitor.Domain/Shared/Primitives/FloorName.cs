@@ -1,7 +1,9 @@
 using Ardalis.GuardClauses;
+using System.ComponentModel;
 
 namespace Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
+[TypeConverter(typeof(FloorNameTypeConverter))]
 public sealed class FloorName : ValueObject
 {
     private FloorName(string value)

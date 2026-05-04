@@ -31,6 +31,34 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
     }
 
     [Fact]
+    public void Api_ShouldFailToStart_WhenFloorNameIsEmpty()
+    {
+        // Arrange
+        _customFactory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.Ordinal)
+                {
+                    ["FloorOptions:Floors:0:Name"] = string.Empty,
+                    ["FloorOptions:Floors:0:Outline:0:X"] = "0",
+                    ["FloorOptions:Floors:0:Outline:0:Y"] = "0",
+                    ["FloorOptions:Floors:0:Outline:1:X"] = "10",
+                    ["FloorOptions:Floors:0:Outline:1:Y"] = "0",
+                    ["FloorOptions:Floors:0:Outline:2:X"] = "0",
+                    ["FloorOptions:Floors:0:Outline:2:Y"] = "10",
+                });
+            });
+        });
+
+        // Act
+        Action act = () => _customFactory.CreateClient();
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
     public void Api_ShouldThrowOptionsValidationException_WhenFloorNamesAreDuplicate()
     {
         // Arrange

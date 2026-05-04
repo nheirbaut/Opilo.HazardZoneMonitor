@@ -16,8 +16,8 @@ public sealed class HandlerTests
         Coordinate point2 = new(10.0, 10.0);
         Coordinate point3 = new(10.0, 0.0);
 
-        FloorConfiguration floor1 = new("Floor 1", new[] { point1, point2, point3 });
-        FloorConfiguration floor2 = new("Floor 2", new[] { point1, point2 });
+        FloorConfiguration floor1 = new(FloorName.From("Floor 1"), new[] { point1, point2, point3 });
+        FloorConfiguration floor2 = new(FloorName.From("Floor 2"), new[] { point1, point2 });
 
         FloorOptions floorOptions = new()
         {

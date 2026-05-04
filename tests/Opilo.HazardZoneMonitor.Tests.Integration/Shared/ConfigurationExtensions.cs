@@ -20,7 +20,7 @@ public static class ConfigurationExtensions
             var floor = floors[floorIndex];
             var floorKey = $"{nameof(FloorOptions)}:{nameof(FloorOptions.Floors)}:{floorIndex}";
 
-            dictionary[$"{floorKey}:{nameof(FloorConfiguration.Name)}"] = floor.Name;
+            dictionary[$"{floorKey}:{nameof(FloorConfiguration.Name)}"] = floor.Name.Value;
 
             for (var pointIndex = 0; pointIndex < floor.Outline.Count; pointIndex++)
             {

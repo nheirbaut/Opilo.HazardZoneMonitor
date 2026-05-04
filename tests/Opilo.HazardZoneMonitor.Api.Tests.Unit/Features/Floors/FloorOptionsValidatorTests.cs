@@ -12,7 +12,7 @@ public sealed class FloorOptionsValidatorTests
     public void Constructor_ShouldAcceptFloorName_WhenNameIsValid()
     {
         // Arrange
-        var floorName = "TestFloor";
+        var floorName = FloorName.From("TestFloor");
 
         // Act
         var floor = new FloorConfiguration(floorName, FloorConfigurationBuilder.DefaultOutline);
@@ -156,7 +156,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenFloorOutlineIsNull()
     {
         // Arrange
-        var floor = new FloorConfiguration("Floor", null!);
+        var floor = new FloorConfiguration(FloorName.From("Floor"), null!);
         var options = new FloorOptions { Floors = [floor] };
 
         // Act
@@ -171,7 +171,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZonesIsNull()
     {
         // Arrange
-        var floor = new FloorConfiguration("Floor", FloorConfigurationBuilder.DefaultOutline)
+        var floor = new FloorConfiguration(FloorName.From("Floor"), FloorConfigurationBuilder.DefaultOutline)
         {
             HazardZones = null!
         };

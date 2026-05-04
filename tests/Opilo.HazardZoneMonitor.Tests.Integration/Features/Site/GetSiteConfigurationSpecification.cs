@@ -66,7 +66,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
         // Arrange
         List<FloorConfiguration> expectedFloors =
         [
-            new("Ground Floor",
+            new(FloorName.From("Ground Floor"),
                 new List<Coordinate>
                 {
                     new(0, 0),
@@ -74,7 +74,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
                     new(20, 20),
                     new(0, 20),
                 }),
-            new("Upper Floor",
+            new(FloorName.From("Upper Floor"),
                 new List<Coordinate>
                 {
                     new(0, 0),

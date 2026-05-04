@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
@@ -10,11 +12,37 @@ public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<FloorOptions>(configuration.GetSection(nameof(FloorOptions)));
+        services.ConfigureHttpJsonOptions(options =>
+            options.SerializerOptions.Converters.Add(new FloorNameJsonConverter()));
+
         services.AddSingleton<IValidateOptions<FloorOptions>, FloorOptionsValidator>();
-        services.AddOptions<FloorOptions>().ValidateOnStart();
+        services.AddOptions<FloorOptions>()
+            .Configure<IConfiguration>((options, configuredConfiguration) =>
+            {
+                ValidateFloorNameConfiguration(configuredConfiguration);
+                configuredConfiguration.GetSection(nameof(FloorOptions)).Bind(options);
+            })
+            .ValidateOnStart();
 
         services.AddScoped<IQueryHandler<Query, GetFloorsResponse>, Handler>();
+    }
+
+    private static void ValidateFloorNameConfiguration(IConfiguration configuration)
+    {
+        var floorNameConverter = TypeDescriptor.GetConverter(typeof(FloorName));
+        var floorsSection = configuration.GetSection($"{nameof(FloorOptions)}:{nameof(FloorOptions.Floors)}");
+
+        foreach (var floorSection in floorsSection.GetChildren())
+        {
+            try
+            {
+                floorNameConverter.ConvertFromInvariantString(floorSection[nameof(FloorConfiguration.Name)] ?? string.Empty);
+            }
+            catch (Exception exception) when (exception is ArgumentException or NotSupportedException)
+            {
+                throw new InvalidOperationException($"Failed to convert configuration value at '{floorSection.Path}:{nameof(FloorConfiguration.Name)}' to type '{typeof(FloorName)}'.", exception);
+            }
+        }
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
