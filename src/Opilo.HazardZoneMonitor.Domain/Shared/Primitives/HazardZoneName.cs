@@ -1,5 +1,5 @@
-using Ardalis.GuardClauses;
 using System.ComponentModel;
+using Ardalis.GuardClauses;
 
 namespace Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 

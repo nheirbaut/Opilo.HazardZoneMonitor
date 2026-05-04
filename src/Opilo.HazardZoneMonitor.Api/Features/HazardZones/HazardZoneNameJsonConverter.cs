@@ -10,7 +10,12 @@ internal sealed class HazardZoneNameJsonConverter : JsonConverter<HazardZoneName
     {
         var hazardZoneName = reader.GetString();
 
-        return HazardZoneName.From(hazardZoneName!);
+        if (hazardZoneName is null)
+        {
+            throw new JsonException("HazardZoneName value cannot be null.");
+        }
+
+        return HazardZoneName.From(hazardZoneName);
     }
 
     public override void Write(Utf8JsonWriter writer, HazardZoneName value, JsonSerializerOptions options)
