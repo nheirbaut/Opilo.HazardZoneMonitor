@@ -1,4 +1,4 @@
-namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 
 public sealed record HazardZoneOptions
 {

@@ -1,8 +1,8 @@
 using Ardalis.GuardClauses;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
+namespace Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 
 public sealed record FloorConfiguration
 {

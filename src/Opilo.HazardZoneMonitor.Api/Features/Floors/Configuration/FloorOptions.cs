@@ -1,4 +1,4 @@
-namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
+namespace Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 
 public sealed record FloorOptions
 {

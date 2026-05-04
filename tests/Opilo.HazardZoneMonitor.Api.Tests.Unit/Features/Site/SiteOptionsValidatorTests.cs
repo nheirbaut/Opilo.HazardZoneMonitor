@@ -1,4 +1,4 @@
-using Opilo.HazardZoneMonitor.Api.Features.Site;
+using Opilo.HazardZoneMonitor.Api.Features.Site.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Site;

@@ -1,7 +1,7 @@
 using System.Globalization;
-using Opilo.HazardZoneMonitor.Api.Features.Floors;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Features.Site;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
+using Opilo.HazardZoneMonitor.Api.Features.Site.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;

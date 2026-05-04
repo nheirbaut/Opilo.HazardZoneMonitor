@@ -1,6 +1,8 @@
 using Dapper;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.Data;
 using Opilo.HazardZoneMonitor.Api.Shared.Database;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
+using Opilo.HazardZoneMonitor.Api.Shared.Infrastructure;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 

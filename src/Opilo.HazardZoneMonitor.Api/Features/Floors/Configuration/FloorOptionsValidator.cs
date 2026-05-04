@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Options;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
+namespace Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 
 public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
 {

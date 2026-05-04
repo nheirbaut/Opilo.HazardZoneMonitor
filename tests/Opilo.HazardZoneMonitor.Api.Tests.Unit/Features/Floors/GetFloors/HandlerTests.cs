@@ -1,6 +1,6 @@
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
-using Opilo.HazardZoneMonitor.Api.Features.Floors;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
 

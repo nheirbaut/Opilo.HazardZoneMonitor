@@ -2,7 +2,7 @@ using System.Data;
 using Dapper;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+namespace Opilo.HazardZoneMonitor.Api.Shared.Database;
 
 internal sealed class PersonIdTypeHandler : SqlMapper.TypeHandler<PersonId>
 {

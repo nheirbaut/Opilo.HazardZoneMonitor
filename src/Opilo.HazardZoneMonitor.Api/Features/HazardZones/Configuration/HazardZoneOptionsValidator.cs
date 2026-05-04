@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 
 public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOptions>
 {

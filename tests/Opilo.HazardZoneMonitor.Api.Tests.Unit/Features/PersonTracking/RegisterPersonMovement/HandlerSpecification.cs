@@ -1,9 +1,11 @@
 using Ardalis.Result;
 using NSubstitute;
-using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.Data;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Handler = Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement.Handler;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.PersonTracking.RegisterPersonMovement;
 
