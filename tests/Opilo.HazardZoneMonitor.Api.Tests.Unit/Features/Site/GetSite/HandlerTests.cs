@@ -20,7 +20,8 @@ public sealed class HandlerTests
         FloorConfiguration floor1 = new("Floor 1", new[] { point1, point2, point3 });
         FloorConfiguration floor2 = new("Floor 2", new[] { point1, point2 });
 
-        SiteOptions siteOptions = new() { Name = "Test Site" };
+        var siteName = SiteName.From("Test Site");
+        SiteOptions siteOptions = new() { Name = siteName };
         FloorOptions floorOptions = new() { Floors = new[] { floor1, floor2 } };
 
         var siteOpts = Options.Create(siteOptions);
@@ -33,7 +34,7 @@ public sealed class HandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);
-        result.Value.Site.Name.Should().Be("Test Site");
+        result.Value.Site.Name.Should().Be(siteName.Value);
         result.Value.Site.Floors.Should().BeEquivalentTo(new[] { floor1, floor2 });
     }
 
@@ -41,7 +42,7 @@ public sealed class HandlerTests
     public async Task Handle_ShouldReturnSuccessResultWithEmptyFloors_WhenNoFloorsAreConfigured()
     {
         // Arrange
-        SiteOptions siteOptions = new() { Name = "Test Site" };
+        SiteOptions siteOptions = new() { Name = SiteName.From("Test Site") };
         FloorOptions floorOptions = new() { Floors = Array.Empty<FloorConfiguration>() };
 
         var siteOpts = Options.Create(siteOptions);

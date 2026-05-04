@@ -64,7 +64,7 @@ public static class ConfigurationExtensions
 
         return new Dictionary<string, string?>(StringComparer.Ordinal)
         {
-            [$"{nameof(SiteOptions)}:{nameof(SiteOptions.Name)}"] = siteOptions.Name,
+            [$"{nameof(SiteOptions)}:{nameof(SiteOptions.Name)}"] = siteOptions.Name.Value,
         };
     }
 

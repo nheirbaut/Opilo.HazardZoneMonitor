@@ -32,9 +32,9 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
     public async Task GetSiteConfiguration_ShouldReturnSiteConfiguration_WhenSiteIsRegistered()
     {
         // Arrange
-        var expectedSite = new SiteConfiguration("Reactor Facility Alpha", []);
+        var expectedSite = new SiteConfiguration(SiteName.From("Reactor Facility Alpha").Value, []);
 
-        var siteOptions = new SiteOptions { Name = expectedSite.Name };
+        var siteOptions = new SiteOptions { Name = SiteName.From(expectedSite.Name) };
 
         await using var customFactory = factory.WithWebHostBuilder(builder =>
         {
@@ -84,7 +84,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
                 }),
         ];
 
-        var siteOptions = new SiteOptions { Name = "Reactor Facility Alpha" };
+        var siteOptions = new SiteOptions { Name = SiteName.From("Reactor Facility Alpha") };
         var floorOptions = new FloorOptions { Floors = expectedFloors };
 
         await using var customFactory = factory.WithWebHostBuilder(builder =>
@@ -109,7 +109,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
 
         // Assert
         response.Should().NotBeNull();
-        response.Site.Name.Should().Be("Reactor Facility Alpha");
+        response.Site.Name.Should().Be(siteOptions.Name.Value);
         response.Site.Floors.Should().NotBeNullOrEmpty();
         response.Site.Floors.Should().BeEquivalentTo(expectedFloors);
     }

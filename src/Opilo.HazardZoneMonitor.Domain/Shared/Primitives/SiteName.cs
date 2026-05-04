@@ -1,7 +1,9 @@
 using Ardalis.GuardClauses;
+using System.ComponentModel;
 
 namespace Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
+[TypeConverter(typeof(SiteNameTypeConverter))]
 public sealed class SiteName : ValueObject
 {
     private SiteName(string value)
