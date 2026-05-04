@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
-using Opilo.HazardZoneMonitor.Api.Features.Floors;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
+using Opilo.HazardZoneMonitor.Api.Features.Site.Configuration;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;

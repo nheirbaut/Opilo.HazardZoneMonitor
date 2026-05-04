@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones;
+namespace Opilo.HazardZoneMonitor.Api.Shared.Infrastructure;
 
 internal sealed class HazardZoneNameJsonConverter : JsonConverter<HazardZoneName>
 {

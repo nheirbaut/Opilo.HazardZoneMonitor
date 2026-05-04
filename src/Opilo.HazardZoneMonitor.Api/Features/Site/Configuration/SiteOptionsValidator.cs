@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.Site;
+namespace Opilo.HazardZoneMonitor.Api.Features.Site.Configuration;
 
 public sealed class SiteOptionsValidator : IValidateOptions<SiteOptions>
 {

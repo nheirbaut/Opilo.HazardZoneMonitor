@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;

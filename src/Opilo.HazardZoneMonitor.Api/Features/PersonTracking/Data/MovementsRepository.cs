@@ -2,10 +2,11 @@ using System.Globalization;
 using System.Text.Json;
 using Ardalis.Result;
 using Dapper;
+using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 using Opilo.HazardZoneMonitor.Api.Shared.Database;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking.Data;
 
 internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory) : IMovementsRepository
 {

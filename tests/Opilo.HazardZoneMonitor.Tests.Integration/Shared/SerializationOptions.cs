@@ -1,8 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Opilo.HazardZoneMonitor.Api.Features.Floors;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+using Opilo.HazardZoneMonitor.Api.Shared.Infrastructure;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 

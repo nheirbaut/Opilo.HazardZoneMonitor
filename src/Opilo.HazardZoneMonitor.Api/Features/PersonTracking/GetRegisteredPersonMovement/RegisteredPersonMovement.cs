@@ -1,7 +1,7 @@
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 
 public sealed class RegisteredPersonMovement : IResponse
 {

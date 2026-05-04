@@ -1,7 +1,7 @@
 using Dapper;
 using Opilo.HazardZoneMonitor.Api.Shared.Database;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
+namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking.Data;
 
 internal sealed class PersonTrackingSchemaInitializer(IDbConnectionFactory connectionFactory) : ISchemaInitializer
 {

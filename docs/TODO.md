@@ -10,7 +10,6 @@ An overview of tasks and features to be implemented.
 
 ## Domain
 
-- [ ] Introduce ValueObjects to avoid the Primitive Obsession code smell.
 - [ ] Add validation for domain invariants
 - [ ] Implement domain event versioning for future compatibility
 

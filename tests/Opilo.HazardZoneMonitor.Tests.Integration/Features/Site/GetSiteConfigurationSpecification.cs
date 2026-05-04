@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
-using Opilo.HazardZoneMonitor.Api.Features.Floors;
-using Opilo.HazardZoneMonitor.Api.Features.Site;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
+using Opilo.HazardZoneMonitor.Api.Features.Site.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
