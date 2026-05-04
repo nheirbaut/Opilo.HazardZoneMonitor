@@ -16,11 +16,11 @@ public sealed class HazardZone : IDisposable
 
     public HazardZoneName Name { get; }
     public Outline Outline { get; }
-    public TimeSpan ActivationDuration { get; }
-    public TimeSpan PreAlarmDuration { get; }
+    public Duration ActivationDuration { get; }
+    public Duration PreAlarmDuration { get; }
     public ZoneState ZoneState => _currentState.ZoneState;
     public AlarmState AlarmState => _currentState.AlarmState;
-    public int AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
+    public Capacity AllowedNumberOfPersons => _currentState.AllowedNumberOfPersons;
 
     public event EventHandler<PersonAddedToHazardZoneEventArgs>? PersonAddedToHazardZone;
     public event EventHandler<PersonRemovedFromHazardZoneEventArgs>? PersonRemovedFromHazardZone;
@@ -31,21 +31,22 @@ public sealed class HazardZone : IDisposable
 
     internal ITimerFactory TimerFactory { get; }
 
-    public HazardZone(HazardZoneName name, Outline outline, TimeSpan preAlarmDuration)
-        : this(name, outline, TimeSpan.Zero, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
+    public HazardZone(HazardZoneName name, Outline outline, Duration preAlarmDuration)
+        : this(name, outline, Duration.From(TimeSpan.Zero), preAlarmDuration, new SystemClock(), new SystemTimerFactory())
     {
     }
 
-    public HazardZone(HazardZoneName name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration)
+    public HazardZone(HazardZoneName name, Outline outline, Duration activationDuration, Duration preAlarmDuration)
         : this(name, outline, activationDuration, preAlarmDuration, new SystemClock(), new SystemTimerFactory())
     {
     }
 
-    public HazardZone(HazardZoneName name, Outline outline, TimeSpan activationDuration, TimeSpan preAlarmDuration, IClock clock, ITimerFactory timerFactory)
+    public HazardZone(HazardZoneName name, Outline outline, Duration activationDuration, Duration preAlarmDuration, IClock clock, ITimerFactory timerFactory)
     {
+        Guard.Against.Null(name);
         Guard.Against.Null(outline);
-        Guard.Against.Negative(activationDuration);
-        Guard.Against.Negative(preAlarmDuration);
+        Guard.Against.Null(activationDuration);
+        Guard.Against.Null(preAlarmDuration);
         Guard.Against.Null(clock);
         Guard.Against.Null(timerFactory);
 
@@ -57,7 +58,7 @@ public sealed class HazardZone : IDisposable
         Clock = clock;
         TimerFactory = timerFactory;
 
-        _currentState = new InactiveHazardZoneState(this, [], [], 0);
+        _currentState = new InactiveHazardZoneState(this, [], [], Capacity.From(0));
     }
 
     public void HandlePersonCreated(PersonId personId, Coordinate location)
@@ -99,24 +100,23 @@ public sealed class HazardZone : IDisposable
         lock (_zoneStateLock) _currentState.ManuallyDeactivate();
     }
 
-    public void ActivateFromExternalSource(string sourceId)
+    public void ActivateFromExternalSource(SourceId sourceId)
     {
-        Guard.Against.NullOrWhiteSpace(sourceId);
+        Guard.Against.Null(sourceId);
 
         lock (_zoneStateLock) _currentState.ActivateFromExternalSource(sourceId);
     }
 
-    public void DeactivateFromExternalSource(string sourceId)
+    public void DeactivateFromExternalSource(SourceId sourceId)
     {
-        Guard.Against.NullOrWhiteSpace(sourceId);
+        Guard.Against.Null(sourceId);
 
         lock (_zoneStateLock) _currentState.DeactivateFromExternalSource(sourceId);
     }
 
-    public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
+    public void SetAllowedNumberOfPersons(Capacity allowedNumberOfPersons)
     {
-        if (allowedNumberOfPersons < 0)
-            return;
+        Guard.Against.Null(allowedNumberOfPersons);
 
         lock (_zoneStateLock) _currentState.SetAllowedNumberOfPersons(allowedNumberOfPersons);
     }
@@ -158,4 +158,3 @@ public sealed class HazardZone : IDisposable
         _currentState.Dispose();
     }
 }
-

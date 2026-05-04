@@ -7,10 +7,10 @@ namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
 internal sealed class HazardZoneBuilder
 {
     private HazardZoneTestState _desiredState = HazardZoneTestState.Inactive;
-    private readonly List<string> _externalActivationSourceIds = [];
-    private int _allowedNumberOfPersons;
-    private TimeSpan _activationDuration = TimeSpan.Zero;
-    private TimeSpan _preAlarmDuration = DefaultPreAlarmDuration;
+    private readonly List<SourceId> _externalActivationSourceIds = [];
+    private Capacity _allowedNumberOfPersons = Capacity.From(0);
+    private Duration _activationDuration = Duration.From(TimeSpan.Zero);
+    private Duration _preAlarmDuration = DefaultPreAlarmDuration;
     private IClock? _clock;
     private ITimerFactory? _timerFactory;
 
@@ -23,7 +23,7 @@ internal sealed class HazardZoneBuilder
         new Coordinate(0, 4)
     ]));
 
-    public static readonly TimeSpan DefaultPreAlarmDuration = TimeSpan.FromSeconds(5);
+    public static readonly Duration DefaultPreAlarmDuration = Duration.From(TimeSpan.FromSeconds(5));
 
     public static HazardZone BuildSimple() => new(DefaultName, DefaultOutline, DefaultPreAlarmDuration);
 
@@ -33,13 +33,13 @@ internal sealed class HazardZoneBuilder
 
     public HazardZoneBuilder WithExternalActivationSource(string sourceId)
     {
-        _externalActivationSourceIds.Add(sourceId);
+        _externalActivationSourceIds.Add(SourceId.From(sourceId));
         return this;
     }
 
     public HazardZoneBuilder WithAllowedNumberOfPersons(int allowedNumberOfPersons)
     {
-        _allowedNumberOfPersons = allowedNumberOfPersons;
+        _allowedNumberOfPersons = Capacity.From(allowedNumberOfPersons);
         return this;
     }
 
@@ -51,13 +51,13 @@ internal sealed class HazardZoneBuilder
 
     public HazardZoneBuilder WithActivationDuration(TimeSpan duration)
     {
-        _activationDuration = duration;
+        _activationDuration = Duration.From(duration);
         return this;
     }
 
     public HazardZoneBuilder WithPreAlarmDuration(TimeSpan duration)
     {
-        _preAlarmDuration = duration;
+        _preAlarmDuration = Duration.From(duration);
         return this;
     }
 
@@ -71,7 +71,7 @@ internal sealed class HazardZoneBuilder
     public HazardZone Build()
     {
         if (_desiredState == HazardZoneTestState.Alarm)
-            _preAlarmDuration = TimeSpan.Zero;
+            _preAlarmDuration = Duration.From(TimeSpan.Zero);
 
         var hazardZone = (_clock is not null && _timerFactory is not null)
             ? new HazardZone(DefaultName, DefaultOutline, _activationDuration, _preAlarmDuration, _clock, _timerFactory)
@@ -112,7 +112,7 @@ internal sealed class HazardZoneBuilder
         DeactivateIfActive(hazardZone);
         hazardZone.ManuallyActivate();
 
-        var personsToAdd = _allowedNumberOfPersons + 1;
+        var personsToAdd = _allowedNumberOfPersons.Value + 1;
         var waiter = new EventCountWaiter(personsToAdd);
 
         hazardZone.PersonAddedToHazardZone += (_, e) => waiter.Signal(e);

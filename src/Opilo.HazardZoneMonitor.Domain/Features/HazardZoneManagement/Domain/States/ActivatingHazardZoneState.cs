@@ -5,20 +5,20 @@ namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain.St
 internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
 {
     private readonly Opilo.HazardZoneMonitor.Domain.Shared.Abstractions.ITimer _activationTimer;
-    private readonly DateTime _enteredActivatingAtUtc;
+    private readonly Timestamp _enteredActivatingAtUtc;
 
     public ActivatingHazardZoneState(
         HazardZone hazardZone,
         HashSet<PersonId> personsInZone,
-        HashSet<string> registeredActivationSourceIds,
-        int allowedNumberOfPersons)
+        HashSet<SourceId> registeredActivationSourceIds,
+        Capacity allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
         HazardZone.RaiseHazardZoneStateChanged(ZoneState.Activating);
 
-        _enteredActivatingAtUtc = HazardZone.Clock.UtcNow;
+        _enteredActivatingAtUtc = new Timestamp(HazardZone.Clock.UtcNow);
 
-        _activationTimer = HazardZone.TimerFactory.Create(HazardZone.ActivationDuration);
+        _activationTimer = HazardZone.TimerFactory.Create(HazardZone.ActivationDuration.Value);
         _activationTimer.Elapsed += OnActivationTimerElapsed;
         _activationTimer.Start();
     }
@@ -32,7 +32,7 @@ internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
             AllowedNumberOfPersons));
     }
 
-    public override void DeactivateFromExternalSource(string sourceId)
+    public override void DeactivateFromExternalSource(SourceId sourceId)
     {
         if (!RegisteredActivationSourceIds.Remove(sourceId))
             return;
@@ -43,7 +43,7 @@ internal sealed class ActivatingHazardZoneState : HazardZoneStateBase
 
     private void OnActivationTimerElapsed(object? _, EventArgs __)
     {
-        if (HazardZone.Clock.UtcNow < _enteredActivatingAtUtc.Add(HazardZone.ActivationDuration))
+        if (HazardZone.Clock.UtcNow < _enteredActivatingAtUtc.Value.Add(HazardZone.ActivationDuration.Value))
             return;
 
         HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,

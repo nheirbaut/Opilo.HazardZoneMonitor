@@ -14,7 +14,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
-        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, null!, TimeSpan.Zero);
+        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, null!, Duration.From(TimeSpan.Zero));
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -23,7 +23,7 @@ public sealed class HazardZoneTests : IDisposable
     {
         // Act
         using var hazardZone =
-            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, TimeSpan.Zero);
+            new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, Duration.From(TimeSpan.Zero));
 
         // Assert
         hazardZone.Name.Should().Be(HazardZoneBuilder.DefaultName);
@@ -36,8 +36,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentException_WhenPreAlarmDurationIsNegative()
     {
         // Act & Assert
-        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline,
-            TimeSpan.FromMilliseconds(-100));
+        var act = () => Duration.From(TimeSpan.FromMilliseconds(-100));
         act.Should().Throw<ArgumentException>();
     }
 
@@ -217,18 +216,6 @@ public sealed class HazardZoneTests : IDisposable
         act.Should().Throw<ArgumentNullException>();
     }
 
-    [Theory]
-    [ClassData(typeof(InvalidNames))]
-    public void ActivateFromExternalSource_ShouldThrowArgumentException_WhenSourceIdIsInvalid(string invalidName)
-    {
-        // Arrange
-        using var hazardZone = HazardZoneBuilder.BuildSimple();
-
-        // Act & Assert
-        var act = () => hazardZone.ActivateFromExternalSource(invalidName);
-        act.Should().Throw<ArgumentException>();
-    }
-
     [Fact]
     public void DeactivateFromExternalSource_ShouldThrowArgumentNullException_WhenSourceIdIsNull()
     {
@@ -238,18 +225,6 @@ public sealed class HazardZoneTests : IDisposable
         // Act & Assert
         var act = () => hazardZone.DeactivateFromExternalSource(null!);
         act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Theory]
-    [ClassData(typeof(InvalidNames))]
-    public void DeactivateFromExternalSource_ShouldThrowArgumentException_WhenSourceIdIsInvalid(string invalidName)
-    {
-        // Arrange
-        using var hazardZone = HazardZoneBuilder.BuildSimple();
-
-        // Act & Assert
-        var act = () => hazardZone.DeactivateFromExternalSource(invalidName);
-        act.Should().Throw<ArgumentException>();
     }
 
     //------------------------------------------------------------------------------
@@ -310,7 +285,7 @@ public sealed class HazardZoneTests : IDisposable
         using var hazardZone = HazardZoneBuilder.BuildSimple();
 
         // Act
-        hazardZone.ActivateFromExternalSource("ext-src");
+        hazardZone.ActivateFromExternalSource(SourceId.From("ext-src"));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -327,7 +302,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.ActivateFromExternalSource("ext-src");
+        hazardZone.ActivateFromExternalSource(SourceId.From("ext-src"));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Activating);
@@ -343,7 +318,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.ActivateFromExternalSource("ext-src");
+        hazardZone.ActivateFromExternalSource(SourceId.From("ext-src"));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -360,7 +335,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.ActivateFromExternalSource(sourceId);
+        hazardZone.ActivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
@@ -413,7 +388,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
 
         // Act
-        hazardZone.ActivateFromExternalSource("ext-src");
+        hazardZone.ActivateFromExternalSource(SourceId.From("ext-src"));
 
         // Assert
         var stateChangedEvent = stateChangedEvents.Single();
@@ -453,7 +428,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
 
         // Act
-        hazardZone.ActivateFromExternalSource("ext-src");
+        hazardZone.ActivateFromExternalSource(SourceId.From("ext-src"));
 
         // Assert
         var stateChangedEvent = stateChangedEvents.Single();
@@ -572,10 +547,10 @@ public sealed class HazardZoneTests : IDisposable
             .WithActivationDuration(activationDuration)
             .Build();
 
-        hazardZone.ActivateFromExternalSource(sourceId);
+        hazardZone.ActivateFromExternalSource(SourceId.From(sourceId));
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
@@ -594,11 +569,11 @@ public sealed class HazardZoneTests : IDisposable
         var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
         hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
 
-        hazardZone.ActivateFromExternalSource(sourceId); // Transition to Activating
+        hazardZone.ActivateFromExternalSource(SourceId.From(sourceId)); // Transition to Activating
         stateChangedEvents.Clear(); // Clear the Inactive->Activating event
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         stateChangedEvents.Should().ContainSingle();
@@ -726,7 +701,7 @@ public sealed class HazardZoneTests : IDisposable
         personAddedEvents.Should().HaveCount(1);
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(2);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(2));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -772,7 +747,7 @@ public sealed class HazardZoneTests : IDisposable
         personAddedEvents.Should().HaveCount(1);
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(0);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(0));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -872,7 +847,7 @@ public sealed class HazardZoneTests : IDisposable
         personAddedEvents.Should().HaveCount(1);
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(0);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(0));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -906,7 +881,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
@@ -926,7 +901,7 @@ public sealed class HazardZoneTests : IDisposable
         var sourceId2 = "ext-src2";
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId2);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId2));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -945,11 +920,11 @@ public sealed class HazardZoneTests : IDisposable
         var stateChangedEvents = new List<HazardZoneStateChangedEventArgs>();
         hazardZone.HazardZoneStateChanged += (_, e) => stateChangedEvents.Add(e);
 
-        hazardZone.ActivateFromExternalSource(sourceId); // Transition to Active
+        hazardZone.ActivateFromExternalSource(SourceId.From(sourceId)); // Transition to Active
         stateChangedEvents.Clear(); // Clear the Inactive->Active event
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         stateChangedEvents.Should().ContainSingle();
@@ -968,7 +943,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.ActivateFromExternalSource(sourceId);
+        hazardZone.ActivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -986,7 +961,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.ActivateFromExternalSource(sourceId);
+        hazardZone.ActivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -1067,7 +1042,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(0);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(0));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -1083,7 +1058,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.DeactivateFromExternalSource("ext-src");
+        hazardZone.DeactivateFromExternalSource(SourceId.From("ext-src"));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -1147,7 +1122,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(1);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(1));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -1166,7 +1141,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(1);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(1));
 
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
@@ -1277,7 +1252,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
@@ -1298,7 +1273,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
@@ -1437,7 +1412,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(0);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(0));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -1453,7 +1428,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.DeactivateFromExternalSource("ext-src");
+        hazardZone.DeactivateFromExternalSource(SourceId.From("ext-src"));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -1516,7 +1491,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(1);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(1));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
@@ -1535,7 +1510,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
 
         // Act
-        hazardZone.SetAllowedNumberOfPersons(1);
+        hazardZone.SetAllowedNumberOfPersons(Capacity.From(1));
 
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
@@ -1592,7 +1567,7 @@ public sealed class HazardZoneTests : IDisposable
             .Build();
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
@@ -1613,7 +1588,7 @@ public sealed class HazardZoneTests : IDisposable
         hazardZone.HazardZoneAlarmStateChanged += (_, e) => alarmStateChangedEvents.Add(e);
 
         // Act
-        hazardZone.DeactivateFromExternalSource(sourceId);
+        hazardZone.DeactivateFromExternalSource(SourceId.From(sourceId));
 
         // Assert
         alarmStateChangedEvents.Should().ContainSingle();
@@ -1712,23 +1687,16 @@ public sealed class HazardZoneTests : IDisposable
     }
 
     [Fact]
-    public void SetAllowedNumberOfPersons_ShouldIgnoreChange_WhenAllowedNumberOfPersonsIsNegative()
+    public void From_ShouldThrowArgumentException_WhenCapacityIsNegative()
     {
         // Arrange
-        using var hazardZone = HazardZoneBuilder.Create()
-            .WithState(HazardZoneTestState.Active)
-            .WithAllowedNumberOfPersons(1)
-            .Build();
-
-        // Act
-        hazardZone.SetAllowedNumberOfPersons(-1);
+        var act = () => Capacity.From(-1);
 
         // Assert
-        hazardZone.AllowedNumberOfPersons.Should().Be(1);
+        act.Should().Throw<ArgumentException>();
     }
 
     public void Dispose()
     {
     }
 }
-

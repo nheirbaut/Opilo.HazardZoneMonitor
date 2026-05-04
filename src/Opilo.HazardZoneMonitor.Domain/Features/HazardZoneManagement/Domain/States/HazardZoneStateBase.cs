@@ -5,18 +5,18 @@ namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain.St
 internal abstract class HazardZoneStateBase(
     HazardZone hazardZone,
     HashSet<PersonId> personsInZone,
-    HashSet<string> registeredActivationSourceIds,
-    int allowedNumberOfPersons) : IDisposable
+    HashSet<SourceId> registeredActivationSourceIds,
+    Capacity allowedNumberOfPersons) : IDisposable
 {
     public abstract ZoneState ZoneState { get; }
     public abstract AlarmState AlarmState { get; }
-    public int AllowedNumberOfPersons { get; private set; } = allowedNumberOfPersons;
+    public Capacity AllowedNumberOfPersons { get; private set; } = allowedNumberOfPersons;
 
     protected HazardZone HazardZone => hazardZone;
     protected HashSet<PersonId> PersonsInZone => personsInZone;
-    protected readonly HashSet<string> RegisteredActivationSourceIds = registeredActivationSourceIds;
+    protected readonly HashSet<SourceId> RegisteredActivationSourceIds = registeredActivationSourceIds;
 
-    public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
+    public void SetAllowedNumberOfPersons(Capacity allowedNumberOfPersons)
     {
         AllowedNumberOfPersons = allowedNumberOfPersons;
         OnAllowedNumberOfPersonsChanged();
@@ -70,11 +70,11 @@ internal abstract class HazardZoneStateBase(
     {
     }
 
-    public virtual void ActivateFromExternalSource(string sourceId)
+    public virtual void ActivateFromExternalSource(SourceId sourceId)
     {
     }
 
-    public virtual void DeactivateFromExternalSource(string sourceId)
+    public virtual void DeactivateFromExternalSource(SourceId sourceId)
     {
     }
 
@@ -96,4 +96,3 @@ internal abstract class HazardZoneStateBase(
     {
     }
 }
-
