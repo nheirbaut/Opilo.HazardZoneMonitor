@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using Ardalis.Result;
 using Dapper;
 using Opilo.HazardZoneMonitor.Api.Shared.Database;
@@ -20,16 +21,15 @@ internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory
         var id = Guid.CreateVersion7();
 
         const string sql = """
-            INSERT INTO PersonMovements (Id, PersonId, X, Y, RegisteredAt)
-            VALUES (@Id, @PersonId, @X, @Y, @RegisteredAt)
+            INSERT INTO PersonMovements (Id, PersonId, Coordinate, RegisteredAt)
+            VALUES (@Id, @PersonId, @Coordinate, @RegisteredAt)
             """;
 
         var parameters = new
         {
             Id = id,
             PersonId = personId,
-            X = coordinate.X,
-            Y = coordinate.Y,
+            Coordinate = coordinate,
             RegisteredAt = registeredAt,
         };
 
@@ -55,7 +55,7 @@ internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory
         connection.Open();
 
         const string sql = """
-            SELECT Id, PersonId, X, Y, RegisteredAt
+            SELECT Id, PersonId, Coordinate, RegisteredAt
             FROM PersonMovements
             WHERE Id = @Id
             """;
@@ -73,7 +73,8 @@ internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory
         {
             Id = Guid.Parse((string)raw.Id),
             PersonId = Guid.Parse((string)raw.PersonId),
-            Coordinate = new Coordinate((double)raw.X, (double)raw.Y),
+            Coordinate = JsonSerializer.Deserialize<Coordinate>((string)raw.Coordinate)
+                ?? throw new InvalidOperationException("Failed to deserialize Coordinate."),
             RegisteredAt = DateTime.Parse((string)raw.RegisteredAt, CultureInfo.InvariantCulture),
         };
 
