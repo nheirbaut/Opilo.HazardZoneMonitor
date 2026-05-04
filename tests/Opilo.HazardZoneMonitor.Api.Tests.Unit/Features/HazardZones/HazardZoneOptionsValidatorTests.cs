@@ -68,7 +68,7 @@ public sealed class HazardZoneOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_ShouldReturnFailure_WhenHazardZoneNamesAreNotUniqueWhenCaseIgnored()
+    public void Validate_ShouldReturnSuccess_WhenHazardZoneNamesDifferOnlyByCase()
     {
         // Arrange
         var hazardZone1 = HazardZoneConfigurationBuilder.Create().WithName("ZoNe A").Build();
@@ -79,8 +79,8 @@ public sealed class HazardZoneOptionsValidatorTests
         var result = _validator.Validate(string.Empty, options);
 
         // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
+        result.Succeeded.Should().BeTrue();
+        result.Failures.Should().BeNullOrEmpty();
     }
 
     [Fact]

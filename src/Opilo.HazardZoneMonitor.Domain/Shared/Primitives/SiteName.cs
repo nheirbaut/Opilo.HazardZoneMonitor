@@ -17,9 +17,7 @@ public sealed class SiteName : ValueObject
     {
         Guard.Against.NullOrWhiteSpace(value);
 
-        var normalized = value.ToUpperInvariant();
-
-        return new SiteName(normalized);
+        return new SiteName(value);
     }
 
     public override string ToString() => Value;

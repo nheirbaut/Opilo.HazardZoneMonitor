@@ -34,7 +34,7 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         var distinctCount = hazardZones.Select(hazardZone => hazardZone.Name).Distinct().Count();
         if (distinctCount != hazardZones.Count)
         {
-            return ValidateOptionsResult.Fail("Hazard zone names must be unique (case-insensitive).");
+            return ValidateOptionsResult.Fail("Hazard zone names must be unique.");
         }
 
         return ValidateOptionsResult.Success;

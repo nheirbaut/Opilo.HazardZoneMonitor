@@ -17,9 +17,7 @@ public sealed class HazardZoneName : ValueObject
     {
         Guard.Against.NullOrWhiteSpace(value);
 
-        var normalized = value.ToUpperInvariant();
-
-        return new HazardZoneName(normalized);
+        return new HazardZoneName(value);
     }
 
     public override string ToString() => Value;

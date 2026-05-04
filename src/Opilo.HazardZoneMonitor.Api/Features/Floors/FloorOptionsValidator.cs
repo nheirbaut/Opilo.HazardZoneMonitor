@@ -37,7 +37,7 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         var distinctCount = floors.Select(floor => floor.Name).Distinct().Count();
         if (distinctCount != floors.Count)
         {
-            return ValidateOptionsResult.Fail("Floor names must be unique (case-insensitive).");
+            return ValidateOptionsResult.Fail("Floor names must be unique.");
         }
 
         return ValidateOptionsResult.Success;

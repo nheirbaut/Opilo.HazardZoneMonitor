@@ -17,9 +17,7 @@ public sealed class FloorName : ValueObject
     {
         Guard.Against.NullOrWhiteSpace(value);
 
-        var normalized = value.ToUpperInvariant();
-
-        return new FloorName(normalized);
+        return new FloorName(value);
     }
 
     public override string ToString() => Value;

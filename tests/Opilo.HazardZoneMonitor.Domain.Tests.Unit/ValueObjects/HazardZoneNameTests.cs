@@ -15,11 +15,11 @@ public sealed class HazardZoneNameTests
         var hazardZoneName = HazardZoneName.From(name);
 
         // Assert
-        hazardZoneName.Value.Should().Be("ASSEMBLYLINE");
+        hazardZoneName.Value.Should().Be("AssemblyLine");
     }
 
     [Fact]
-    public void From_ShouldBeCaseInsensitive_WhenNamesDifferOnlyByCase()
+    public void From_ShouldBeCaseSensitive_WhenNamesDifferOnlyByCase()
     {
         // Arrange
         var lowerCase = HazardZoneName.From("assemblyline");
@@ -27,9 +27,9 @@ public sealed class HazardZoneNameTests
         var mixedCase = HazardZoneName.From("AssemblyLine");
 
         // Assert
-        lowerCase.Should().Be(upperCase);
-        upperCase.Should().Be(mixedCase);
-        lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
+        lowerCase.Should().NotBe(upperCase);
+        upperCase.Should().NotBe(mixedCase);
+        lowerCase.GetHashCode().Should().NotBe(upperCase.GetHashCode());
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public sealed class HazardZoneNameTests
     {
         // Arrange
         var first = HazardZoneName.From("Zone");
-        var second = HazardZoneName.From("zone");
+        var second = HazardZoneName.From("Zone");
 
         // Act & Assert
         (first == second).Should().BeTrue();

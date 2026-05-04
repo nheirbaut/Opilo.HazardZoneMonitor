@@ -52,19 +52,19 @@ public sealed class FloorOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_ShouldReturnFailure_WhenFloorNamesAreNotUniqueWhenCaseIgnored()
+    public void Validate_ShouldReturnSuccess_WhenFloorNamesDifferOnlyByCase()
     {
         // Arrange
-        var floor1 = FloorConfigurationBuilder.Create().WithName("FlOoR").WithOutline().Build();
-        var floor2 = FloorConfigurationBuilder.Create().WithName("fLoOr").WithOutline().Build();
+        var floor1 = FloorConfigurationBuilder.Create().WithName("FlOoR").WithOutline(new Coordinate(0, 0), new Coordinate(1, 0), new Coordinate(0, 1)).Build();
+        var floor2 = FloorConfigurationBuilder.Create().WithName("fLoOr").WithOutline(new Coordinate(2, 2), new Coordinate(3, 2), new Coordinate(2, 3)).Build();
         var options = new FloorOptions { Floors = [floor1, floor2] };
 
         // Act
         var result = _validator.Validate(string.Empty, options);
 
         // Assert
-        result.Succeeded.Should().BeFalse();
-        result.Failures.Should().ContainSingle();
+        result.Succeeded.Should().BeTrue();
+        result.Failures.Should().BeNullOrEmpty();
     }
 
     [Fact]

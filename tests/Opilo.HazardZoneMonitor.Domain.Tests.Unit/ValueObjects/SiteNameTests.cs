@@ -15,11 +15,11 @@ public sealed class SiteNameTests
         var siteName = SiteName.From(name);
 
         // Assert
-        siteName.Value.Should().Be("REACTORFACILITY");
+        siteName.Value.Should().Be("ReactorFacility");
     }
 
     [Fact]
-    public void From_ShouldBeCaseInsensitive_WhenNamesDifferOnlyByCase()
+    public void From_ShouldBeCaseSensitive_WhenNamesDifferOnlyByCase()
     {
         // Arrange
         var lowerCase = SiteName.From("reactorfacility");
@@ -27,9 +27,9 @@ public sealed class SiteNameTests
         var mixedCase = SiteName.From("ReactorFacility");
 
         // Assert
-        lowerCase.Should().Be(upperCase);
-        upperCase.Should().Be(mixedCase);
-        lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
+        lowerCase.Should().NotBe(upperCase);
+        upperCase.Should().NotBe(mixedCase);
+        lowerCase.GetHashCode().Should().NotBe(upperCase.GetHashCode());
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public sealed class SiteNameTests
     {
         // Arrange
         var first = SiteName.From("Site");
-        var second = SiteName.From("site");
+        var second = SiteName.From("Site");
 
         // Act & Assert
         (first == second).Should().BeTrue();

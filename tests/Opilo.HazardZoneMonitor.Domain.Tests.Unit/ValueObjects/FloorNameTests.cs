@@ -15,11 +15,11 @@ public sealed class FloorNameTests
         var floorName = FloorName.From(name);
 
         // Assert
-        floorName.Value.Should().Be("GROUNDFLOOR");
+        floorName.Value.Should().Be("GroundFloor");
     }
 
     [Fact]
-    public void From_ShouldBeCaseInsensitive_WhenNamesDifferOnlyByCase()
+    public void From_ShouldBeCaseSensitive_WhenNamesDifferOnlyByCase()
     {
         // Arrange
         var lowerCase = FloorName.From("groundfloor");
@@ -27,9 +27,9 @@ public sealed class FloorNameTests
         var mixedCase = FloorName.From("GroundFloor");
 
         // Assert
-        lowerCase.Should().Be(upperCase);
-        upperCase.Should().Be(mixedCase);
-        lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
+        lowerCase.Should().NotBe(upperCase);
+        upperCase.Should().NotBe(mixedCase);
+        lowerCase.GetHashCode().Should().NotBe(upperCase.GetHashCode());
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public sealed class FloorNameTests
     {
         // Arrange
         var first = FloorName.From("Floor");
-        var second = FloorName.From("floor");
+        var second = FloorName.From("Floor");
 
         // Act & Assert
         (first == second).Should().BeTrue();
