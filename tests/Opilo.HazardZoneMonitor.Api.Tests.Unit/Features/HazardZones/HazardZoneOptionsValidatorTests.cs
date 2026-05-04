@@ -1,6 +1,5 @@
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones;
@@ -41,7 +40,7 @@ public sealed class HazardZoneOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZoneOutlineIsNull()
     {
         // Arrange
-        var hazardZone = new HazardZoneConfiguration(HazardZoneName.From("Zone"), null!, TimeSpan.Zero, TimeSpan.Zero);
+        var hazardZone = new HazardZoneConfiguration("Zone", null!, TimeSpan.Zero, TimeSpan.Zero);
         var options = new HazardZoneOptions { HazardZones = [hazardZone] };
 
         // Act

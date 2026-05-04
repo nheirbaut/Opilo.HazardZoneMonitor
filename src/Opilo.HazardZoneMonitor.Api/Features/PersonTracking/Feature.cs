@@ -12,7 +12,6 @@ public sealed class Feature : IFeature
             ?? "Data Source=hazardzone.db";
 
         SqlMapper.AddTypeHandler(new GuidTypeHandler());
-        SqlMapper.AddTypeHandler(new PersonIdTypeHandler());
 
         services.AddSingleton<IDbConnectionFactory>(_ => new SqliteDbConnectionFactory(connectionString));
         services.AddScoped<IMovementsRepository, MovementsRepository>();

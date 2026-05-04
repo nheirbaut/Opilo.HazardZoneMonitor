@@ -1,6 +1,6 @@
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Events;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 

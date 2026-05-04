@@ -1,6 +1,5 @@
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Floors;
@@ -13,7 +12,7 @@ public sealed class FloorOptionsValidatorTests
     public void Constructor_ShouldAcceptFloorName_WhenNameIsValid()
     {
         // Arrange
-        var floorName = FloorName.From("TestFloor");
+        var floorName = "TestFloor";
 
         // Act
         var floor = new FloorConfiguration(floorName, FloorConfigurationBuilder.DefaultOutline);
@@ -56,8 +55,8 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenFloorNamesAreNotUniqueWhenCaseIgnored()
     {
         // Arrange
-        var floor1 = FloorConfigurationBuilder.Create().WithName(FloorName.From("FlOoR")).WithOutline().Build();
-        var floor2 = FloorConfigurationBuilder.Create().WithName(FloorName.From("fLoOr")).WithOutline().Build();
+        var floor1 = FloorConfigurationBuilder.Create().WithName("FlOoR").WithOutline().Build();
+        var floor2 = FloorConfigurationBuilder.Create().WithName("fLoOr").WithOutline().Build();
         var options = new FloorOptions { Floors = [floor1, floor2] };
 
         // Act
@@ -157,7 +156,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenFloorOutlineIsNull()
     {
         // Arrange
-        var floor = new FloorConfiguration(FloorName.From("Floor"), null!);
+        var floor = new FloorConfiguration("Floor", null!);
         var options = new FloorOptions { Floors = [floor] };
 
         // Act
@@ -172,7 +171,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZonesIsNull()
     {
         // Arrange
-        var floor = new FloorConfiguration(FloorName.From("Floor"), FloorConfigurationBuilder.DefaultOutline)
+        var floor = new FloorConfiguration("Floor", FloorConfigurationBuilder.DefaultOutline)
         {
             HazardZones = null!
         };

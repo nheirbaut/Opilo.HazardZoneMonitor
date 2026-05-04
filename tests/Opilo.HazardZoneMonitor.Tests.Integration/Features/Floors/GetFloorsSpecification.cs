@@ -5,7 +5,6 @@ using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Floors;
@@ -50,7 +49,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         // Arrange
         List<FloorConfiguration> expectedFloors =
         [
-            new(FloorName.From("First Floor"),
+            new("First Floor",
                 new List<PointConfiguration>
                 {
                     new(0, 0),
@@ -58,7 +57,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
                     new(10, 10),
                     new(0, 10)
                 }),
-            new(FloorName.From("Second Floor"),
+            new("Second Floor",
                 new List<PointConfiguration>
                 {
                     new(0, 0),
@@ -97,7 +96,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         // Arrange
         List<HazardZoneConfiguration> expectedHazardZones =
         [
-            new(HazardZoneName.From("Reactor Room"),
+            new("Reactor Room",
             [
                 new(2, 2),
                 new(8, 2),
@@ -110,7 +109,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
 
         List<FloorConfiguration> expectedFloors =
         [
-            new(FloorName.From("Ground Floor"),
+            new("Ground Floor",
                 new List<PointConfiguration>
                 {
                     new(0, 0),

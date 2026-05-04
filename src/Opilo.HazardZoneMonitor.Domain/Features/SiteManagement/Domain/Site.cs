@@ -1,7 +1,7 @@
 using Ardalis.GuardClauses;
 using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Shared.Guards;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.SiteManagement.Domain;
 

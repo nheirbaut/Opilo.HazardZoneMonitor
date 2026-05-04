@@ -2,7 +2,7 @@
 
 using Opilo.HazardZoneMonitor.Domain.Features.SiteManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 

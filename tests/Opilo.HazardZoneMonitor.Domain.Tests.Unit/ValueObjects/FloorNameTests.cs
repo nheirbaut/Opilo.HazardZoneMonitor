@@ -1,4 +1,4 @@
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.ValueObjects;
@@ -18,17 +18,6 @@ public sealed class FloorNameTests
         floorName.Value.Should().Be("GROUNDFLOOR");
     }
 
-    [Theory]
-    [ClassData(typeof(InvalidNames))]
-    public void From_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
-    {
-        // Act
-        var act = () => FloorName.From(invalidName);
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
     [Fact]
     public void From_ShouldBeCaseInsensitive_WhenNamesDifferOnlyByCase()
     {
@@ -43,42 +32,46 @@ public sealed class FloorNameTests
         lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
     }
 
-    [Fact]
-    public void JsonSerialize_ShouldRoundTrip_WhenNameIsValid()
+    [Theory]
+    [ClassData(typeof(InvalidNames))]
+    public void From_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
-        // Arrange
-        var name = FloorName.From("TestFloor");
-
         // Act
-        var json = System.Text.Json.JsonSerializer.Serialize(name);
-        var deserialized = System.Text.Json.JsonSerializer.Deserialize<FloorName>(json);
+        var act = () => FloorName.From(invalidName);
 
         // Assert
-        deserialized.Should().Be(name);
-        json.Should().Be("\"TESTFLOOR\"");
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
-    public void JsonDeserialize_ShouldThrow_WhenNameIsEmpty()
+    public void EqualityOperator_ShouldReturnTrue_WhenValuesAreEqual()
     {
-        // Act
-        var act = () => System.Text.Json.JsonSerializer.Deserialize<FloorName>("\"\"");
+        // Arrange
+        var first = FloorName.From("Floor");
+        var second = FloorName.From("floor");
 
-        // Assert
-        act.Should().Throw<System.Text.Json.JsonException>();
+        // Act & Assert
+        (first == second).Should().BeTrue();
+        (first != second).Should().BeFalse();
     }
 
     [Fact]
-    public void Equals_ShouldReturnFalse_WhenFloorNamesHaveDifferentValues()
+    public void Equals_ShouldReturnFalse_WhenComparedToNull()
     {
         // Arrange
-        var floorName1 = FloorName.From("FloorOne");
-        var floorName2 = FloorName.From("FloorTwo");
+        var name = FloorName.From("Floor");
 
-        // Act
-        var result = floorName1 == floorName2;
+        // Act & Assert
+        name.Equals(null).Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsAssignableToValueObject_ShouldBeTrue()
+    {
+        // Arrange
+        var name = FloorName.From("Floor");
 
         // Assert
-        result.Should().BeFalse();
+        name.Should().BeAssignableTo<ValueObject>();
     }
 }

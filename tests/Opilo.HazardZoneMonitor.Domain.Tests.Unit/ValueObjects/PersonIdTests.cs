@@ -1,5 +1,4 @@
-using System.Globalization;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.ValueObjects;
 
@@ -29,46 +28,38 @@ public sealed class PersonIdTests
     }
 
     [Fact]
-    public void Equals_ShouldReturnTrue_WhenPersonIdsHaveSameGuidValue()
+    public void EqualityOperator_ShouldReturnTrue_WhenValuesAreEqual()
     {
         // Arrange
         var guid = Guid.NewGuid();
-        var personId1 = PersonId.From(guid);
-        var personId2 = PersonId.From(guid);
+        var first = PersonId.From(guid);
+        var second = PersonId.From(guid);
 
-        // Act
-        var result = personId1 == personId2;
-
-        // Assert
-        result.Should().BeTrue();
+        // Act & Assert
+        (first == second).Should().BeTrue();
+        (first != second).Should().BeFalse();
     }
 
     [Fact]
-    public void Equals_ShouldReturnFalse_WhenPersonIdsHaveDifferentGuidValue()
+    public void EqualityOperator_ShouldReturnFalse_WhenValuesDiffer()
     {
         // Arrange
-        var personId1 = PersonId.From(Guid.NewGuid());
-        var personId2 = PersonId.From(Guid.NewGuid());
+        var first = PersonId.From(Guid.NewGuid());
+        var second = PersonId.From(Guid.NewGuid());
 
-        // Act
-        var result = personId1 == personId2;
-
-        // Assert
-        result.Should().BeFalse();
+        // Act & Assert
+        (first == second).Should().BeFalse();
+        (first != second).Should().BeTrue();
     }
 
     [Fact]
-    public void ToString_ShouldReturnGuidStringRepresentation_WhenPersonIdIsValid()
+    public void Equals_ShouldReturnFalse_WhenComparedToNull()
     {
         // Arrange
-        var guid = Guid.NewGuid();
-        var personId = PersonId.From(guid);
+        var personId = PersonId.From(Guid.NewGuid());
 
-        // Act
-        var result = personId.ToString(null, CultureInfo.InvariantCulture);
-
-        // Assert
-        result.Should().Be(guid.ToString(null, CultureInfo.InvariantCulture));
+        // Act & Assert
+        personId.Equals(null).Should().BeFalse();
     }
 
     [Fact]
@@ -76,14 +67,34 @@ public sealed class PersonIdTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        var personId1 = PersonId.From(guid);
-        var personId2 = PersonId.From(guid);
-
-        // Act
-        var hashCode1 = personId1.GetHashCode();
-        var hashCode2 = personId2.GetHashCode();
+        var first = PersonId.From(guid);
+        var second = PersonId.From(guid);
 
         // Assert
-        hashCode1.Should().Be(hashCode2);
+        first.GetHashCode().Should().Be(second.GetHashCode());
+    }
+
+    [Fact]
+    public void ToString_ShouldReturnGuidStringRepresentation()
+    {
+        // Arrange
+        var guid = Guid.NewGuid();
+        var personId = PersonId.From(guid);
+
+        // Act
+        var result = personId.ToString();
+
+        // Assert
+        result.Should().Be(guid.ToString());
+    }
+
+    [Fact]
+    public void IsAssignableToValueObject_ShouldBeTrue()
+    {
+        // Arrange
+        var personId = PersonId.From(Guid.NewGuid());
+
+        // Assert
+        personId.Should().BeAssignableTo<ValueObject>();
     }
 }

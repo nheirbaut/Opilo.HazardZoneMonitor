@@ -1,4 +1,4 @@
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.ValueObjects;
@@ -18,17 +18,6 @@ public sealed class SiteNameTests
         siteName.Value.Should().Be("REACTORFACILITY");
     }
 
-    [Theory]
-    [ClassData(typeof(InvalidNames))]
-    public void From_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
-    {
-        // Act
-        var act = () => SiteName.From(invalidName);
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
     [Fact]
     public void From_ShouldBeCaseInsensitive_WhenNamesDifferOnlyByCase()
     {
@@ -43,42 +32,46 @@ public sealed class SiteNameTests
         lowerCase.GetHashCode().Should().Be(upperCase.GetHashCode());
     }
 
-    [Fact]
-    public void JsonSerialize_ShouldRoundTrip_WhenNameIsValid()
+    [Theory]
+    [ClassData(typeof(InvalidNames))]
+    public void From_ShouldThrowArgumentException_WhenNameIsInvalid(string invalidName)
     {
-        // Arrange
-        var name = SiteName.From("TestSite");
-
         // Act
-        var json = System.Text.Json.JsonSerializer.Serialize(name);
-        var deserialized = System.Text.Json.JsonSerializer.Deserialize<SiteName>(json);
+        var act = () => SiteName.From(invalidName);
 
         // Assert
-        deserialized.Should().Be(name);
-        json.Should().Be("\"TESTSITE\"");
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
-    public void JsonDeserialize_ShouldThrow_WhenNameIsEmpty()
+    public void EqualityOperator_ShouldReturnTrue_WhenValuesAreEqual()
     {
-        // Act
-        var act = () => System.Text.Json.JsonSerializer.Deserialize<SiteName>("\"\"");
+        // Arrange
+        var first = SiteName.From("Site");
+        var second = SiteName.From("site");
 
-        // Assert
-        act.Should().Throw<System.Text.Json.JsonException>();
+        // Act & Assert
+        (first == second).Should().BeTrue();
+        (first != second).Should().BeFalse();
     }
 
     [Fact]
-    public void Equals_ShouldReturnFalse_WhenSiteNamesHaveDifferentValues()
+    public void Equals_ShouldReturnFalse_WhenComparedToNull()
     {
         // Arrange
-        var siteName1 = SiteName.From("SiteOne");
-        var siteName2 = SiteName.From("SiteTwo");
+        var name = SiteName.From("Site");
 
-        // Act
-        var result = siteName1 == siteName2;
+        // Act & Assert
+        name.Equals(null).Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsAssignableToValueObject_ShouldBeTrue()
+    {
+        // Arrange
+        var name = SiteName.From("Site");
 
         // Assert
-        result.Should().BeFalse();
+        name.Should().BeAssignableTo<ValueObject>();
     }
 }

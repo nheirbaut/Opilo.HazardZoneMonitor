@@ -5,7 +5,6 @@ using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.Site;
 using Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Site;
@@ -33,7 +32,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
     public async Task GetSiteConfiguration_ShouldReturnSiteConfiguration_WhenSiteIsRegistered()
     {
         // Arrange
-        var expectedSite = new SiteConfiguration(SiteName.From("Reactor Facility Alpha"), []);
+        var expectedSite = new SiteConfiguration("Reactor Facility Alpha", []);
 
         var siteOptions = new SiteOptions { Name = expectedSite.Name };
 
@@ -67,7 +66,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
         // Arrange
         List<FloorConfiguration> expectedFloors =
         [
-            new(FloorName.From("Ground Floor"),
+            new("Ground Floor",
                 new List<PointConfiguration>
                 {
                     new(0, 0),
@@ -75,7 +74,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
                     new(20, 20),
                     new(0, 20),
                 }),
-            new(FloorName.From("Upper Floor"),
+            new("Upper Floor",
                 new List<PointConfiguration>
                 {
                     new(0, 0),
@@ -85,7 +84,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
                 }),
         ];
 
-        var siteOptions = new SiteOptions { Name = SiteName.From("Reactor Facility Alpha") };
+        var siteOptions = new SiteOptions { Name = "Reactor Facility Alpha" };
         var floorOptions = new FloorOptions { Floors = expectedFloors };
 
         await using var customFactory = factory.WithWebHostBuilder(builder =>
@@ -110,7 +109,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
 
         // Assert
         response.Should().NotBeNull();
-        response.Site.Name.Should().Be(SiteName.From("Reactor Facility Alpha"));
+        response.Site.Name.Should().Be("Reactor Facility Alpha");
         response.Site.Floors.Should().NotBeNullOrEmpty();
         response.Site.Floors.Should().BeEquivalentTo(expectedFloors);
     }

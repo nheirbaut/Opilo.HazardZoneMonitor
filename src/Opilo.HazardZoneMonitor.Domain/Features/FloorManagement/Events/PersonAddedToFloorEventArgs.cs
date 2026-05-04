@@ -1,5 +1,4 @@
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Events;
 

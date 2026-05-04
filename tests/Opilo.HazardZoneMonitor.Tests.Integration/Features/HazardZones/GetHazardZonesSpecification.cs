@@ -3,7 +3,6 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
@@ -48,7 +47,7 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
         // Arrange
         List<HazardZoneConfiguration> expectedHazardZones =
         [
-            new(HazardZoneName.From("Reactor Room"),
+            new("Reactor Room",
                 [
                     new(0, 0),
                     new(10, 0),
@@ -57,7 +56,7 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
                 ],
                 TimeSpan.Zero,
                 TimeSpan.Zero),
-            new(HazardZoneName.From("Chemical Storage"),
+            new("Chemical Storage",
                 [
                     new(20, 20),
                     new(35, 20),

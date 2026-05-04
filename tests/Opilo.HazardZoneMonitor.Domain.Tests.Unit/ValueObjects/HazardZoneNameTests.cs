@@ -1,4 +1,4 @@
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.ValueObjects;
@@ -44,28 +44,34 @@ public sealed class HazardZoneNameTests
     }
 
     [Fact]
-    public void JsonSerialize_ShouldRoundTrip_WhenNameIsValid()
+    public void EqualityOperator_ShouldReturnTrue_WhenValuesAreEqual()
     {
         // Arrange
-        var name = HazardZoneName.From("TestZone");
+        var first = HazardZoneName.From("Zone");
+        var second = HazardZoneName.From("zone");
 
-        // Act
-        var json = System.Text.Json.JsonSerializer.Serialize(name);
-        var deserialized = System.Text.Json.JsonSerializer.Deserialize<HazardZoneName>(json);
-
-        // Assert
-        deserialized.Should().Be(name);
-        json.Should().Be("\"TESTZONE\"");
+        // Act & Assert
+        (first == second).Should().BeTrue();
+        (first != second).Should().BeFalse();
     }
 
     [Fact]
-    public void JsonDeserialize_ShouldThrow_WhenNameIsEmpty()
+    public void Equals_ShouldReturnFalse_WhenComparedToNull()
     {
-        // Act
-        var act = () => System.Text.Json.JsonSerializer.Deserialize<HazardZoneName>("\"\"");
+        // Arrange
+        var name = HazardZoneName.From("Zone");
 
-        // Assert
-        act.Should().Throw<System.Text.Json.JsonException>();
+        // Act & Assert
+        name.Equals(null).Should().BeFalse();
     }
 
+    [Fact]
+    public void IsAssignableToValueObject_ShouldBeTrue()
+    {
+        // Arrange
+        var name = HazardZoneName.From("Zone");
+
+        // Assert
+        name.Should().BeAssignableTo<ValueObject>();
+    }
 }

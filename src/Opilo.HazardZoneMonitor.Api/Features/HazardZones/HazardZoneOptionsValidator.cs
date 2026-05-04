@@ -31,7 +31,7 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
 
     private static ValidateOptionsResult ValidateHazardZoneNamesAreUnique(IReadOnlyList<HazardZoneConfiguration> hazardZones)
     {
-        var distinctCount = hazardZones.Select(hazardZone => hazardZone.Name).Distinct().Count();
+        var distinctCount = hazardZones.Select(hazardZone => hazardZone.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
         if (distinctCount != hazardZones.Count)
         {
             return ValidateOptionsResult.Fail("Hazard zone names must be unique (case-insensitive).");

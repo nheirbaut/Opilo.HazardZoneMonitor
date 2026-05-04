@@ -1,13 +1,12 @@
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
-using Opilo.HazardZoneMonitor.Domain.Shared.ValueObjects;
 
 namespace Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 internal sealed class HazardZoneConfigurationBuilder
 {
-    public static readonly HazardZoneName DefaultName = HazardZoneName.From("Zone");
+    public const string DefaultName = "Zone";
 
     public static readonly IReadOnlyList<PointConfiguration> DefaultOutline =
     [
@@ -16,7 +15,7 @@ internal sealed class HazardZoneConfigurationBuilder
         new PointConfiguration(1, 2)
     ];
 
-    private HazardZoneName _name = DefaultName;
+    private string _name = DefaultName;
     private IReadOnlyList<PointConfiguration> _outline = DefaultOutline;
     private TimeSpan _activationDuration = TimeSpan.Zero;
     private TimeSpan _preAlarmDuration = TimeSpan.Zero;
@@ -31,7 +30,7 @@ internal sealed class HazardZoneConfigurationBuilder
 
     public HazardZoneConfigurationBuilder WithName(string name)
     {
-        _name = HazardZoneName.From(name);
+        _name = name;
         return this;
     }
 
