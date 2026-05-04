@@ -38,7 +38,7 @@ public static class ConfigurationExtensions
                     var hazardZone = floor.HazardZones[hazardZoneIndex];
                     var hazardZoneKey = $"{floorKey}:{nameof(FloorConfiguration.HazardZones)}:{hazardZoneIndex}";
 
-                    dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Name)}"] = hazardZone.Name;
+                    dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Name)}"] = hazardZone.Name.Value;
                     dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.ActivationDuration)}"] = hazardZone.ActivationDuration.ToString("c", CultureInfo.InvariantCulture);
                     dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.PreAlarmDuration)}"] = hazardZone.PreAlarmDuration.ToString("c", CultureInfo.InvariantCulture);
                     dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.AllowedNumberOfPersons)}"] = hazardZone.AllowedNumberOfPersons.ToString(CultureInfo.InvariantCulture);
@@ -80,7 +80,7 @@ public static class ConfigurationExtensions
             var hazardZone = hazardZones[hazardZoneIndex];
             var hazardZoneKey = $"{nameof(HazardZoneOptions)}:{nameof(HazardZoneOptions.HazardZones)}:{hazardZoneIndex}";
 
-            dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Name)}"] = hazardZone.Name;
+            dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.Name)}"] = hazardZone.Name.Value;
             dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.ActivationDuration)}"] = hazardZone.ActivationDuration.ToString("c", CultureInfo.InvariantCulture);
             dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.PreAlarmDuration)}"] = hazardZone.PreAlarmDuration.ToString("c", CultureInfo.InvariantCulture);
             dictionary[$"{hazardZoneKey}:{nameof(HazardZoneConfiguration.AllowedNumberOfPersons)}"] = hazardZone.AllowedNumberOfPersons.ToString(CultureInfo.InvariantCulture);

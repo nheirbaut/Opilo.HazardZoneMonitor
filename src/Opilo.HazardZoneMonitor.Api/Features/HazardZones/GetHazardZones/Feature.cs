@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Shared.Cqrs;
 using Opilo.HazardZoneMonitor.Api.Shared.Features;
 
@@ -10,11 +12,37 @@ public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<HazardZoneOptions>(configuration.GetSection(nameof(HazardZoneOptions)));
+        services.ConfigureHttpJsonOptions(options =>
+            options.SerializerOptions.Converters.Add(new HazardZoneNameJsonConverter()));
+
         services.AddSingleton<IValidateOptions<HazardZoneOptions>, HazardZoneOptionsValidator>();
-        services.AddOptions<HazardZoneOptions>().ValidateOnStart();
+        services.AddOptions<HazardZoneOptions>()
+            .Configure<IConfiguration>((options, configuredConfiguration) =>
+            {
+                ValidateHazardZoneNameConfiguration(configuredConfiguration);
+                configuredConfiguration.GetSection(nameof(HazardZoneOptions)).Bind(options);
+            })
+            .ValidateOnStart();
 
         services.AddScoped<IQueryHandler<Query, GetHazardZonesResponse>, Handler>();
+    }
+
+    private static void ValidateHazardZoneNameConfiguration(IConfiguration configuration)
+    {
+        var hazardZoneNameConverter = TypeDescriptor.GetConverter(typeof(HazardZoneName));
+        var hazardZonesSection = configuration.GetSection($"{nameof(HazardZoneOptions)}:{nameof(HazardZoneOptions.HazardZones)}");
+
+        foreach (var hazardZoneSection in hazardZonesSection.GetChildren())
+        {
+            try
+            {
+                hazardZoneNameConverter.ConvertFromInvariantString(hazardZoneSection[nameof(HazardZoneConfiguration.Name)] ?? string.Empty);
+            }
+            catch (Exception exception) when (exception is ArgumentException or NotSupportedException)
+            {
+                throw new InvalidOperationException($"Failed to convert configuration value at '{hazardZoneSection.Path}:{nameof(HazardZoneConfiguration.Name)}' to type '{typeof(HazardZoneName)}'.", exception);
+            }
+        }
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)

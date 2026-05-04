@@ -40,7 +40,7 @@ public sealed class HazardZoneOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZoneOutlineIsNull()
     {
         // Arrange
-        var hazardZone = new HazardZoneConfiguration("Zone", null!, TimeSpan.Zero, TimeSpan.Zero);
+        var hazardZone = new HazardZoneConfiguration(HazardZoneName.From("Zone"), null!, TimeSpan.Zero, TimeSpan.Zero);
         var options = new HazardZoneOptions { HazardZones = [hazardZone] };
 
         // Act

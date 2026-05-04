@@ -96,7 +96,7 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         // Arrange
         List<HazardZoneConfiguration> expectedHazardZones =
         [
-            new("Reactor Room",
+            new(HazardZoneName.From("Reactor Room"),
             [
                 new(2, 2),
                 new(8, 2),

@@ -1,7 +1,9 @@
 using Ardalis.GuardClauses;
+using System.ComponentModel;
 
 namespace Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
+[TypeConverter(typeof(HazardZoneNameTypeConverter))]
 public sealed class HazardZoneName : ValueObject
 {
     private HazardZoneName(string value)

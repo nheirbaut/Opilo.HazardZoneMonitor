@@ -5,7 +5,7 @@ namespace Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 internal sealed class HazardZoneConfigurationBuilder
 {
-    public const string DefaultName = "Zone";
+    public static readonly HazardZoneName DefaultName = HazardZoneName.From("Zone");
 
     public static readonly IReadOnlyList<Coordinate> DefaultOutline =
     [
@@ -14,7 +14,7 @@ internal sealed class HazardZoneConfigurationBuilder
         new Coordinate(1, 2)
     ];
 
-    private string _name = DefaultName;
+    private HazardZoneName _name = DefaultName;
     private IReadOnlyList<Coordinate> _outline = DefaultOutline;
     private TimeSpan _activationDuration = TimeSpan.Zero;
     private TimeSpan _preAlarmDuration = TimeSpan.Zero;
@@ -29,7 +29,7 @@ internal sealed class HazardZoneConfigurationBuilder
 
     public HazardZoneConfigurationBuilder WithName(string name)
     {
-        _name = name;
+        _name = HazardZoneName.From(name);
         return this;
     }
 
