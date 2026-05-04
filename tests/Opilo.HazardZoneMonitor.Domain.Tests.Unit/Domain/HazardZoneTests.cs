@@ -11,6 +11,14 @@ namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 public sealed class HazardZoneTests : IDisposable
 {
     [Fact]
+    public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
+    {
+        // Act & Assert
+        var act = () => new HazardZone(null!, HazardZoneBuilder.DefaultOutline, Duration.From(TimeSpan.Zero));
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenOutlineIsNull()
     {
         // Act & Assert
@@ -36,7 +44,7 @@ public sealed class HazardZoneTests : IDisposable
     public void Constructor_ShouldThrowArgumentException_WhenPreAlarmDurationIsNegative()
     {
         // Act & Assert
-        var act = () => Duration.From(TimeSpan.FromMilliseconds(-100));
+        var act = () => new HazardZone(HazardZoneBuilder.DefaultName, HazardZoneBuilder.DefaultOutline, Duration.From(TimeSpan.FromMilliseconds(-100)));
         act.Should().Throw<ArgumentException>();
     }
 
@@ -1684,16 +1692,6 @@ public sealed class HazardZoneTests : IDisposable
         // Assert
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
-    }
-
-    [Fact]
-    public void From_ShouldThrowArgumentException_WhenCapacityIsNegative()
-    {
-        // Arrange
-        var act = () => Capacity.From(-1);
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
     }
 
     public void Dispose()

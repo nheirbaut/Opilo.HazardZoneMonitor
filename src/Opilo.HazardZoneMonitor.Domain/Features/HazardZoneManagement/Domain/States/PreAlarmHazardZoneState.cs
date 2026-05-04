@@ -16,7 +16,7 @@ internal sealed class PreAlarmHazardZoneState : HazardZoneStateBase
     {
         HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.PreAlarm);
 
-        _enteredPreAlarmAtUtc = new Timestamp(HazardZone.Clock.UtcNow);
+        _enteredPreAlarmAtUtc = Timestamp.From(HazardZone.Clock.UtcNow);
 
         if (HazardZone.PreAlarmDuration.Value == TimeSpan.Zero)
         {
