@@ -9,6 +9,6 @@ public sealed class Handler(IMovementsRepository movementsRepository, IClock clo
     public async Task<Result<RegisteredPersonMovement>> Handle(Command command, CancellationToken cancellationToken)
     {
         DateTime registeredAt = clock.UtcNow;
-        return await movementsRepository.RegisterMovementAsync(command.PersonId, command.X, command.Y, registeredAt, cancellationToken);
+        return await movementsRepository.RegisterMovementAsync(command.PersonId, command.Coordinate, registeredAt, cancellationToken);
     }
 }

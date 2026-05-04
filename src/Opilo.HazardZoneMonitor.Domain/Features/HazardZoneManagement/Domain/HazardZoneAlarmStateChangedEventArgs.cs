@@ -2,8 +2,8 @@ using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 
-public sealed class HazardZoneAlarmStateChangedEventArgs(string hazardZoneName, AlarmState newState) : EventArgs
+public sealed class HazardZoneAlarmStateChangedEventArgs(HazardZoneName hazardZoneName, AlarmState newState) : EventArgs
 {
-    public string HazardZoneName { get; } = hazardZoneName;
+    public HazardZoneName HazardZoneName { get; } = hazardZoneName;
     public AlarmState NewState { get; } = newState;
 }

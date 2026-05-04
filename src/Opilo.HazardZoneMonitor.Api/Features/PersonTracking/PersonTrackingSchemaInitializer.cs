@@ -14,8 +14,7 @@ internal sealed class PersonTrackingSchemaInitializer(IDbConnectionFactory conne
             CREATE TABLE IF NOT EXISTS PersonMovements (
                 Id TEXT NOT NULL PRIMARY KEY,
                 PersonId TEXT NOT NULL,
-                X REAL NOT NULL,
-                Y REAL NOT NULL,
+                Coordinate TEXT NOT NULL,
                 RegisteredAt TEXT NOT NULL
             )
             """;

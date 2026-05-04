@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
@@ -31,30 +31,6 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
     }
 
     [Fact]
-    public void Api_ShouldThrowOptionsValidationException_WhenHazardZoneNameIsEmpty()
-    {
-        // Arrange
-        var hazardZoneOptions = new HazardZoneOptions
-        {
-            HazardZones = [HazardZoneConfigurationBuilder.Create().WithName(string.Empty).Build()]
-        };
-
-        _customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(hazardZoneOptions.ToConfigurationDictionary());
-            });
-        });
-
-        // Act
-        Action act = () => _customFactory.CreateClient();
-
-        // Assert
-        act.Should().Throw<OptionsValidationException>();
-    }
-
-    [Fact]
     public void Api_ShouldThrowOptionsValidationException_WhenHazardZoneNamesAreDuplicate()
     {
         // Arrange
@@ -63,7 +39,7 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
             HazardZones =
             [
                 HazardZoneConfigurationBuilder.BuildSimple(),
-                HazardZoneConfigurationBuilder.Create().WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build()
+                HazardZoneConfigurationBuilder.Create().WithOutline(new Coordinate(2, 2), new Coordinate(3, 2), new Coordinate(2, 3)).Build()
             ]
         };
 

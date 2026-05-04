@@ -1,10 +1,11 @@
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Events;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 
 internal static class PersonHelper
 {
     public static PersonLocationChangedEventArgs CreatePersonLocationChangedEventLocatedInHazardZone(HazardZone hazardZone)
-        => new(Guid.NewGuid(), hazardZone.Outline.Vertices.GetCentroid());
+        => new(PersonId.From(Guid.NewGuid()), hazardZone.Outline.Vertices.GetCentroid());
 }

@@ -3,6 +3,7 @@ using NSubstitute;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.PersonTracking.RegisterPersonMovement;
 
@@ -23,20 +24,18 @@ public sealed class HandlerSpecification
     public async Task Handle_ShouldReturnCreatedResult_WhenMovementIsRegisteredSuccessfully()
     {
         // Arrange
-        Guid personId = Guid.NewGuid();
-        double x = 1.0;
-        double y = 2.0;
-        Command command = new(personId, x, y);
+        var personId = PersonId.From(Guid.NewGuid());
+        var coordinate = new Coordinate(1.0, 2.0);
+        Command command = new(personId, coordinate);
         RegisteredPersonMovement expectedMovement = new()
         {
             PersonId = personId,
-            X = x,
-            Y = y,
+            Coordinate = coordinate,
             RegisteredAt = DateTime.UtcNow,
         };
 
         _movementsRepository
-            .RegisterMovementAsync(personId, x, y, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .RegisterMovementAsync(personId, coordinate, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
             .Returns(Result.Created(expectedMovement));
 
         // Act
@@ -54,16 +53,16 @@ public sealed class HandlerSpecification
         DateTime fixedTime = new(2025, 6, 15, 10, 30, 0, DateTimeKind.Utc);
         _clock.UtcNow.Returns(fixedTime);
 
-        var personId = Guid.NewGuid();
-        Command command = new(personId, 1.0, 2.0);
+        var personId = PersonId.From(Guid.NewGuid());
+        var coordinate = new Coordinate(1.0, 2.0);
+        Command command = new(personId, coordinate);
 
         _movementsRepository
-            .RegisterMovementAsync(Arg.Any<Guid>(), Arg.Any<double>(), Arg.Any<double>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .RegisterMovementAsync(personId, Arg.Any<Coordinate>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
             .Returns(Result.Created(new RegisteredPersonMovement
             {
                 PersonId = personId,
-                X = 1.0,
-                Y = 2.0,
+                Coordinate = coordinate,
                 RegisteredAt = fixedTime,
             }));
 
@@ -72,6 +71,6 @@ public sealed class HandlerSpecification
 
         // Assert
         await _movementsRepository.Received(1)
-            .RegisterMovementAsync(personId, 1.0, 2.0, fixedTime, Arg.Any<CancellationToken>());
+            .RegisterMovementAsync(personId, coordinate, fixedTime, Arg.Any<CancellationToken>());
     }
 }

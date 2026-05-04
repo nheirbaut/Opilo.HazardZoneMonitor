@@ -2,9 +2,9 @@ using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Domain.Features.PersonTracking.Events;
 
-public sealed class PersonCreatedEventArgs(Guid personId, Location location) : EventArgs
+public sealed class PersonCreatedEventArgs(PersonId personId, Coordinate location) : EventArgs
 {
-    public Guid PersonId { get; } = personId;
-    public Location Location { get; } = location;
+    public PersonId PersonId { get; } = personId;
+    public Coordinate Location { get; } = location;
 }
 

@@ -5,9 +5,9 @@ namespace Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 public sealed class Outline
 {
-    public ReadOnlyCollection<Location> Vertices { get; }
+    public ReadOnlyCollection<Coordinate> Vertices { get; }
 
-    public Outline(ReadOnlyCollection<Location> vertices)
+    public Outline(ReadOnlyCollection<Coordinate> vertices)
     {
         Vertices = vertices;
         Guard.Against.Null(vertices);
@@ -19,7 +19,7 @@ public sealed class Outline
     }
 
     // Based on the Winding Number Algorithm: https://en.wikipedia.org/wiki/Point_in_polygon#Winding_number_algorithm
-    public bool IsLocationInside(Location location)
+    public bool IsLocationInside(Coordinate location)
     {
         Guard.Against.Null(location);
 
@@ -27,8 +27,8 @@ public sealed class Outline
 
         for (var i = 0; i < Vertices.Count; i++)
         {
-            Location currentVertex = Vertices[i];
-            Location nextVertex = Vertices[(i + 1) % Vertices.Count];
+            Coordinate currentVertex = Vertices[i];
+            Coordinate nextVertex = Vertices[(i + 1) % Vertices.Count];
 
             if (IsUpwardCrossing(currentVertex, nextVertex, location))
             {
@@ -64,7 +64,7 @@ public sealed class Outline
         return Vertices.All(v => other.IsLocationInside(v) && !other.IsLocationOnBoundary(v));
     }
 
-    private bool IsLocationOnBoundary(Location location)
+    private bool IsLocationOnBoundary(Coordinate location)
     {
         for (var i = 0; i < Vertices.Count; i++)
         {
@@ -78,7 +78,7 @@ public sealed class Outline
         return false;
     }
 
-    private static bool IsPointOnSegment(Location point, Location segmentStart, Location segmentEnd)
+    private static bool IsPointOnSegment(Coordinate point, Coordinate segmentStart, Coordinate segmentEnd)
     {
         // Check if point is collinear with the segment
         var crossProduct = (point.Y - segmentStart.Y) * (segmentEnd.X - segmentStart.X) -
@@ -116,7 +116,7 @@ public sealed class Outline
         return false;
     }
 
-    private static bool EdgesIntersect(Location a1, Location a2, Location b1, Location b2)
+    private static bool EdgesIntersect(Coordinate a1, Coordinate a2, Coordinate b1, Coordinate b2)
     {
         var d1 = CrossProduct(b2, b1, a1);
         var d2 = CrossProduct(b2, b1, a2);
@@ -130,22 +130,22 @@ public sealed class Outline
         return false;
     }
 
-    private static double CrossProduct(Location a, Location b, Location c)
+    private static double CrossProduct(Coordinate a, Coordinate b, Coordinate c)
         => (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
 
-    private static bool IsUpwardCrossing(Location v1, Location v2, Location point)
+    private static bool IsUpwardCrossing(Coordinate v1, Coordinate v2, Coordinate point)
         => v1.Y <= point.Y && v2.Y > point.Y;
 
-    private static bool IsDownwardCrossing(Location v1, Location v2, Location point)
+    private static bool IsDownwardCrossing(Coordinate v1, Coordinate v2, Coordinate point)
         => v1.Y > point.Y && v2.Y <= point.Y;
 
-    private static bool IsPointLeftOfEdge(Location v1, Location v2, Location point)
+    private static bool IsPointLeftOfEdge(Coordinate v1, Coordinate v2, Coordinate point)
         => IsLeft(v1, v2, point) > 0;
 
-    private static bool IsPointRightOfEdge(Location v1, Location v2, Location point)
+    private static bool IsPointRightOfEdge(Coordinate v1, Coordinate v2, Coordinate point)
         => IsLeft(v1, v2, point) < 0;
 
-    private static double IsLeft(Location v1, Location v2, Location point)
+    private static double IsLeft(Coordinate v1, Coordinate v2, Coordinate point)
         => (v2.X - v1.X) * (point.Y - v1.Y) - (point.X - v1.X) * (v2.Y - v1.Y);
 }
 

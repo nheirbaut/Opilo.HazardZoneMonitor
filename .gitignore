@@ -634,3 +634,6 @@ nul
 
 # SQLite database
 hazardzone.db
+
+# Exclude oh-my-openagent folders
+.sisyphus/

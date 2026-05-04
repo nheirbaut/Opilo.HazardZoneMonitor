@@ -4,25 +4,25 @@ namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain.St
 
 internal abstract class HazardZoneStateBase(
     HazardZone hazardZone,
-    HashSet<Guid> personsInZone,
-    HashSet<string> registeredActivationSourceIds,
-    int allowedNumberOfPersons) : IDisposable
+    HashSet<PersonId> personsInZone,
+    HashSet<SourceId> registeredActivationSourceIds,
+    Capacity allowedNumberOfPersons) : IDisposable
 {
     public abstract ZoneState ZoneState { get; }
     public abstract AlarmState AlarmState { get; }
-    public int AllowedNumberOfPersons { get; private set; } = allowedNumberOfPersons;
+    public Capacity AllowedNumberOfPersons { get; private set; } = allowedNumberOfPersons;
 
     protected HazardZone HazardZone => hazardZone;
-    protected HashSet<Guid> PersonsInZone => personsInZone;
-    protected readonly HashSet<string> RegisteredActivationSourceIds = registeredActivationSourceIds;
+    protected HashSet<PersonId> PersonsInZone => personsInZone;
+    protected readonly HashSet<SourceId> RegisteredActivationSourceIds = registeredActivationSourceIds;
 
-    public void SetAllowedNumberOfPersons(int allowedNumberOfPersons)
+    public void SetAllowedNumberOfPersons(Capacity allowedNumberOfPersons)
     {
         AllowedNumberOfPersons = allowedNumberOfPersons;
         OnAllowedNumberOfPersonsChanged();
     }
 
-    public void OnPersonAddedToHazardZone(Guid personId)
+    public void OnPersonAddedToHazardZone(PersonId personId)
     {
         if (PersonsInZone.Add(personId))
             HazardZone.RaisePersonAddedToHazardZone(personId);
@@ -30,7 +30,7 @@ internal abstract class HazardZoneStateBase(
         OnPersonAddedToHazardZone();
     }
 
-    public void OnPersonRemovedFromHazardZone(Guid personId)
+    public void OnPersonRemovedFromHazardZone(PersonId personId)
     {
         if (PersonsInZone.Remove(personId))
             HazardZone.RaisePersonRemovedFromHazardZone(personId);
@@ -38,7 +38,7 @@ internal abstract class HazardZoneStateBase(
         OnPersonRemovedFromHazardZone();
     }
 
-    public void OnPersonChangedLocation(Guid personId, Location location)
+    public void OnPersonChangedLocation(PersonId personId, Coordinate location)
     {
         if (PersonsInZone.Contains(personId))
         {
@@ -70,11 +70,11 @@ internal abstract class HazardZoneStateBase(
     {
     }
 
-    public virtual void ActivateFromExternalSource(string sourceId)
+    public virtual void ActivateFromExternalSource(SourceId sourceId)
     {
     }
 
-    public virtual void DeactivateFromExternalSource(string sourceId)
+    public virtual void DeactivateFromExternalSource(SourceId sourceId)
     {
     }
 
@@ -96,4 +96,3 @@ internal abstract class HazardZoneStateBase(
     {
     }
 }
-

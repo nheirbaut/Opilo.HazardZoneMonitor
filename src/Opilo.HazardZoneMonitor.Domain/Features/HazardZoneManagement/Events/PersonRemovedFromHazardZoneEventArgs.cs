@@ -1,7 +1,9 @@
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+
 namespace Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Events;
 
-public sealed class PersonRemovedFromHazardZoneEventArgs(Guid personId, string hazardZoneName) : EventArgs
+public sealed class PersonRemovedFromHazardZoneEventArgs(PersonId personId, HazardZoneName hazardZoneName) : EventArgs
 {
-    public Guid PersonId { get; } = personId;
-    public string HazardZoneName { get; } = hazardZoneName;
+    public PersonId PersonId { get; } = personId;
+    public HazardZoneName HazardZoneName { get; } = hazardZoneName;
 }

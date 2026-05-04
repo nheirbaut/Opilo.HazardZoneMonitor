@@ -6,9 +6,9 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
 {
     public ActiveHazardZoneState(
         HazardZone hazardZone,
-        HashSet<Guid> personsInZone,
-        HashSet<string> registeredActivationSourceIds,
-        int allowedNumberOfPersons)
+        HashSet<PersonId> personsInZone,
+        HashSet<SourceId> registeredActivationSourceIds,
+        Capacity allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
         HazardZone.RaiseHazardZoneStateChanged(ZoneState.Active);
@@ -23,7 +23,7 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
             AllowedNumberOfPersons));
     }
 
-    public override void DeactivateFromExternalSource(string sourceId)
+    public override void DeactivateFromExternalSource(SourceId sourceId)
     {
         if (!RegisteredActivationSourceIds.Remove(sourceId))
             return;
@@ -34,10 +34,10 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
 
     protected override void OnPersonAddedToHazardZone()
     {
-        if (PersonsInZone.Count <= AllowedNumberOfPersons)
+        if (PersonsInZone.Count <= AllowedNumberOfPersons.Value)
             return;
 
-        if (HazardZone.PreAlarmDuration == TimeSpan.Zero)
+        if (HazardZone.PreAlarmDuration.Value == TimeSpan.Zero)
         {
             HazardZone.TransitionTo(new AlarmHazardZoneState(HazardZone, PersonsInZone,
                 RegisteredActivationSourceIds,
@@ -52,9 +52,9 @@ internal sealed class ActiveHazardZoneState : HazardZoneStateBase
 
     protected override void OnAllowedNumberOfPersonsChanged()
     {
-        if (PersonsInZone.Count > AllowedNumberOfPersons)
+        if (PersonsInZone.Count > AllowedNumberOfPersons.Value)
         {
-            if (HazardZone.PreAlarmDuration == TimeSpan.Zero)
+            if (HazardZone.PreAlarmDuration.Value == TimeSpan.Zero)
             {
                 HazardZone.TransitionTo(new AlarmHazardZoneState(HazardZone, PersonsInZone,
                     RegisteredActivationSourceIds,

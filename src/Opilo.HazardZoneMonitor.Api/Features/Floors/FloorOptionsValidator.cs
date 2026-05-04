@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
@@ -15,10 +14,7 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
             return ValidateOptionsResult.Fail("Floors configuration is missing.");
         }
 
-        var result = ValidateFloorNamesAreNotEmpty(options.Floors);
-        if (!result.Succeeded) return result;
-
-        result = ValidateFloorNamesAreUnique(options.Floors);
+        var result = ValidateFloorNamesAreUnique(options.Floors);
         if (!result.Succeeded) return result;
 
         result = ValidateFloorOutlinesHaveMinimumPoints(options.Floors);
@@ -36,22 +32,12 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         return ValidateOptionsResult.Success;
     }
 
-    private static ValidateOptionsResult ValidateFloorNamesAreNotEmpty(IReadOnlyList<FloorConfiguration> floors)
-    {
-        if (floors.Any(floor => string.IsNullOrWhiteSpace(floor.Name)))
-        {
-            return ValidateOptionsResult.Fail("Each floor must have a non-empty name.");
-        }
-
-        return ValidateOptionsResult.Success;
-    }
-
     private static ValidateOptionsResult ValidateFloorNamesAreUnique(IReadOnlyList<FloorConfiguration> floors)
     {
-        var distinctCount = floors.Select(floor => floor.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        var distinctCount = floors.Select(floor => floor.Name).Distinct().Count();
         if (distinctCount != floors.Count)
         {
-            return ValidateOptionsResult.Fail("Floor names must be unique (case-insensitive).");
+            return ValidateOptionsResult.Fail("Floor names must be unique.");
         }
 
         return ValidateOptionsResult.Success;
@@ -166,9 +152,8 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         return ValidateOptionsResult.Success;
     }
 
-    private static Outline ToOutline(IReadOnlyList<PointConfiguration> points)
+    private static Outline ToOutline(IReadOnlyList<Coordinate> points)
     {
-        var locations = points.Select(p => new Location(p.X, p.Y)).ToList();
-        return new Outline(new ReadOnlyCollection<Location>(locations));
+        return new Outline(new ReadOnlyCollection<Coordinate>(points.ToList()));
     }
 }

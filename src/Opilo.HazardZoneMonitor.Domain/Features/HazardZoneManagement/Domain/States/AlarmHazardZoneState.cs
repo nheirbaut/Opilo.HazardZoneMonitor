@@ -6,9 +6,9 @@ internal sealed class AlarmHazardZoneState : HazardZoneStateBase
 {
     public AlarmHazardZoneState(
         HazardZone hazardZone,
-        HashSet<Guid> personsInZone,
-        HashSet<string> registeredActivationSourceIds,
-        int allowedNumberOfPersons)
+        HashSet<PersonId> personsInZone,
+        HashSet<SourceId> registeredActivationSourceIds,
+        Capacity allowedNumberOfPersons)
         : base(hazardZone, personsInZone, registeredActivationSourceIds, allowedNumberOfPersons)
     {
         HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.Alarm);
@@ -23,7 +23,7 @@ internal sealed class AlarmHazardZoneState : HazardZoneStateBase
             AllowedNumberOfPersons));
     }
 
-    public override void DeactivateFromExternalSource(string sourceId)
+    public override void DeactivateFromExternalSource(SourceId sourceId)
     {
         if (!RegisteredActivationSourceIds.Remove(sourceId))
             return;
@@ -34,7 +34,7 @@ internal sealed class AlarmHazardZoneState : HazardZoneStateBase
 
     protected override void OnPersonRemovedFromHazardZone()
     {
-        if (PersonsInZone.Count > AllowedNumberOfPersons)
+        if (PersonsInZone.Count > AllowedNumberOfPersons.Value)
             return;
 
         HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
@@ -44,7 +44,7 @@ internal sealed class AlarmHazardZoneState : HazardZoneStateBase
 
     protected override void OnAllowedNumberOfPersonsChanged()
     {
-        if (PersonsInZone.Count <= AllowedNumberOfPersons)
+        if (PersonsInZone.Count <= AllowedNumberOfPersons.Value)
         {
             HazardZone.RaiseHazardZoneAlarmStateChanged(AlarmState.None);
             HazardZone.TransitionTo(new ActiveHazardZoneState(HazardZone, PersonsInZone, RegisteredActivationSourceIds,

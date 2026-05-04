@@ -7,26 +7,26 @@ namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
 
 internal sealed class FloorBuilder
 {
-    private string _name = DefaultName;
+    private FloorName _name = DefaultName;
     private Outline _outline = DefaultOutline;
     private readonly List<HazardZone> _hazardZones = [];
     private TimeSpan? _personLifespan;
     private ITimerFactory? _timerFactory;
 
-    public const string DefaultName = "TestFloor";
+    public static readonly FloorName DefaultName = FloorName.From("TestFloor");
 
     public static readonly Outline DefaultOutline = new(new([
-        new Location(0, 0),
-        new Location(4, 0),
-        new Location(4, 4),
-        new Location(0, 4)
+        new Coordinate(0, 0),
+        new Coordinate(4, 0),
+        new Coordinate(4, 4),
+        new Coordinate(0, 4)
     ]));
 
     public static Floor BuildSimple() => new(DefaultName, DefaultOutline, []);
 
     public static FloorBuilder Create() => new();
 
-    public FloorBuilder WithName(string name)
+    public FloorBuilder WithName(FloorName name)
     {
         _name = name;
         return this;

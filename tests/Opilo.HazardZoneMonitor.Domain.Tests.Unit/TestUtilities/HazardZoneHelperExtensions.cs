@@ -6,13 +6,13 @@ namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 
 internal static class HazardZoneHelperExtensions
 {
-    public static Location GetLocationOutside(this HazardZone hazardZone)
+    public static Coordinate GetLocationOutside(this HazardZone hazardZone)
         => hazardZone.Outline.Vertices.GetPointOutside();
 
-    public static Location GetLocationInside(this HazardZone hazardZone)
+    public static Coordinate GetLocationInside(this HazardZone hazardZone)
         => hazardZone.Outline.Vertices.GetCentroid();
 
-    public static Location GetCentroid(this ReadOnlyCollection<Location> locations)
+    public static Coordinate GetCentroid(this ReadOnlyCollection<Coordinate> locations)
     {
         ArgumentNullException.ThrowIfNull(locations);
 
@@ -30,10 +30,10 @@ internal static class HazardZoneHelperExtensions
         if (count == 0)
             throw new ArgumentException("The collection of locations cannot be empty.", nameof(locations));
 
-        return new Location(sumX / count, sumY / count);
+        return new Coordinate(sumX / count, sumY / count);
     }
 
-    public static Location GetPointOutside(this ReadOnlyCollection<Location> locations)
+    public static Coordinate GetPointOutside(this ReadOnlyCollection<Coordinate> locations)
     {
         ArgumentNullException.ThrowIfNull(locations);
 
@@ -59,10 +59,10 @@ internal static class HazardZoneHelperExtensions
         var directionX = farthestVertex.X - centroid.X;
         var directionY = farthestVertex.Y - centroid.Y;
 
-        return new Location(centroid.X + directionX * 2, centroid.Y + directionY * 2);
+        return new Coordinate(centroid.X + directionX * 2, centroid.Y + directionY * 2);
     }
 
-    private static double DistanceSquared(Location a, Location b)
+    private static double DistanceSquared(Coordinate a, Coordinate b)
     {
         var dx = a.X - b.X;
         var dy = a.Y - b.Y;

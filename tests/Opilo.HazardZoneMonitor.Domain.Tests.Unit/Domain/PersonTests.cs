@@ -10,14 +10,14 @@ public sealed class PersonTests : IDisposable
     Person? _testPerson;
     private readonly FakeClock _clock;
     private readonly FakeTimerFactory _timerFactory;
-    private readonly Guid _personId;
-    private readonly Location _location;
+    private readonly PersonId _personId;
+    private readonly Coordinate _location;
     private readonly TimeSpan _timeout;
 
     public PersonTests()
     {
-        _personId = Guid.NewGuid();
-        _location = new Location(0, 0);
+        _personId = PersonId.From(Guid.NewGuid());
+        _location = new Coordinate(0, 0);
         _timeout = TimeSpan.FromSeconds(1);
         _clock = new FakeClock(DateTime.UnixEpoch);
         _timerFactory = new FakeTimerFactory(_clock);
@@ -40,8 +40,8 @@ public sealed class PersonTests : IDisposable
     {
         // Arrange
         _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);
-        var differentPersonId = Guid.NewGuid();
-        var personLocationUpdate = new PersonLocationUpdate(differentPersonId, new Location(1, 1));
+        var differentPersonId = PersonId.From(Guid.NewGuid());
+        var personLocationUpdate = new PersonLocationUpdate(differentPersonId, new Coordinate(1, 1));
 
         // Act
         var result = _testPerson.TryLocationUpdate(personLocationUpdate);
@@ -54,7 +54,7 @@ public sealed class PersonTests : IDisposable
     public void TryLocationUpdate_ShouldRaisePersonLocationChangedEvent_WhenLocationIsUpdatedToNewValue()
     {
         // Arrange
-        var newLocation = new Location(1, 1);
+        var newLocation = new Coordinate(1, 1);
         PersonLocationChangedEventArgs? personLocationChangedEvent = null;
 
         _testPerson = Person.Create(_personId, _location, _timeout, _timerFactory);

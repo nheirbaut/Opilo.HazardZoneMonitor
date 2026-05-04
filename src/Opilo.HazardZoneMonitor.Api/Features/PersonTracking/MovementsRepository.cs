@@ -1,36 +1,48 @@
+using System.Globalization;
+using System.Text.Json;
 using Ardalis.Result;
 using Dapper;
 using Opilo.HazardZoneMonitor.Api.Shared.Database;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 
 internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory) : IMovementsRepository
 {
     public async Task<Result<RegisteredPersonMovement>> RegisterMovementAsync(
-        Guid personId,
-        double x,
-        double y,
+        PersonId personId,
+        Coordinate coordinate,
         DateTime registeredAt,
         CancellationToken cancellationToken)
     {
         using var connection = connectionFactory.Create();
         connection.Open();
 
-        RegisteredPersonMovement movement = new()
+        var id = Guid.CreateVersion7();
+
+        const string sql = """
+            INSERT INTO PersonMovements (Id, PersonId, Coordinate, RegisteredAt)
+            VALUES (@Id, @PersonId, @Coordinate, @RegisteredAt)
+            """;
+
+        var parameters = new
         {
+            Id = id,
             PersonId = personId,
-            X = x,
-            Y = y,
+            Coordinate = coordinate,
             RegisteredAt = registeredAt,
         };
 
-        const string sql = """
-            INSERT INTO PersonMovements (Id, PersonId, X, Y, RegisteredAt)
-            VALUES (@Id, @PersonId, @X, @Y, @RegisteredAt)
-            """;
-
-        CommandDefinition command = new(sql, movement, cancellationToken: cancellationToken);
+        CommandDefinition command = new(sql, parameters, cancellationToken: cancellationToken);
         await connection.ExecuteAsync(command).ConfigureAwait(false);
+
+        RegisteredPersonMovement movement = new()
+        {
+            Id = id,
+            PersonId = personId,
+            Coordinate = coordinate,
+            RegisteredAt = registeredAt,
+        };
 
         return Result.Created(movement);
     }
@@ -43,19 +55,28 @@ internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory
         connection.Open();
 
         const string sql = """
-            SELECT Id, PersonId, X, Y, RegisteredAt
+            SELECT Id, PersonId, Coordinate, RegisteredAt
             FROM PersonMovements
             WHERE Id = @Id
             """;
 
         CommandDefinition command = new(sql, new { Id = id }, cancellationToken: cancellationToken);
-        RegisteredPersonMovement? movement = await connection.QuerySingleOrDefaultAsync<RegisteredPersonMovement>(command)
+        var raw = await connection.QuerySingleOrDefaultAsync<dynamic>(command)
             .ConfigureAwait(false);
 
-        if (movement is null)
+        if (raw is null)
         {
             return Result<RegisteredPersonMovement>.NotFound();
         }
+
+        RegisteredPersonMovement movement = new()
+        {
+            Id = Guid.Parse((string)raw.Id),
+            PersonId = PersonId.From(Guid.Parse((string)raw.PersonId)),
+            Coordinate = JsonSerializer.Deserialize<Coordinate>((string)raw.Coordinate)
+                ?? throw new InvalidOperationException("Failed to deserialize Coordinate."),
+            RegisteredAt = DateTime.Parse((string)raw.RegisteredAt, CultureInfo.InvariantCulture),
+        };
 
         return Result.Success(movement);
     }
