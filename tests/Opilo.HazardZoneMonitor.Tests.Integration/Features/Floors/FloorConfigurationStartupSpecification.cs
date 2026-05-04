@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
@@ -38,8 +38,8 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         {
             Floors =
             [
-                FloorConfigurationBuilder.Create().WithOutline(new PointConfiguration(0, 0), new PointConfiguration(1, 0), new PointConfiguration(0, 1)).Build(),
-                FloorConfigurationBuilder.Create().WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build()
+                FloorConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 0), new Coordinate(0, 1)).Build(),
+                FloorConfigurationBuilder.Create().WithOutline(new Coordinate(2, 2), new Coordinate(3, 2), new Coordinate(2, 3)).Build()
             ]
         };
 
@@ -64,7 +64,7 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         // Arrange
         var floorOptions = new FloorOptions
         {
-            Floors = [FloorConfigurationBuilder.Create().WithOutline(new PointConfiguration(0, 0), new PointConfiguration(1, 1)).Build()]
+            Floors = [FloorConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 1)).Build()]
         };
 
         _customFactory = factory.WithWebHostBuilder(builder =>

@@ -17,10 +17,10 @@ internal sealed class HazardZoneBuilder
     public static readonly HazardZoneName DefaultName = HazardZoneName.From("HazardZone");
 
     public static readonly Outline DefaultOutline = new(new([
-        new Location(0, 0),
-        new Location(4, 0),
-        new Location(4, 4),
-        new Location(0, 4)
+        new Coordinate(0, 0),
+        new Coordinate(4, 0),
+        new Coordinate(4, 4),
+        new Coordinate(0, 4)
     ]));
 
     public static readonly TimeSpan DefaultPreAlarmDuration = TimeSpan.FromSeconds(5);
@@ -120,7 +120,7 @@ internal sealed class HazardZoneBuilder
         foreach (var _ in Enumerable.Range(0, personsToAdd))
         {
             var personId = PersonId.From(Guid.NewGuid());
-            var insideLocation = new Location(2, 2);
+            var insideLocation = new Coordinate(2, 2);
             hazardZone.HandlePersonCreated(personId, insideLocation);
         }
 

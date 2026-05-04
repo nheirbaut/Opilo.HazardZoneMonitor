@@ -12,10 +12,10 @@ public sealed class FloorTests : IDisposable
 {
     private static readonly Outline s_validOutline = new(
         new([
-            new Location(0, 0),
-            new Location(4, 0),
-            new Location(4, 4),
-            new Location(0, 4)
+            new Coordinate(0, 0),
+            new Coordinate(4, 0),
+            new Coordinate(4, 4),
+            new Coordinate(0, 4)
         ]));
 
     private Floor? _testFloor;
@@ -66,10 +66,10 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         var hazardZoneOutline = new Outline(new([
-            new Location(10, 10),
-            new Location(12, 10),
-            new Location(12, 12),
-            new Location(10, 12)
+            new Coordinate(10, 10),
+            new Coordinate(12, 10),
+            new Coordinate(12, 12),
+            new Coordinate(10, 12)
         ]));
         using var hazardZone = new HazardZone(HazardZoneName.From("TestZone"), hazardZoneOutline, TimeSpan.FromSeconds(5));
 
@@ -85,10 +85,10 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         var hazardZoneOutline = new Outline(new([
-            new Location(1, 1),
-            new Location(3, 1),
-            new Location(3, 3),
-            new Location(1, 3)
+            new Coordinate(1, 1),
+            new Coordinate(3, 1),
+            new Coordinate(3, 3),
+            new Coordinate(1, 3)
         ]));
         using var hazardZone = new HazardZone(HazardZoneName.From("TestZone"), hazardZoneOutline, TimeSpan.FromSeconds(5));
 
@@ -104,16 +104,16 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         var outline1 = new Outline(new([
-            new Location(1, 1),
-            new Location(2, 1),
-            new Location(2, 2),
-            new Location(1, 2)
+            new Coordinate(1, 1),
+            new Coordinate(2, 1),
+            new Coordinate(2, 2),
+            new Coordinate(1, 2)
         ]));
         var outline2 = new Outline(new([
-            new Location(2.5, 2.5),
-            new Location(3.5, 2.5),
-            new Location(3.5, 3.5),
-            new Location(2.5, 3.5)
+            new Coordinate(2.5, 2.5),
+            new Coordinate(3.5, 2.5),
+            new Coordinate(3.5, 3.5),
+            new Coordinate(2.5, 3.5)
         ]));
 
         using var hazardZone1 = new HazardZone(HazardZoneName.From("SameName"), outline1, TimeSpan.FromSeconds(5));
@@ -165,7 +165,7 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         _testFloor = new Floor(s_validFloorName, s_validOutline, []);
-        var personMovement = new PersonLocationUpdate(PersonId.From(Guid.NewGuid()), new Location(8, 8));
+        var personMovement = new PersonLocationUpdate(PersonId.From(Guid.NewGuid()), new Coordinate(8, 8));
 
         // Act
         var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -179,7 +179,7 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         _testFloor = new Floor(s_validFloorName, s_validOutline, []);
-        var personMovement = new PersonLocationUpdate(PersonId.From(Guid.NewGuid()), new Location(2, 2));
+        var personMovement = new PersonLocationUpdate(PersonId.From(Guid.NewGuid()), new Coordinate(2, 2));
 
         // Act
         var result = _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -194,7 +194,7 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         var personId = PersonId.From(Guid.NewGuid());
-        var location = new Location(2, 2);
+        var location = new Coordinate(2, 2);
         _testFloor = new Floor(s_validFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(personId, location);
         PersonAddedToFloorEventArgs? personAddedToFloorEvent = null;
@@ -216,7 +216,7 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         var personId = PersonId.From(Guid.NewGuid());
-        var location = new Location(2, 2);
+        var location = new Coordinate(2, 2);
         _testFloor = new Floor(s_validFloorName, s_validOutline, []);
         var personMovement = new PersonLocationUpdate(personId, location);
         _testFloor.TryAddPersonLocationUpdate(personMovement);
@@ -235,7 +235,7 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         var personId = PersonId.From(Guid.NewGuid());
-        var location = new Location(2, 2);
+        var location = new Coordinate(2, 2);
         var personTimeout = TimeSpan.FromMilliseconds(10);
         _testFloor = new Floor(s_validFloorName, s_validOutline, [], personTimeout, _timerFactory);
         var personMovement = new PersonLocationUpdate(personId, location);
@@ -258,8 +258,8 @@ public sealed class FloorTests : IDisposable
     {
         // Arrange
         var personId = PersonId.From(Guid.NewGuid());
-        var locationOnFloor = new Location(2, 2);
-        var locationOffFloor = new Location(200, 200);
+        var locationOnFloor = new Coordinate(2, 2);
+        var locationOffFloor = new Coordinate(200, 200);
         _testFloor = new Floor(s_validFloorName, s_validOutline, []);
         var personMovementOnFloor = new PersonLocationUpdate(personId, locationOnFloor);
         var personMovementOffFloor = new PersonLocationUpdate(personId, locationOffFloor);
@@ -287,7 +287,7 @@ public sealed class FloorTests : IDisposable
         _testFloor = new Floor(FloorName.From("Test Floor"), floorOutline, [hazardZone]);
 
         var personId = PersonId.From(Guid.NewGuid());
-        var location = new Location(20, 20); // Inside hazard zone
+        var location = new Coordinate(20, 20); // Inside hazard zone
         var personLocationUpdate = new PersonLocationUpdate(personId, location);
 
         var personAddedEvents = new List<PersonAddedToHazardZoneEventArgs>();
@@ -313,8 +313,8 @@ public sealed class FloorTests : IDisposable
         _testFloor = new Floor(FloorName.From("Test Floor"), floorOutline, [hazardZone]);
 
         var personId = PersonId.From(Guid.NewGuid());
-        var initialLocation = new Location(50, 50); // Outside hazard zone
-        var newLocation = new Location(20, 20); // Inside hazard zone
+        var initialLocation = new Coordinate(50, 50); // Outside hazard zone
+        var newLocation = new Coordinate(20, 20); // Inside hazard zone
 
         // Add person first
         _testFloor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, initialLocation));
@@ -342,7 +342,7 @@ public sealed class FloorTests : IDisposable
         _testFloor = new Floor(FloorName.From("Test Floor"), floorOutline, [hazardZone], personTimeout, _timerFactory);
 
         var personId = PersonId.From(Guid.NewGuid());
-        var location = new Location(20, 20); // Inside hazard zone
+        var location = new Coordinate(20, 20); // Inside hazard zone
 
         // Add person first
         _testFloor.TryAddPersonLocationUpdate(new PersonLocationUpdate(personId, location));

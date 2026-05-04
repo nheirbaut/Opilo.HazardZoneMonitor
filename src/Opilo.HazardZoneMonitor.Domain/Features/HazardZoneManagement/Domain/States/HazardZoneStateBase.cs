@@ -38,7 +38,7 @@ internal abstract class HazardZoneStateBase(
         OnPersonRemovedFromHazardZone();
     }
 
-    public void OnPersonChangedLocation(PersonId personId, Location location)
+    public void OnPersonChangedLocation(PersonId personId, Coordinate location)
     {
         if (PersonsInZone.Contains(personId))
         {

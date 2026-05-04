@@ -1,6 +1,8 @@
+using System.Globalization;
 using Ardalis.Result;
 using Dapper;
 using Opilo.HazardZoneMonitor.Api.Shared.Database;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 
@@ -8,29 +10,39 @@ internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory
 {
     public async Task<Result<RegisteredPersonMovement>> RegisterMovementAsync(
         Guid personId,
-        double x,
-        double y,
+        Coordinate coordinate,
         DateTime registeredAt,
         CancellationToken cancellationToken)
     {
         using var connection = connectionFactory.Create();
         connection.Open();
 
-        RegisteredPersonMovement movement = new()
-        {
-            PersonId = personId,
-            X = x,
-            Y = y,
-            RegisteredAt = registeredAt,
-        };
+        var id = Guid.CreateVersion7();
 
         const string sql = """
             INSERT INTO PersonMovements (Id, PersonId, X, Y, RegisteredAt)
             VALUES (@Id, @PersonId, @X, @Y, @RegisteredAt)
             """;
 
-        CommandDefinition command = new(sql, movement, cancellationToken: cancellationToken);
+        var parameters = new
+        {
+            Id = id,
+            PersonId = personId,
+            X = coordinate.X,
+            Y = coordinate.Y,
+            RegisteredAt = registeredAt,
+        };
+
+        CommandDefinition command = new(sql, parameters, cancellationToken: cancellationToken);
         await connection.ExecuteAsync(command).ConfigureAwait(false);
+
+        RegisteredPersonMovement movement = new()
+        {
+            Id = id,
+            PersonId = personId,
+            Coordinate = coordinate,
+            RegisteredAt = registeredAt,
+        };
 
         return Result.Created(movement);
     }
@@ -49,13 +61,21 @@ internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory
             """;
 
         CommandDefinition command = new(sql, new { Id = id }, cancellationToken: cancellationToken);
-        RegisteredPersonMovement? movement = await connection.QuerySingleOrDefaultAsync<RegisteredPersonMovement>(command)
+        var raw = await connection.QuerySingleOrDefaultAsync<dynamic>(command)
             .ConfigureAwait(false);
 
-        if (movement is null)
+        if (raw is null)
         {
             return Result<RegisteredPersonMovement>.NotFound();
         }
+
+        RegisteredPersonMovement movement = new()
+        {
+            Id = Guid.Parse((string)raw.Id),
+            PersonId = Guid.Parse((string)raw.PersonId),
+            Coordinate = new Coordinate((double)raw.X, (double)raw.Y),
+            RegisteredAt = DateTime.Parse((string)raw.RegisteredAt, CultureInfo.InvariantCulture),
+        };
 
         return Result.Success(movement);
     }

@@ -3,8 +3,8 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.Site;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Site;
@@ -67,7 +67,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
         List<FloorConfiguration> expectedFloors =
         [
             new("Ground Floor",
-                new List<PointConfiguration>
+                new List<Coordinate>
                 {
                     new(0, 0),
                     new(20, 0),
@@ -75,7 +75,7 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
                     new(0, 20),
                 }),
             new("Upper Floor",
-                new List<PointConfiguration>
+                new List<Coordinate>
                 {
                     new(0, 0),
                     new(15, 0),

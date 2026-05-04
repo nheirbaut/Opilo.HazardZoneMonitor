@@ -1,5 +1,5 @@
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Floors;
@@ -71,7 +71,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenFloorOutlineHasFewerThanThreePoints()
     {
         // Arrange
-        var floor = FloorConfigurationBuilder.Create().WithOutline(new PointConfiguration(0, 0), new PointConfiguration(1, 1)).Build();
+        var floor = FloorConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 1)).Build();
         var options = new FloorOptions { Floors = [floor] };
 
         // Act
@@ -87,9 +87,9 @@ public sealed class FloorOptionsValidatorTests
     {
         // Arrange
         var floor = FloorConfigurationBuilder.Create().WithOutline(
-            new PointConfiguration(0, 0),
-            new PointConfiguration(1, 0),
-            new PointConfiguration(0, 1)).Build();
+            new Coordinate(0, 0),
+            new Coordinate(1, 0),
+            new Coordinate(0, 1)).Build();
         var options = new FloorOptions { Floors = [floor] };
 
         // Act
@@ -104,13 +104,13 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZonesOverlapWithinFloor()
     {
         // Arrange
-        var hazardZone1 = HazardZoneConfigurationBuilder.Create().WithName("Zone A").WithOutline(new PointConfiguration(0, 0), new PointConfiguration(4, 0), new PointConfiguration(4, 4), new PointConfiguration(0, 4)).Build();
-        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("Zone B").WithOutline(new PointConfiguration(2, 2), new PointConfiguration(6, 2), new PointConfiguration(6, 6), new PointConfiguration(2, 6)).Build();
+        var hazardZone1 = HazardZoneConfigurationBuilder.Create().WithName("Zone A").WithOutline(new Coordinate(0, 0), new Coordinate(4, 0), new Coordinate(4, 4), new Coordinate(0, 4)).Build();
+        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("Zone B").WithOutline(new Coordinate(2, 2), new Coordinate(6, 2), new Coordinate(6, 6), new Coordinate(2, 6)).Build();
         var floor = FloorConfigurationBuilder.Create().WithOutline(
-            new PointConfiguration(0, 0),
-            new PointConfiguration(10, 0),
-            new PointConfiguration(10, 10),
-            new PointConfiguration(0, 10)).WithHazardZones(hazardZone1, hazardZone2).Build();
+            new Coordinate(0, 0),
+            new Coordinate(10, 0),
+            new Coordinate(10, 10),
+            new Coordinate(0, 10)).WithHazardZones(hazardZone1, hazardZone2).Build();
         var options = new FloorOptions { Floors = [floor] };
 
         // Act
@@ -125,7 +125,7 @@ public sealed class FloorOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZoneIsOutsideFloorOutline()
     {
         // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.Create().WithOutline(new PointConfiguration(15, 15), new PointConfiguration(20, 15), new PointConfiguration(20, 20), new PointConfiguration(15, 20)).Build();
+        var hazardZone = HazardZoneConfigurationBuilder.Create().WithOutline(new Coordinate(15, 15), new Coordinate(20, 15), new Coordinate(20, 20), new Coordinate(15, 20)).Build();
         var floor = FloorConfigurationBuilder.BuildSimple();
         floor = floor with { HazardZones = [hazardZone] };
         var options = new FloorOptions { Floors = [floor] };

@@ -2,8 +2,8 @@ using Ardalis.Result;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.Site;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.Site.GetSite;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Site.GetSite;
 
@@ -13,9 +13,9 @@ public sealed class HandlerTests
     public async Task Handle_ShouldReturnSuccessResultWithSiteNameAndFloors_WhenSiteIsConfigured()
     {
         // Arrange
-        PointConfiguration point1 = new(0.0, 0.0);
-        PointConfiguration point2 = new(10.0, 10.0);
-        PointConfiguration point3 = new(10.0, 0.0);
+        Coordinate point1 = new(0.0, 0.0);
+        Coordinate point2 = new(10.0, 10.0);
+        Coordinate point3 = new(10.0, 0.0);
 
         FloorConfiguration floor1 = new("Floor 1", new[] { point1, point2, point3 });
         FloorConfiguration floor2 = new("Floor 2", new[] { point1, point2 });

@@ -16,10 +16,10 @@ internal sealed class FloorBuilder
     public static readonly FloorName DefaultName = FloorName.From("TestFloor");
 
     public static readonly Outline DefaultOutline = new(new([
-        new Location(0, 0),
-        new Location(4, 0),
-        new Location(4, 4),
-        new Location(0, 4)
+        new Coordinate(0, 0),
+        new Coordinate(4, 0),
+        new Coordinate(4, 4),
+        new Coordinate(0, 4)
     ]));
 
     public static Floor BuildSimple() => new(DefaultName, DefaultOutline, []);

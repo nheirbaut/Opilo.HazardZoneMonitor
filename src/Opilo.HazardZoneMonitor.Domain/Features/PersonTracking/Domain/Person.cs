@@ -10,12 +10,12 @@ public sealed class Person : IDisposable
     private readonly Shared.Abstractions.ITimer _expiryTimer;
 
     public PersonId Id { get; }
-    public Location Location { get; private set; }
+    public Coordinate Location { get; private set; }
 
     public event EventHandler<PersonLocationChangedEventArgs>? LocationChanged;
     public event EventHandler<PersonExpiredEventArgs>? Expired;
 
-    public static Person Create(PersonId id, Location location, TimeSpan lifespanTimeout, ITimerFactory timerFactory)
+    public static Person Create(PersonId id, Coordinate location, TimeSpan lifespanTimeout, ITimerFactory timerFactory)
     {
         ArgumentNullException.ThrowIfNull(timerFactory);
 
@@ -31,16 +31,16 @@ public sealed class Person : IDisposable
 
         RescheduleExpiry();
 
-        if (personLocationUpdate.Location == Location)
+        if (personLocationUpdate.Coordinate == Location)
             return true;
 
-        Location = personLocationUpdate.Location;
+        Location = personLocationUpdate.Coordinate;
         LocationChanged?.Invoke(this, new PersonLocationChangedEventArgs(Id, Location));
 
         return true;
     }
 
-    private Person(PersonId id, Location initialLocation, TimeSpan timeout, ITimerFactory timerFactory)
+    private Person(PersonId id, Coordinate initialLocation, TimeSpan timeout, ITimerFactory timerFactory)
     {
         Id = id;
         Location = initialLocation;

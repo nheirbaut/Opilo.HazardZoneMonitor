@@ -1,4 +1,4 @@
 namespace Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
-public record PersonLocationUpdate(PersonId PersonId, Location Location);
+public record PersonLocationUpdate(PersonId PersonId, Coordinate Coordinate);
 

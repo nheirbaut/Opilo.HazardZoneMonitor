@@ -60,7 +60,7 @@ public sealed class HazardZone : IDisposable
         _currentState = new InactiveHazardZoneState(this, [], [], 0);
     }
 
-    public void HandlePersonCreated(PersonId personId, Location location)
+    public void HandlePersonCreated(PersonId personId, Coordinate location)
     {
         Guard.Against.Null(location);
 
@@ -81,7 +81,7 @@ public sealed class HazardZone : IDisposable
         }
     }
 
-    public void HandlePersonLocationChanged(PersonId personId, Location location)
+    public void HandlePersonLocationChanged(PersonId personId, Coordinate location)
     {
         lock (_zoneStateLock)
         {

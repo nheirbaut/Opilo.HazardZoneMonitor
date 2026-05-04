@@ -1,6 +1,6 @@
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
@@ -8,15 +8,15 @@ internal sealed class FloorConfigurationBuilder
 {
     public const string DefaultName = "Floor";
 
-    public static readonly IReadOnlyList<PointConfiguration> DefaultOutline =
+    public static readonly IReadOnlyList<Coordinate> DefaultOutline =
     [
-        new PointConfiguration(0, 0),
-        new PointConfiguration(10, 0),
-        new PointConfiguration(0, 10)
+        new(0, 0),
+        new(10, 0),
+        new(0, 10)
     ];
 
     private string _name = DefaultName;
-    private IReadOnlyList<PointConfiguration> _outline = DefaultOutline;
+    private IReadOnlyList<Coordinate> _outline = DefaultOutline;
     private IReadOnlyList<HazardZoneConfiguration> _hazardZones = [];
 
     public static FloorConfigurationBuilder Create() => new();
@@ -30,7 +30,7 @@ internal sealed class FloorConfigurationBuilder
         return this;
     }
 
-    public FloorConfigurationBuilder WithOutline(params PointConfiguration[] outline)
+    public FloorConfigurationBuilder WithOutline(params Coordinate[] outline)
     {
         _outline = outline;
         return this;

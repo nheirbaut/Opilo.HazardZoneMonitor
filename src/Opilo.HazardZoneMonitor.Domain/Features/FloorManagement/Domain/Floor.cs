@@ -54,7 +54,7 @@ public sealed class Floor : IDisposable
     {
         Guard.Against.Null(personLocationUpdate);
 
-        var locationIsOnFloor = Outline.IsLocationInside(personLocationUpdate.Location);
+        var locationIsOnFloor = Outline.IsLocationInside(personLocationUpdate.Coordinate);
 
         if (!locationIsOnFloor)
         {
@@ -64,7 +64,7 @@ public sealed class Floor : IDisposable
 
         bool isNewPerson;
         PersonId personId;
-        Location location;
+        Coordinate location;
 
         lock (_personsOnFloorLock)
         {
@@ -73,7 +73,7 @@ public sealed class Floor : IDisposable
                 return true;
             }
 
-            var newPerson = Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Location, _personLifespan,
+            var newPerson = Person.Create(personLocationUpdate.PersonId, personLocationUpdate.Coordinate, _personLifespan,
                 _timerFactory);
 
             newPerson.Expired += OnPersonExpired;
@@ -82,7 +82,7 @@ public sealed class Floor : IDisposable
 
             isNewPerson = true;
             personId = personLocationUpdate.PersonId;
-            location = personLocationUpdate.Location;
+            location = personLocationUpdate.Coordinate;
         }
 
         if (isNewPerson)
@@ -94,7 +94,7 @@ public sealed class Floor : IDisposable
         return true;
     }
 
-    private void NotifyHazardZonesOfPersonCreated(PersonId personId, Location location)
+    private void NotifyHazardZonesOfPersonCreated(PersonId personId, Coordinate location)
     {
         if (_disposed)
             return;

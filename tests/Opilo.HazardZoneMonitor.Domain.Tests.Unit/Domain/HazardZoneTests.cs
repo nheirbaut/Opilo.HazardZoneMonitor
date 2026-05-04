@@ -191,7 +191,7 @@ public sealed class HazardZoneTests : IDisposable
         var locationInsideZone = hazardZone.GetLocationInside();
         hazardZone.HandlePersonLocationChanged(personId, locationInsideZone);
 
-        var newLocation = new Location(locationInsideZone.X + 1, locationInsideZone.Y + 1);
+        var newLocation = new Coordinate(locationInsideZone.X + 1, locationInsideZone.Y + 1);
         var personRemovedEvents = new List<PersonRemovedFromHazardZoneEventArgs>();
         hazardZone.PersonRemovedFromHazardZone += (_, e) => personRemovedEvents.Add(e);
 

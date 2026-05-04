@@ -2,6 +2,7 @@ using Ardalis.Result;
 using NSubstitute;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.PersonTracking.GetRegisteredPersonMovement;
 
@@ -22,16 +23,14 @@ public sealed class HandlerTests
         // Arrange
         var movementId = Guid.NewGuid();
         var personId = Guid.NewGuid();
-        var x = 1.0;
-        var y = 2.0;
+        var coordinate = new Coordinate(1.0, 2.0);
         var registeredAt = DateTime.UtcNow;
         Query query = new(movementId);
         RegisteredPersonMovement expectedMovement = new()
         {
             Id = movementId,
             PersonId = personId,
-            X = x,
-            Y = y,
+            Coordinate = coordinate,
             RegisteredAt = registeredAt,
         };
 

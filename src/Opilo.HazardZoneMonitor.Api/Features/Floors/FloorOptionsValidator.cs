@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.Floors;
@@ -153,9 +152,8 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         return ValidateOptionsResult.Success;
     }
 
-    private static Outline ToOutline(IReadOnlyList<PointConfiguration> points)
+    private static Outline ToOutline(IReadOnlyList<Coordinate> points)
     {
-        var locations = points.Select(p => new Location(p.X, p.Y)).ToList();
-        return new Outline(new ReadOnlyCollection<Location>(locations));
+        return new Outline(new ReadOnlyCollection<Coordinate>(points.ToList()));
     }
 }

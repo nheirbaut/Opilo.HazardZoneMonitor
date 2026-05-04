@@ -24,7 +24,7 @@ public sealed class PersonMovementPersistenceSpecification
 
                 HttpResponseMessage postResponse = await client.PostAsJsonAsync(
                     "/api/v1/person-movements",
-                    new { PersonId = Guid.NewGuid(), X = 5.0, Y = 10.0 },
+                    new { PersonId = Guid.NewGuid(), Coordinate = new { X = 5.0, Y = 10.0 } },
                     TestContext.Current.CancellationToken);
 
                 postResponse.EnsureSuccessStatusCode();

@@ -5,11 +5,11 @@ namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 
 public sealed class OutlineTests
 {
-    private static readonly ReadOnlyCollection<Location> s_validVertices = new([
-        new Location(0, 0),
-        new Location(4, 0),
-        new Location(4, 4),
-        new Location(0, 4)
+    private static readonly ReadOnlyCollection<Coordinate> s_validVertices = new([
+        new Coordinate(0, 0),
+        new Coordinate(4, 0),
+        new Coordinate(4, 4),
+        new Coordinate(0, 4)
     ]);
 
     [Fact]
@@ -24,9 +24,9 @@ public sealed class OutlineTests
     public void Constructor_ShouldThrowArgumentException_WhenVerticesAreLessThanThree()
     {
         // Arrange
-        var vertices = new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(1, 1)]);
+        var vertices = new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(1, 1)]);
 
         // Act & Assert
         var act = () => new Outline(vertices);
@@ -60,7 +60,7 @@ public sealed class OutlineTests
     {
         // Arrange
         var outline = new Outline(s_validVertices);
-        var point = new Location(2, 2);
+        var point = new Coordinate(2, 2);
 
         // Act
         var result = outline.IsLocationInside(point);
@@ -74,7 +74,7 @@ public sealed class OutlineTests
     {
         // Arrange
         var outline = new Outline(s_validVertices);
-        var point = new Location(5, 5);
+        var point = new Coordinate(5, 5);
 
         // Act
         var result = outline.IsLocationInside(point);
@@ -88,7 +88,7 @@ public sealed class OutlineTests
     {
         // Arrange
         var outline = new Outline(s_validVertices);
-        var point = new Location(2, 0);
+        var point = new Coordinate(2, 0);
 
         // Act
         var result = outline.IsLocationInside(point);
@@ -101,16 +101,16 @@ public sealed class OutlineTests
     public void IsLocationInside_ShouldReturnTrueForInsidePointsAndFalseForOutsidePoints_WhenPolygonIsConcave()
     {
         // Arrange
-        var vertices = new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(4, 0),
-            new Location(2, 2),
-            new Location(4, 4),
-            new Location(0, 4)
+        var vertices = new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(4, 0),
+            new Coordinate(2, 2),
+            new Coordinate(4, 4),
+            new Coordinate(0, 4)
         ]);
         var outline = new Outline(vertices);
-        var pointInside = new Location(2, 1);
-        var pointOutside = new Location(3, 3);
+        var pointInside = new Coordinate(2, 1);
+        var pointOutside = new Coordinate(3, 3);
 
         // Act
         var resultInside = outline.IsLocationInside(pointInside);
@@ -138,17 +138,17 @@ public sealed class OutlineTests
     public void Overlaps_ShouldReturnTrue_WhenOutlinesShareEdgeIntersection()
     {
         // Arrange
-        var outline1 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(4, 0),
-            new Location(4, 4),
-            new Location(0, 4)
+        var outline1 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(4, 0),
+            new Coordinate(4, 4),
+            new Coordinate(0, 4)
         ]));
-        var outline2 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(2, 2),
-            new Location(6, 2),
-            new Location(6, 6),
-            new Location(2, 6)
+        var outline2 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(2, 2),
+            new Coordinate(6, 2),
+            new Coordinate(6, 6),
+            new Coordinate(2, 6)
         ]));
 
         // Act
@@ -162,17 +162,17 @@ public sealed class OutlineTests
     public void Overlaps_ShouldReturnFalse_WhenOutlinesAreCompletelyDisjoint()
     {
         // Arrange
-        var outline1 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(2, 0),
-            new Location(2, 2),
-            new Location(0, 2)
+        var outline1 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(2, 0),
+            new Coordinate(2, 2),
+            new Coordinate(0, 2)
         ]));
-        var outline2 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(5, 5),
-            new Location(7, 5),
-            new Location(7, 7),
-            new Location(5, 7)
+        var outline2 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(5, 5),
+            new Coordinate(7, 5),
+            new Coordinate(7, 7),
+            new Coordinate(5, 7)
         ]));
 
         // Act
@@ -186,17 +186,17 @@ public sealed class OutlineTests
     public void Overlaps_ShouldReturnTrue_WhenOutlinesTouchAtSinglePoint()
     {
         // Arrange
-        var outline1 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(2, 0),
-            new Location(2, 2),
-            new Location(0, 2)
+        var outline1 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(2, 0),
+            new Coordinate(2, 2),
+            new Coordinate(0, 2)
         ]));
-        var outline2 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(2, 2),
-            new Location(4, 2),
-            new Location(4, 4),
-            new Location(2, 4)
+        var outline2 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(2, 2),
+            new Coordinate(4, 2),
+            new Coordinate(4, 4),
+            new Coordinate(2, 4)
         ]));
 
         // Act
@@ -210,17 +210,17 @@ public sealed class OutlineTests
     public void Overlaps_ShouldReturnTrue_WhenOutlinesShareCollinearEdgeSegment()
     {
         // Arrange
-        var outline1 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(2, 0),
-            new Location(2, 2),
-            new Location(0, 2)
+        var outline1 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(2, 0),
+            new Coordinate(2, 2),
+            new Coordinate(0, 2)
         ]));
-        var outline2 = new Outline(new ReadOnlyCollection<Location>([
-            new Location(1, 0),
-            new Location(3, 0),
-            new Location(3, 2),
-            new Location(1, 2)
+        var outline2 = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(1, 0),
+            new Coordinate(3, 0),
+            new Coordinate(3, 2),
+            new Coordinate(1, 2)
         ]));
 
         // Act
@@ -234,17 +234,17 @@ public sealed class OutlineTests
     public void Overlaps_ShouldReturnTrue_WhenOneOutlineCompletelyContainsAnother()
     {
         // Arrange
-        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(2, 2),
-            new Location(3, 2),
-            new Location(3, 3),
-            new Location(2, 3)
+        var innerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(2, 2),
+            new Coordinate(3, 2),
+            new Coordinate(3, 3),
+            new Coordinate(2, 3)
         ]));
-        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(5, 0),
-            new Location(5, 5),
-            new Location(0, 5)
+        var outerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(5, 0),
+            new Coordinate(5, 5),
+            new Coordinate(0, 5)
         ]));
 
         // Act
@@ -271,17 +271,17 @@ public sealed class OutlineTests
     public void IsWithin_ShouldReturnTrue_WhenOutlineIsFullyInsideOther()
     {
         // Arrange
-        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(1, 1),
-            new Location(3, 1),
-            new Location(3, 3),
-            new Location(1, 3)
+        var innerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(1, 1),
+            new Coordinate(3, 1),
+            new Coordinate(3, 3),
+            new Coordinate(1, 3)
         ]));
-        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(4, 0),
-            new Location(4, 4),
-            new Location(0, 4)
+        var outerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(4, 0),
+            new Coordinate(4, 4),
+            new Coordinate(0, 4)
         ]));
 
         // Act
@@ -295,17 +295,17 @@ public sealed class OutlineTests
     public void IsWithin_ShouldReturnFalse_WhenOutlineIsPartiallyOutside()
     {
         // Arrange
-        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(2, 2),
-            new Location(5, 2),
-            new Location(5, 5),
-            new Location(2, 5)
+        var innerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(2, 2),
+            new Coordinate(5, 2),
+            new Coordinate(5, 5),
+            new Coordinate(2, 5)
         ]));
-        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(4, 0),
-            new Location(4, 4),
-            new Location(0, 4)
+        var outerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(4, 0),
+            new Coordinate(4, 4),
+            new Coordinate(0, 4)
         ]));
 
         // Act
@@ -319,17 +319,17 @@ public sealed class OutlineTests
     public void IsWithin_ShouldReturnFalse_WhenOutlineVertexIsOnBoundary()
     {
         // Arrange
-        var innerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),  // This vertex is exactly on the outer outline's boundary
-            new Location(2, 0),
-            new Location(2, 2),
-            new Location(0, 2)
+        var innerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),  // This vertex is exactly on the outer outline's boundary
+            new Coordinate(2, 0),
+            new Coordinate(2, 2),
+            new Coordinate(0, 2)
         ]));
-        var outerOutline = new Outline(new ReadOnlyCollection<Location>([
-            new Location(0, 0),
-            new Location(4, 0),
-            new Location(4, 4),
-            new Location(0, 4)
+        var outerOutline = new Outline(new ReadOnlyCollection<Coordinate>([
+            new Coordinate(0, 0),
+            new Coordinate(4, 0),
+            new Coordinate(4, 4),
+            new Coordinate(0, 4)
         ]));
 
         // Act

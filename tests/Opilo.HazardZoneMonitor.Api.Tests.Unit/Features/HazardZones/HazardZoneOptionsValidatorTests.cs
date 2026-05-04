@@ -1,5 +1,5 @@
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Shared.Configuration;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones;
@@ -56,7 +56,7 @@ public sealed class HazardZoneOptionsValidatorTests
     {
         // Arrange
         var hazardZone1 = HazardZoneConfigurationBuilder.Create().WithName("Zone A").Build();
-        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("Zone A").WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build();
+        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("Zone A").WithOutline(new Coordinate(2, 2), new Coordinate(3, 2), new Coordinate(2, 3)).Build();
         var options = new HazardZoneOptions { HazardZones = [hazardZone1, hazardZone2] };
 
         // Act
@@ -72,7 +72,7 @@ public sealed class HazardZoneOptionsValidatorTests
     {
         // Arrange
         var hazardZone1 = HazardZoneConfigurationBuilder.Create().WithName("ZoNe A").Build();
-        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("zOnE a").WithOutline(new PointConfiguration(2, 2), new PointConfiguration(3, 2), new PointConfiguration(2, 3)).Build();
+        var hazardZone2 = HazardZoneConfigurationBuilder.Create().WithName("zOnE a").WithOutline(new Coordinate(2, 2), new Coordinate(3, 2), new Coordinate(2, 3)).Build();
         var options = new HazardZoneOptions { HazardZones = [hazardZone1, hazardZone2] };
 
         // Act
@@ -87,7 +87,7 @@ public sealed class HazardZoneOptionsValidatorTests
     public void Validate_ShouldReturnFailure_WhenHazardZoneOutlineHasFewerThanThreePoints()
     {
         // Arrange
-        var hazardZone = HazardZoneConfigurationBuilder.Create().WithOutline(new PointConfiguration(0, 0), new PointConfiguration(1, 1)).Build();
+        var hazardZone = HazardZoneConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 1)).Build();
         var options = new HazardZoneOptions { HazardZones = [hazardZone] };
 
         // Act
