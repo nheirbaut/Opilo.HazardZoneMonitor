@@ -18,7 +18,7 @@ public sealed record FloorConfiguration
         init => field = Guard.Against.Null(value);
     } = null!;
 
-    public IReadOnlyList<Coordinate> Outline { get; init; } = [];
+    public IReadOnlyList<Coordinate> Outline { get; } = [];
 
     public IReadOnlyList<HazardZoneConfiguration> HazardZones { get; init; } = [];
 }
