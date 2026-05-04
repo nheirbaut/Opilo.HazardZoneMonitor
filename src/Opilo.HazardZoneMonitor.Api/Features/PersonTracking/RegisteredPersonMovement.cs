@@ -6,7 +6,7 @@ namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 public sealed class RegisteredPersonMovement : IResponse
 {
     public Guid Id { get; init; } = Guid.CreateVersion7();
-    public required Guid PersonId { get; init; }
+    public required PersonId PersonId { get; init; }
     public required Coordinate Coordinate { get; init; }
     public required DateTime RegisteredAt { get; init; }
 }

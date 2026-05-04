@@ -25,12 +25,13 @@ public sealed class PersonMovementPersistenceSpecification
                 HttpResponseMessage postResponse = await client.PostAsJsonAsync(
                     "/api/v1/person-movements",
                     new { PersonId = Guid.NewGuid(), Coordinate = new { X = 5.0, Y = 10.0 } },
+                    SerializationOptions.Default,
                     TestContext.Current.CancellationToken);
 
                 postResponse.EnsureSuccessStatusCode();
 
                 RegisteredPersonMovement? movementRegistration = await postResponse.Content
-                    .ReadFromJsonAsync<RegisteredPersonMovement>(TestContext.Current.CancellationToken);
+                    .ReadFromJsonAsync<RegisteredPersonMovement>(SerializationOptions.Default, TestContext.Current.CancellationToken);
 
                 movementRegistration.Should().NotBeNull();
                 registrationId = movementRegistration.Id;

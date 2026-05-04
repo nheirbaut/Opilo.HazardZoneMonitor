@@ -16,9 +16,9 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
     {
         // Arrange
         var client = factory.CreateClient();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var command = new Command(personId, new Coordinate(1, 1));
-        var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, TestContext.Current.CancellationToken);
+        var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, SerializationOptions.Default, TestContext.Current.CancellationToken);
         var registrationId = await ReadIdFromResponse(postResponse);
 
         // Act
@@ -35,9 +35,9 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
     {
         // Arrange
         var client = factory.CreateClient();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var command = new Command(personId, new Coordinate(5, 10));
-        var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, TestContext.Current.CancellationToken);
+        var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, SerializationOptions.Default, TestContext.Current.CancellationToken);
         var registrationId = await ReadIdFromResponse(postResponse);
 
         // Act

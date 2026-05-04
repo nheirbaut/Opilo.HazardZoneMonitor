@@ -13,6 +13,10 @@ public sealed class Feature : IFeature
 
         SqlMapper.AddTypeHandler(new GuidTypeHandler());
         SqlMapper.AddTypeHandler(new CoordinateTypeHandler());
+        SqlMapper.AddTypeHandler(new PersonIdTypeHandler());
+
+        services.ConfigureHttpJsonOptions(options =>
+            options.SerializerOptions.Converters.Add(new PersonIdJsonConverter()));
 
         services.AddSingleton<IDbConnectionFactory>(_ => new SqliteDbConnectionFactory(connectionString));
         services.AddScoped<IMovementsRepository, MovementsRepository>();

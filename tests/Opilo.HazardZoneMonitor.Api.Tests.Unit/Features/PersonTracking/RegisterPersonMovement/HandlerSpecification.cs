@@ -24,7 +24,7 @@ public sealed class HandlerSpecification
     public async Task Handle_ShouldReturnCreatedResult_WhenMovementIsRegisteredSuccessfully()
     {
         // Arrange
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var coordinate = new Coordinate(1.0, 2.0);
         Command command = new(personId, coordinate);
         RegisteredPersonMovement expectedMovement = new()
@@ -53,7 +53,7 @@ public sealed class HandlerSpecification
         DateTime fixedTime = new(2025, 6, 15, 10, 30, 0, DateTimeKind.Utc);
         _clock.UtcNow.Returns(fixedTime);
 
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var coordinate = new Coordinate(1.0, 2.0);
         Command command = new(personId, coordinate);
 

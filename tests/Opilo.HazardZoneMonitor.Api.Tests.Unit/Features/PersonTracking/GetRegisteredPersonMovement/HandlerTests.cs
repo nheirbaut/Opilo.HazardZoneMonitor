@@ -22,7 +22,7 @@ public sealed class HandlerTests
     {
         // Arrange
         var movementId = Guid.NewGuid();
-        var personId = Guid.NewGuid();
+        var personId = PersonId.From(Guid.NewGuid());
         var coordinate = new Coordinate(1.0, 2.0);
         var registeredAt = DateTime.UtcNow;
         Query query = new(movementId);

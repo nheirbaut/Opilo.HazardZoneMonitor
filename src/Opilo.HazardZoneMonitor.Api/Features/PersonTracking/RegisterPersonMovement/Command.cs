@@ -3,4 +3,4 @@ using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 
-public sealed record Command(Guid PersonId, Coordinate Coordinate) : ICommand<RegisteredPersonMovement>;
+public sealed record Command(PersonId PersonId, Coordinate Coordinate) : ICommand<RegisteredPersonMovement>;

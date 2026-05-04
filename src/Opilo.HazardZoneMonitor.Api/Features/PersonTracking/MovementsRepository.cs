@@ -10,7 +10,7 @@ namespace Opilo.HazardZoneMonitor.Api.Features.PersonTracking;
 internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory) : IMovementsRepository
 {
     public async Task<Result<RegisteredPersonMovement>> RegisterMovementAsync(
-        Guid personId,
+        PersonId personId,
         Coordinate coordinate,
         DateTime registeredAt,
         CancellationToken cancellationToken)
@@ -72,7 +72,7 @@ internal sealed class MovementsRepository(IDbConnectionFactory connectionFactory
         RegisteredPersonMovement movement = new()
         {
             Id = Guid.Parse((string)raw.Id),
-            PersonId = Guid.Parse((string)raw.PersonId),
+            PersonId = PersonId.From(Guid.Parse((string)raw.PersonId)),
             Coordinate = JsonSerializer.Deserialize<Coordinate>((string)raw.Coordinate)
                 ?? throw new InvalidOperationException("Failed to deserialize Coordinate."),
             RegisteredAt = DateTime.Parse((string)raw.RegisteredAt, CultureInfo.InvariantCulture),
