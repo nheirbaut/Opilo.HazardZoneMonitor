@@ -1,3 +1,4 @@
+using System.Net;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
@@ -10,12 +11,12 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
     {
         // Arrange
         var client = factory.CreateClient();
-        var request = new Command();
+        using var emptyContent = new StringContent(string.Empty);
 
         // Act
         var response = await client.PostAsync(
             new Uri("/api/v1/hazard-zones/non-existing/activate", UriKind.Relative),
-            request,
+            emptyContent,
             TestContext.Current.CancellationToken);
 
         // Assert
