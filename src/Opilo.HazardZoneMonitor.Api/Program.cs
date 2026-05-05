@@ -53,12 +53,7 @@ try
 
     var app = builder.Build();
 
-    var initializers = app.Services.GetServices<ISchemaInitializer>();
-    foreach (var initializer in initializers)
-    {
-        await initializer.InitializeAsync();
-    }
-
+    app.InitializeDatabaseSchemas();
     app.UseSerilogRequestLogging();
     app.MapOpenApi();
     app.MapScalarApiReference();
