@@ -1,7 +1,7 @@
 using Ardalis.Result;
-using Microsoft.Extensions.Options;
+using NSubstitute;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.ActivateHazardZone;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones.ActivateHazardZone;
@@ -12,13 +12,12 @@ public sealed class HandlerTests
     public async Task Handle_ShouldReturnNotFoundResult_WhenNoHazardZonesAreConfigured()
     {
         // Arrange
-        HazardZoneOptions hazardZoneOptions = new()
-        {
-            HazardZones = []
-        };
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        hazardZoneService
+            .ActivateHazardZone(Arg.Any<HazardZoneName>())
+            .Returns(Result.NotFound());
 
-        var options = Options.Create(hazardZoneOptions);
-        Handler handler = new(options);
+        Handler handler = new(hazardZoneService);
         Command command = new(HazardZoneName.From("non-existing-hazardzone"));
 
         // Act
