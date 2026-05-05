@@ -19,7 +19,7 @@ public class Feature : IFeature
         app.MapPost("/api/v1/hazard-zones/{hazardZoneName}/activate", async Task<IResult> (
             [FromRoute] string hazardZoneName,
             ICommandHandler<Command> handler,
-        CancellationToken cancellationToken) =>
+            CancellationToken cancellationToken) =>
         {
             var result = await handler.Handle(new Command(HazardZoneName.From(hazardZoneName)), cancellationToken);
 

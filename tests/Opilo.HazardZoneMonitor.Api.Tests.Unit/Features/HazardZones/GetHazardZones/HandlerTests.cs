@@ -39,12 +39,12 @@ public sealed class HandlerTests
             HazardZones = new[] { zone1, zone2 },
         };
 
-        IOptions<HazardZoneOptions> options = Options.Create(hazardZoneOptions);
+        var options = Options.Create(hazardZoneOptions);
         Handler handler = new(options);
         Query query = new();
 
         // Act
-        Result<GetHazardZonesResponse> result = await handler.Handle(query, TestContext.Current.CancellationToken);
+        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);
@@ -60,12 +60,12 @@ public sealed class HandlerTests
             HazardZones = Array.Empty<HazardZoneConfiguration>(),
         };
 
-        IOptions<HazardZoneOptions> options = Options.Create(hazardZoneOptions);
+        var options = Options.Create(hazardZoneOptions);
         Handler handler = new(options);
         Query query = new();
 
         // Act
-        Result<GetHazardZonesResponse> result = await handler.Handle(query, TestContext.Current.CancellationToken);
+        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);
