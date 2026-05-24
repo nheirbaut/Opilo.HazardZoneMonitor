@@ -7,6 +7,4 @@ public sealed record HazardZoneConfiguration(
     IReadOnlyList<Coordinate> Outline,
     TimeSpan ActivationDuration,
     TimeSpan PreAlarmDuration,
-    ZoneState ZoneState = default,
-    AlarmState AlarmState = default,
     int AllowedNumberOfPersons = 0);

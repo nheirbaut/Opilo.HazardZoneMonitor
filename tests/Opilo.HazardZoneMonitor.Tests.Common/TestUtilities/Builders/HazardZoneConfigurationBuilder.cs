@@ -18,8 +18,6 @@ internal sealed class HazardZoneConfigurationBuilder
     private IReadOnlyList<Coordinate> _outline = DefaultOutline;
     private TimeSpan _activationDuration = TimeSpan.Zero;
     private TimeSpan _preAlarmDuration = TimeSpan.Zero;
-    private ZoneState _zoneState;
-    private AlarmState _alarmState;
     private int _allowedNumberOfPersons;
 
     public static HazardZoneConfigurationBuilder Create() => new();
@@ -51,18 +49,6 @@ internal sealed class HazardZoneConfigurationBuilder
         return this;
     }
 
-    public HazardZoneConfigurationBuilder WithZoneState(ZoneState zoneState)
-    {
-        _zoneState = zoneState;
-        return this;
-    }
-
-    public HazardZoneConfigurationBuilder WithAlarmState(AlarmState alarmState)
-    {
-        _alarmState = alarmState;
-        return this;
-    }
-
     public HazardZoneConfigurationBuilder WithAllowedNumberOfPersons(int allowedNumberOfPersons)
     {
         _allowedNumberOfPersons = allowedNumberOfPersons;
@@ -70,5 +56,5 @@ internal sealed class HazardZoneConfigurationBuilder
     }
 
     public HazardZoneConfiguration Build() =>
-        new(_name, _outline, _activationDuration, _preAlarmDuration, _zoneState, _alarmState, _allowedNumberOfPersons);
+        new(_name, _outline, _activationDuration, _preAlarmDuration, _allowedNumberOfPersons);
 }

@@ -22,8 +22,7 @@ public sealed class HandlerTests
             new[] { point1, point2, point3 },
             TimeSpan.FromSeconds(30),
             TimeSpan.FromSeconds(10),
-            ZoneState.Active,
-            AlarmState.Alarm,
+
             5);
 
         HazardZoneConfiguration zone2 = new(
@@ -31,8 +30,6 @@ public sealed class HandlerTests
             new[] { point1, point2 },
             TimeSpan.FromSeconds(60),
             TimeSpan.FromSeconds(20),
-            ZoneState.Inactive,
-            AlarmState.PreAlarm,
             10);
 
         var hazardZoneService = Substitute.For<IHazardZoneService>();
