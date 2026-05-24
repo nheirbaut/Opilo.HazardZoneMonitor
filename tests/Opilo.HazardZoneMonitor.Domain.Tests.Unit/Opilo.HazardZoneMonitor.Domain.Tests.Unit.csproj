@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Opilo.HazardZoneMonitor.Domain\Opilo.HazardZoneMonitor.Domain.csproj" />
+    <ProjectReference Include="..\Opilo.HazardZoneMonitor.Tests.Common\Opilo.HazardZoneMonitor.Tests.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 
-namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
+namespace Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
 
 internal sealed class FakeClock(DateTime? initialUtcNow = null) : IClock
 {
