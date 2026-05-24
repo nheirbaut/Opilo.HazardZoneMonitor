@@ -7,11 +7,11 @@ using IResult = Microsoft.AspNetCore.Http.IResult;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones.ActivateHazardZone;
 
-public class Feature : IFeature
+public sealed class Feature : IFeature
 {
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-
+        services.AddScoped<ICommandHandler<Command>, Handler>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)

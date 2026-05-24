@@ -33,6 +33,7 @@ try
     });
 
     builder.Services.AddSingleton<IClock, SystemClock>();
+    builder.Services.AddSingleton<ITimerFactory, SystemTimerFactory>();
     builder.Services.AddOpenApi(options =>
     {
         options.AddSchemaTransformer((schema, context, _) =>

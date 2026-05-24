@@ -1,8 +1,9 @@
 using Ardalis.Result;
-using Microsoft.Extensions.Options;
+using NSubstitute;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones.GetHazardZones;
 
@@ -34,13 +35,10 @@ public sealed class HandlerTests
             AlarmState.PreAlarm,
             10);
 
-        HazardZoneOptions hazardZoneOptions = new()
-        {
-            HazardZones = new[] { zone1, zone2 },
-        };
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        hazardZoneService.GetHazardZones().Returns([zone1, zone2]);
 
-        var options = Options.Create(hazardZoneOptions);
-        Handler handler = new(options);
+        Handler handler = new(hazardZoneService);
         Query query = new();
 
         // Act
@@ -55,13 +53,10 @@ public sealed class HandlerTests
     public async Task Handle_ShouldReturnSuccessResultWithEmptyHazardZones_WhenNoHazardZonesAreConfigured()
     {
         // Arrange
-        HazardZoneOptions hazardZoneOptions = new()
-        {
-            HazardZones = Array.Empty<HazardZoneConfiguration>(),
-        };
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        hazardZoneService.GetHazardZones().Returns(Array.Empty<HazardZoneConfiguration>());
 
-        var options = Options.Create(hazardZoneOptions);
-        Handler handler = new(options);
+        Handler handler = new(hazardZoneService);
         Query query = new();
 
         // Act
