@@ -12,14 +12,13 @@ namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 public sealed class HazardZoneService : IHazardZoneService, IDisposable
 {
     private readonly Dictionary<HazardZoneName, HazardZone> _hazardZones = new();
-    private readonly IReadOnlyList<HazardZoneConfiguration> _configurations;
     private bool _disposed;
 
     public HazardZoneService(IOptions<HazardZoneOptions> options, IClock clock, ITimerFactory timerFactory)
     {
-        _configurations = options.Value.HazardZones;
+        var configurations = options.Value.HazardZones;
 
-        foreach (var config in _configurations)
+        foreach (var config in configurations)
         {
             var outline = new Outline(new ReadOnlyCollection<Coordinate>(config.Outline.ToList()));
             var zone = new HazardZone(
@@ -36,7 +35,8 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
         }
     }
 
-    public IReadOnlyList<HazardZoneConfiguration> GetHazardZones() => _configurations;
+    public IReadOnlyList<HazardZoneInfo> GetHazardZones()
+        => _hazardZones.Select(z => z.Value.ToHazardZoneInfo()).ToList();
 
     public Result ActivateHazardZone(HazardZoneName hazardZoneName)
     {

@@ -1,6 +1,6 @@
 using Ardalis.Result;
 using NSubstitute;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
@@ -17,20 +17,23 @@ public sealed class HandlerTests
         Coordinate point2 = new(10.0, 10.0);
         Coordinate point3 = new(10.0, 0.0);
 
-        HazardZoneConfiguration zone1 = new(
+        HazardZoneInfo zone1 = new(
             HazardZoneName.From("Hazard Zone 1"),
             new[] { point1, point2, point3 },
             TimeSpan.FromSeconds(30),
             TimeSpan.FromSeconds(10),
+            5,
+            ZoneState.Inactive,
+            AlarmState.None);
 
-            5);
-
-        HazardZoneConfiguration zone2 = new(
+        HazardZoneInfo zone2 = new(
             HazardZoneName.From("Hazard Zone 2"),
             new[] { point1, point2 },
             TimeSpan.FromSeconds(60),
             TimeSpan.FromSeconds(20),
-            10);
+            10,
+            ZoneState.Inactive,
+            AlarmState.None);
 
         var hazardZoneService = Substitute.For<IHazardZoneService>();
         hazardZoneService.GetHazardZones().Returns([zone1, zone2]);
@@ -51,7 +54,7 @@ public sealed class HandlerTests
     {
         // Arrange
         var hazardZoneService = Substitute.For<IHazardZoneService>();
-        hazardZoneService.GetHazardZones().Returns(Array.Empty<HazardZoneConfiguration>());
+        hazardZoneService.GetHazardZones().Returns(Array.Empty<HazardZoneInfo>());
 
         Handler handler = new(hazardZoneService);
         Query query = new();
