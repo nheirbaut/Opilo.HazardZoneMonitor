@@ -637,3 +637,4 @@ hazardzone.db
 
 # Exclude oh-my-openagent folders
 .sisyphus/
+.omo/
