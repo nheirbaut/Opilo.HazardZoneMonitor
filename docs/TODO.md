@@ -1,77 +1,86 @@
 # Development Items
 
-An overview of tasks and features to be implemented.
+Prioritized backlog based on the current codebase state. Status markers:
 
-## Build
+- **Missing**: no meaningful implementation found.
+- **Partial**: some infrastructure or related behavior exists, but the TODO is not complete.
+- **Valid**: still relevant as written.
 
-- [ ] Add a GitHub build script.
-- [ ] Add continuous integration pipeline
-- [ ] Add code coverage reporting
+## P0 - Core Runtime Correctness
 
-## Domain
+- [ ] **Valid**: Wire person movement registration into the domain model. `RegisterPersonMovement` currently persists directly through Dapper/SQLite and does not update `Floor`, `Person`, or `HazardZone`, so alarm and occupancy behavior is bypassed.
+- [ ] **Missing**: Add API boundary validation for request bodies and route values before handlers run.
+- [ ] **Missing**: Add global structured error handling using RFC 9457 Problem Details.
+- [ ] **Missing**: Define a project-wide value-object validation convention so invalid route values such as `HazardZoneName` consistently return `400` without duplicated endpoint guards.
+- [ ] **Missing**: Add API-level integration tests proving person movement posts update floor occupancy and hazard-zone alarm state.
 
-- [ ] Add validation for domain invariants
-- [ ] Implement domain event versioning for future compatibility
+## P1 - Release Readiness and Observability
 
-### Bugs
+### Build and CI
 
-- [ ] Fix `Outline` constructor: `Vertices` is assigned before the null guard, and assigned twice.
+- [ ] **Missing**: Add a GitHub build script or workflow job that runs restore/build/test.
+- [ ] **Partial**: Expand the existing GitHub workflow beyond encoding checks into a continuous integration pipeline.
+- [ ] **Partial**: Add code coverage reporting. Coverlet packages/tools exist, but coverage is not reported by CI.
 
-## Critical Blockers
+### API Operations
 
-- [ ] Wire the API layer to the domain model. `RegisterPersonMovement` writes directly to SQLite via Dapper and never touches `Floor`, `Person`, or `HazardZone`. All feature work is blocked until this gap is closed.
+- [ ] **Missing**: Add a health/readiness endpoint (`/health`) for container/orchestration readiness.
+- [ ] **Missing**: Add correlation/request ID tracking for traceability across logs.
+- [ ] **Partial**: Improve observability beyond Serilog request logging with domain-relevant context such as person, floor, hazard-zone, and state transitions.
+- [ ] **Valid**: Add audit logging for safety-relevant events and administrative actions.
 
-## Features
+### Domain and Reliability
 
-### PersonTracking
+- [ ] **Valid**: Fix `Outline` constructor: `Vertices` is assigned before the null guard, and assigned twice.
+- [ ] **Partial**: Add validation for remaining domain invariants. Guards and options validators exist, but validation is not complete across the model.
+- [ ] **Missing**: Review hazard-zone timer/state transition synchronization before production-like use.
+- [ ] **Missing**: Add database schema evolution strategy, including migrations/versioning and indexes for movement history queries.
 
-- [ ] Implement person history tracking
-- [ ] Add configurable timeout per person type
+## P2 - Product Features
 
-### FloorManagement
+### Person Tracking
 
-- [ ] Add floor capacity management
-- [ ] Implement floor access control
-- [ ] Add floor occupancy reporting
+- [ ] **Partial**: Implement person history tracking beyond single movement registration lookup.
+- [ ] **Missing**: Add configurable timeout per person type.
 
-### HazardZoneManagement
+### Floor Management
 
-- [ ] Add zone priority levels
-- [ ] Implement zone scheduling (active hours)
-- [ ] Add zone dependency management (linked zones)
+- [ ] **Missing**: Add floor capacity management.
+- [ ] **Missing**: Implement floor access control.
+- [ ] **Partial**: Add floor occupancy reporting. The domain tracks persons internally, but there is no reporting model or endpoint.
 
-### New Features
+### Hazard Zone Management
 
-- [ ] NotificationManagement: Handle alarm notifications
-- [ ] AuditLogging: Track all system events
-- [ ] Analytics: Person movement patterns and statistics
-- [ ] Configuration: Dynamic zone and floor configuration
-- [ ] Integration: External sensor and alarm system integration
+- [ ] **Missing**: Add zone priority levels.
+- [ ] **Missing**: Implement zone scheduling with active hours.
+- [ ] **Missing**: Add zone dependency management for linked zones.
+- [ ] **Partial**: Add full hazard-zone management endpoints. `GET`, `activate`, and `deactivate` exist; CRUD/configuration management does not.
 
-## API
+### Configuration and Integrations
 
-- [ ] Add health check endpoint (`/health`) for container/orchestration readiness (Kubernetes/KubeEdge).
-- [ ] Add API versioning infrastructure (endpoints use `/api/v1/` prefix but no actual versioning strategy exists).
-- [ ] Add structured error responses (RFC 9457 Problem Details) via global error handling middleware.
-- [ ] Add request validation at the API boundary (commands accept arbitrary values with no validation before hitting the handler).
-- [ ] Decide project-wide value-object validation convention so invalid `HazardZoneName` route values map consistently to 400 without duplicating endpoint guards.
-- [ ] Add correlation/request ID tracking for traceability across logs.
+- [ ] **Partial**: Add dynamic floor and zone configuration. Startup/appsettings configuration exists, but there is no runtime configuration workflow.
+- [ ] **Partial**: Add external sensor and alarm-system integration. Domain hooks exist for external activation, but no adapter/API integration exists.
+- [ ] **Missing**: Add notification handling for alarm transitions.
+- [ ] **Missing**: Add analytics for person movement patterns and statistics.
+- [ ] **Missing**: Add real-time WebSocket or SignalR updates.
 
-### Endpoints
+## P3 - API Maturity
 
-- [ ] Floor management endpoints (only `GET /api/v1/floors` exists, no CRUD).
-- [ ] HazardZone management endpoints (`GET /api/v1/hazard-zones` exists, no CRUD).
-- [ ] Real-time WebSocket updates
+- [ ] **Missing**: Add API versioning infrastructure. Endpoints use `/api/v1/` prefixes, but there is no versioning strategy.
+- [ ] **Valid**: Add floor management CRUD endpoints. Only `GET /api/v1/floors` exists.
+- [ ] **Partial**: Expand API documentation. OpenAPI/Scalar and README docs exist, but feature-level behavior and operational contracts are incomplete.
 
-## Tests
+## P4 - Documentation and Future Hardening
 
-- [ ] Add performance benchmarks
-- [ ] Add load testing scenarios
+- [ ] **Missing**: Create Architecture Decision Records.
+- [ ] **Missing**: Create a Feature Catalog.
+- [ ] **Partial**: Create a developer onboarding guide. README getting-started steps exist, but no dedicated onboarding guide exists.
+- [ ] **Missing**: Add sequence diagrams for key workflows. A hazard-zone state diagram exists, but no workflow sequence diagrams exist.
+- [ ] **Missing**: Implement domain event versioning when events need to leave the process or be persisted.
+- [ ] **Missing**: Add performance benchmarks.
+- [ ] **Missing**: Add load testing scenarios.
 
-## Documentation
+## Additional Gaps Found During Review
 
-- [ ] Create Architecture Decision Records
-- [ ] Create Feature Catalog
-- [ ] Add API documentation
-- [ ] Create developer onboarding guide
-- [ ] Add sequence diagrams for key workflows
+- [ ] **Missing**: Complete or revisit the `Site` domain model. It validates floors but does not appear to store/expose them meaningfully, while `GET /api/v1/site` is configuration DTO driven.
+- [ ] **Missing**: Implement real `SiteOptionsValidator` validation instead of always returning success.
