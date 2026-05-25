@@ -41,32 +41,12 @@ public sealed class IntegrationTestHostBuilder
     public IntegrationTestHostBuilder WithDatabase(string databasePath) =>
         WithSetting("ConnectionStrings:DefaultConnection", $"Data Source={databasePath}");
 
-    public IntegrationTestHostBuilder WithClock(IClock clock) =>
-        WithServices(services =>
-        {
-            services.RemoveAll<IClock>();
-            services.AddSingleton(clock);
-        });
-
-    public IntegrationTestHostBuilder WithTimerFactory(ITimerFactory timerFactory) =>
-        WithServices(services =>
-        {
-            services.RemoveAll<ITimerFactory>();
-            services.AddSingleton(timerFactory);
-        });
-
     internal IntegrationTestHostBuilder WithFakeTime(FakeClock clock) =>
         WithClock(clock).WithTimerFactory(new FakeTimerFactory(clock));
 
-    public IntegrationTestHostBuilder WithServices(Action<IServiceCollection> configureServices)
-    {
-        _serviceOverrides.Add(configureServices);
-        return this;
-    }
-
     public IntegrationTestHost Start()
     {
-        WebApplicationFactory<IApiMarker> configuredFactory = _factory.WithWebHostBuilder(builder =>
+        var configuredFactory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureAppConfiguration((_, config) =>
             {
@@ -95,6 +75,26 @@ public sealed class IntegrationTestHostBuilder
             configuredFactory.Dispose();
             throw;
         }
+    }
+
+    private IntegrationTestHostBuilder WithClock(IClock clock) =>
+        WithServices(services =>
+        {
+            services.RemoveAll<IClock>();
+            services.AddSingleton(clock);
+        });
+
+    private IntegrationTestHostBuilder WithTimerFactory(ITimerFactory timerFactory) =>
+        WithServices(services =>
+        {
+            services.RemoveAll<ITimerFactory>();
+            services.AddSingleton(timerFactory);
+        });
+
+    private IntegrationTestHostBuilder WithServices(Action<IServiceCollection> configureServices)
+    {
+        _serviceOverrides.Add(configureServices);
+        return this;
     }
 
     private IntegrationTestHostBuilder WithConfiguration(IDictionary<string, string?> configuration)
