@@ -36,9 +36,7 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
         // Arrange
         var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
             .WithHazardZone("existing-hazardzone", zone => zone
-                .WithRectangleOutline(0, 0, 10, 10)
-                .WithActivationDuration(TimeSpan.FromSeconds(1))
-                .WithPreAlarmDuration(TimeSpan.FromSeconds(1)))
+                .WithRectangleOutline(0, 0, 10, 10))
             .Build();
 
         await using var host = factory.CreateHost()
