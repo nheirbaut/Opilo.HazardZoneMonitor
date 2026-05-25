@@ -54,7 +54,7 @@ try
 
     var app = builder.Build();
 
-    app.InitializeDatabaseSchemas();
+    await app.InitializeDatabaseSchemasAsync();
     app.UseSerilogRequestLogging();
     app.MapOpenApi();
     app.MapScalarApiReference();

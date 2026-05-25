@@ -2,12 +2,12 @@ namespace Opilo.HazardZoneMonitor.Api.Shared.Database;
 
 public static class DatabaseExtensions
 {
-    public static void InitializeDatabaseSchemas(this IHost app)
+    public static async Task InitializeDatabaseSchemasAsync(this IHost app, CancellationToken cancellationToken = default)
     {
         var initializers = app.Services.GetServices<ISchemaInitializer>();
         foreach (var initializer in initializers)
         {
-            initializer.InitializeAsync().GetAwaiter().GetResult();
+            await initializer.InitializeAsync(cancellationToken);
         }
     }
 }
