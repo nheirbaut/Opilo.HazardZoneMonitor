@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
+using Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
@@ -61,5 +63,36 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
         registeredPersonMovement.Should().NotBeNull();
         response.Headers.Location.Should().NotBeNull();
         response.Headers.Location!.ToString().Should().Be($"/api/v1/person-movements/{registeredPersonMovement.Id}");
+    }
+
+    [Fact]
+    public async Task RegisterPersonMovement_ShouldUpdateHazardZoneAlarmState_WhenMovementIsInsideActiveHazardZone()
+    {
+        // Arrange
+        var hazardZoneName = HazardZoneName.From("Reactor Room");
+        var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
+            .WithHazardZone(hazardZoneName.Value, zone => zone
+                .WithRectangleOutline(2, 2, 8, 8)
+                .WithAllowedNumberOfPersons(0)
+                .WithPreAlarmDuration(TimeSpan.Zero))
+            .Build();
+
+        await using var host = factory.CreateHost()
+            .WithHazardZoneConfiguration(hazardZoneOptions)
+            .Start();
+        var client = host.CreateClient();
+
+        await HazardZoneApi.ActivateHazardZone(client, hazardZoneName);
+
+        var request = new Command(PersonId.From(Guid.NewGuid()), new Coordinate(4, 4));
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/v1/person-movements", request, SerializationOptions.Default, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 }
