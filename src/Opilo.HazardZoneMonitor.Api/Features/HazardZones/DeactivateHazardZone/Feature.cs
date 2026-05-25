@@ -7,9 +7,8 @@ using IResult = Microsoft.AspNetCore.Http.IResult;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones.DeactivateHazardZone;
 
-public class Feature : IFeature
+public sealed class Feature : IFeature
 {
-
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ICommandHandler<Command>, Handler>();
@@ -28,7 +27,6 @@ public class Feature : IFeature
             {
                 ResultStatus.NotFound => TypedResults.NotFound(),
                 ResultStatus.Ok => TypedResults.NoContent(),
-                ResultStatus.NoContent => TypedResults.NoContent(),
                 _ => TypedResults.InternalServerError()
             };
         });
