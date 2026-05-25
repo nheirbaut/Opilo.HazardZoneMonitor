@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.Extensions.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
@@ -16,7 +15,8 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
     public async Task GetFloors_ShouldReturn200Ok_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetAsync(new Uri("/api/v1/floors", UriKind.Relative), TestContext.Current.CancellationToken);
@@ -29,7 +29,8 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
     public async Task GetFloors_ShouldSendResponseWithoutFloors_WhenNoFloorsAreRegistered()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetFloorsResponse>(
@@ -68,15 +69,10 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         ];
         var floorOptions = new FloorOptions { Floors = expectedFloors };
 
-        await using var customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-            });
-        });
-
-        var client = customFactory.CreateClient();
+        await using var host = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions)
+            .Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetFloorsResponse>(
@@ -124,15 +120,10 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
 
         var floorOptions = new FloorOptions { Floors = expectedFloors };
 
-        await using var customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-            });
-        });
-
-        var client = customFactory.CreateClient();
+        await using var host = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions)
+            .Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetFloorsResponse>(

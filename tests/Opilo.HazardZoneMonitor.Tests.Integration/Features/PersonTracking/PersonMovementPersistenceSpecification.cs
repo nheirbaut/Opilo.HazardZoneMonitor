@@ -20,7 +20,8 @@ public sealed class PersonMovementPersistenceSpecification
         {
             await using (CustomWebApplicationFactory firstFactory = new(sharedDatabasePath))
             {
-                HttpClient client = firstFactory.CreateClient();
+                await using var firstHost = firstFactory.CreateHost().Start();
+                HttpClient client = firstHost.CreateClient();
 
                 HttpResponseMessage postResponse = await client.PostAsJsonAsync(
                     "/api/v1/person-movements",
@@ -39,7 +40,8 @@ public sealed class PersonMovementPersistenceSpecification
 
             // Act
             await using CustomWebApplicationFactory secondFactory = new(sharedDatabasePath);
-            HttpClient freshClient = secondFactory.CreateClient();
+            await using var secondHost = secondFactory.CreateHost().Start();
+            HttpClient freshClient = secondHost.CreateClient();
 
             HttpResponseMessage response = await freshClient.GetAsync(
                 new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),

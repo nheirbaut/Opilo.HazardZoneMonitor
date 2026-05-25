@@ -3,17 +3,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Opilo.HazardZoneMonitor.Api;
 
-namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared;
+namespace Opilo.HazardZoneMonitor.Tests.Integration.Shared.Hosting;
 
 public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>
 {
     private readonly string _databasePath;
     private readonly bool _ownsDatabase;
-
-    public CustomWebApplicationFactory()
-        : this(Path.Combine(Path.GetTempPath(), $"hazardzone_test_{Guid.NewGuid():N}.db"), ownsDatabase: true)
-    {
-    }
 
     internal CustomWebApplicationFactory(string databasePath)
         : this(databasePath, ownsDatabase: false)
@@ -26,6 +21,8 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMark
         _ownsDatabase = ownsDatabase;
     }
 
+    public IntegrationTestHostBuilder CreateHost() => new(this);
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -34,11 +31,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMark
 
         builder.ConfigureAppConfiguration((_, config) =>
         {
-            config.AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.Ordinal)
-            {
-                ["ConnectionStrings:DefaultConnection"] = $"Data Source={_databasePath}",
-                ["SiteOptions:Name"] = "Test Site",
-            });
+            config.AddInMemoryCollection(TestHostDefaults.CreateSettings(_databasePath));
         });
     }
 

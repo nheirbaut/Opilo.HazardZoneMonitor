@@ -1,7 +1,5 @@
 using System.Net;
 
-using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
-
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Site;
 
 public sealed class SiteConfigurationStartupSpecification(CustomWebApplicationFactory factory)
@@ -11,7 +9,8 @@ public sealed class SiteConfigurationStartupSpecification(CustomWebApplicationFa
     public async Task Api_ShouldStart_WhenSiteConfigurationIsValid()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetAsync(

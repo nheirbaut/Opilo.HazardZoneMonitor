@@ -14,7 +14,8 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
     public async Task RegisterPersonMovement_ShouldReturn201Created_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, new Coordinate(1, 1));
 
@@ -29,7 +30,8 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
     public async Task RegisterPersonMovement_ShouldIncludeRegisteredAtTimestamp_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, new Coordinate(1, 1));
 
@@ -46,7 +48,8 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
     public async Task RegisterPersonMovement_ShouldReturnLocationHeader_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, new Coordinate(1, 1));
 

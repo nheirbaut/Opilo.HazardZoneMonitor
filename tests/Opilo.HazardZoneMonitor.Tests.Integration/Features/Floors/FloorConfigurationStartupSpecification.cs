@@ -1,25 +1,20 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Opilo.HazardZoneMonitor.Api;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
-using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Floors;
 
 public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationFactory factory)
-    : IClassFixture<CustomWebApplicationFactory>, IDisposable
+    : IClassFixture<CustomWebApplicationFactory>
 {
-    private WebApplicationFactory<IApiMarker>? _customFactory;
-
     [Fact]
     public async Task Api_ShouldStart_WhenFloorConfigurationIsValid()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetAsync(
@@ -34,25 +29,17 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
     public void Api_ShouldFailToStart_WhenFloorNameIsEmpty()
     {
         // Arrange
-        _customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.Ordinal)
-                {
-                    ["FloorOptions:Floors:0:Name"] = string.Empty,
-                    ["FloorOptions:Floors:0:Outline:0:X"] = "0",
-                    ["FloorOptions:Floors:0:Outline:0:Y"] = "0",
-                    ["FloorOptions:Floors:0:Outline:1:X"] = "10",
-                    ["FloorOptions:Floors:0:Outline:1:Y"] = "0",
-                    ["FloorOptions:Floors:0:Outline:2:X"] = "0",
-                    ["FloorOptions:Floors:0:Outline:2:Y"] = "10",
-                });
-            });
-        });
+        var hostBuilder = factory.CreateHost()
+            .WithSetting("FloorOptions:Floors:0:Name", string.Empty)
+            .WithSetting("FloorOptions:Floors:0:Outline:0:X", "0")
+            .WithSetting("FloorOptions:Floors:0:Outline:0:Y", "0")
+            .WithSetting("FloorOptions:Floors:0:Outline:1:X", "10")
+            .WithSetting("FloorOptions:Floors:0:Outline:1:Y", "0")
+            .WithSetting("FloorOptions:Floors:0:Outline:2:X", "0")
+            .WithSetting("FloorOptions:Floors:0:Outline:2:Y", "10");
 
         // Act
-        Action act = () => _customFactory.CreateClient();
+        Action act = () => hostBuilder.Start();
 
         // Assert
         act.Should().Throw<InvalidOperationException>();
@@ -71,16 +58,11 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
             ]
         };
 
-        _customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-            });
-        });
+        var hostBuilder = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions);
 
         // Act
-        Action act = () => _customFactory.CreateClient();
+        Action act = () => hostBuilder.Start();
 
         // Assert
         act.Should().Throw<OptionsValidationException>();
@@ -95,23 +77,14 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
             Floors = [FloorConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 1)).Build()]
         };
 
-        _customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-            });
-        });
+        var hostBuilder = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions);
 
         // Act
-        Action act = () => _customFactory.CreateClient();
+        Action act = () => hostBuilder.Start();
 
         // Assert
         act.Should().Throw<OptionsValidationException>();
     }
 
-    public void Dispose()
-    {
-        _customFactory?.Dispose();
-    }
 }

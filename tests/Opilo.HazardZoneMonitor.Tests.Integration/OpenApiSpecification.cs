@@ -1,6 +1,4 @@
 using System.Net;
-using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
-
 namespace Opilo.HazardZoneMonitor.Tests.Integration;
 
 public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
@@ -10,7 +8,8 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     public async Task GetOpenApiDocument_ShouldReturnOk_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -25,7 +24,8 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     public async Task GetOpenApiDocument_ShouldReturnJsonContentType_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -41,7 +41,8 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     public async Task GetOpenApiDocument_ShouldContainApiInfo_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         string content = await client.GetStringAsync(
@@ -57,7 +58,8 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     public async Task GetOpenApiDocument_ShouldIncludeMappedEndpoints_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         string content = await client.GetStringAsync(
@@ -72,7 +74,8 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     public async Task GetScalarUi_ShouldReturnOk_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -87,7 +90,8 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     public async Task GetScalarUi_ShouldReturnHtmlContentType_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(

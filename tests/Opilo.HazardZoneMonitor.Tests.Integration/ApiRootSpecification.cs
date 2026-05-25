@@ -13,7 +13,8 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldReturnOkStatusCode_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -28,7 +29,8 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldReturnJsonContentType_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -43,7 +45,8 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeApiName_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -60,7 +63,8 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeApiVersion_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -77,7 +81,8 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeLinksCollection_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -95,7 +100,8 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeFloorsLink_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -113,7 +119,8 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludePersonMovementsLink_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        HttpClient client = host.CreateClient();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(
@@ -131,8 +138,9 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeLinkForEveryFeatureEndpoint_WhenFeaturesAreRegistered()
     {
         // Arrange
-        var client = factory.CreateClient();
-        EndpointDataSource endpointDataSource = factory.Services.GetRequiredService<EndpointDataSource>();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
+        EndpointDataSource endpointDataSource = host.Services.GetRequiredService<EndpointDataSource>();
         var expectedFeatureRoutes = endpointDataSource.Endpoints
             .OfType<RouteEndpoint>()
             .Select(endpoint => endpoint.RoutePattern.RawText)

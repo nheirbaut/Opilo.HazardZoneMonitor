@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.Extensions.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.Site.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
@@ -16,7 +15,8 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
     public async Task GetSiteConfiguration_ShouldReturn200Ok_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetAsync(
@@ -36,17 +36,10 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
 
         var siteOptions = new SiteOptions { Name = SiteName.From(expectedSite.Name) };
 
-        await using var customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration(
-                (_, config) =>
-                {
-                    config.AddInMemoryCollection(siteOptions.ToConfigurationDictionary());
-                }
-            );
-        });
-
-        var client = customFactory.CreateClient();
+        await using var host = factory.CreateHost()
+            .WithSiteConfiguration(siteOptions)
+            .Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetSiteResponse>(
@@ -87,18 +80,11 @@ public sealed class GetSiteConfigurationSpecification(CustomWebApplicationFactor
         var siteOptions = new SiteOptions { Name = SiteName.From("Reactor Facility Alpha") };
         var floorOptions = new FloorOptions { Floors = expectedFloors };
 
-        await using var customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration(
-                (_, config) =>
-                {
-                    config.AddInMemoryCollection(siteOptions.ToConfigurationDictionary());
-                    config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-                }
-            );
-        });
-
-        var client = customFactory.CreateClient();
+        await using var host = factory.CreateHost()
+            .WithSiteConfiguration(siteOptions)
+            .WithFloorConfiguration(floorOptions)
+            .Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetSiteResponse>(
