@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using NSubstitute;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.Data;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
@@ -19,7 +20,8 @@ public sealed class HandlerSpecification
     {
         _movementsRepository = Substitute.For<IMovementsRepository>();
         _clock = Substitute.For<IClock>();
-        _sut = new Handler(_movementsRepository, _clock);
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        _sut = new Handler(_movementsRepository, _clock, hazardZoneService);
     }
 
     [Fact]

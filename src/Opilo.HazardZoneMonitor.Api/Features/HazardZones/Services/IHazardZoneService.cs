@@ -7,6 +7,8 @@ public interface IHazardZoneService
 {
     IReadOnlyList<HazardZoneInfo> GetHazardZones();
 
+    void ApplyPersonLocationUpdate(PersonLocationUpdate personLocationUpdate);
+
     Result ActivateHazardZone(HazardZoneName hazardZoneName);
     Result DeactivateHazardZone(HazardZoneName hazardZoneName);
 }

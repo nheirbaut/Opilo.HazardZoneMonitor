@@ -38,6 +38,14 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
     public IReadOnlyList<HazardZoneInfo> GetHazardZones()
         => _hazardZones.Select(z => z.Value.ToHazardZoneInfo()).ToList();
 
+    public void ApplyPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
+    {
+        foreach (var hazardZone in _hazardZones.Values)
+        {
+            hazardZone.HandlePersonLocationChanged(personLocationUpdate.PersonId, personLocationUpdate.Coordinate);
+        }
+    }
+
     public Result ActivateHazardZone(HazardZoneName hazardZoneName)
     {
         if (!_hazardZones.TryGetValue(hazardZoneName, out var zone))
