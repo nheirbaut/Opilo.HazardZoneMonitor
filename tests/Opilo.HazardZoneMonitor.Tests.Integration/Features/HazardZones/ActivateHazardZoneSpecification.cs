@@ -1,11 +1,7 @@
 using System.Net;
-using System.Net.Http.Json;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
-using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
 
@@ -75,7 +71,7 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
         var client = host.CreateClient();
         using var emptyContent = new StringContent(string.Empty);
 
-        var hazardZone = await GetCurrentHazardZone(client, hazardZoneName);
+        var hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
 
         // Act
@@ -86,23 +82,11 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        hazardZone = await GetCurrentHazardZone(client, hazardZoneName);
+        hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.ZoneState.Should().Be(ZoneState.Activating);
 
         clock.AdvanceBy(TimeSpan.FromSeconds(1));
-        hazardZone = await GetCurrentHazardZone(client, hazardZoneName);
+        hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
-    }
-
-    private static async Task<HazardZoneInfo> GetCurrentHazardZone(HttpClient client, HazardZoneName hazardZoneName)
-    {
-        var currentHazardZones = await client.GetFromJsonAsync<GetHazardZonesResponse>(
-            new Uri("/api/v1/hazard-zones", UriKind.Relative),
-            SerializationOptions.Default,
-            TestContext.Current.CancellationToken);
-
-        currentHazardZones.Should().NotBeNull();
-
-        return currentHazardZones.HazardZones.Single(hazardZone => hazardZone.Name == hazardZoneName);
     }
 }
