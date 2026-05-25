@@ -12,17 +12,18 @@ public sealed class PersonMovementPersistenceSpecification
     {
         // Arrange
         Guid registrationId;
-        string sharedDatabasePath = Path.Combine(
+        var sharedDatabasePath = Path.Combine(
             Path.GetTempPath(),
             $"hazardzone_persistence_test_{Guid.NewGuid():N}.db");
 
         try
         {
-            await using (CustomWebApplicationFactory firstFactory = new(sharedDatabasePath))
+            await using (CustomWebApplicationFactory firstFactory = CustomWebApplicationFactory.ForDatabase(sharedDatabasePath))
             {
-                HttpClient client = firstFactory.CreateClient();
+                await using var firstHost = firstFactory.CreateHost().Start();
+                var client = firstHost.CreateClient();
 
-                HttpResponseMessage postResponse = await client.PostAsJsonAsync(
+                var postResponse = await client.PostAsJsonAsync(
                     "/api/v1/person-movements",
                     new { PersonId = Guid.NewGuid(), Coordinate = new { X = 5.0, Y = 10.0 } },
                     SerializationOptions.Default,
@@ -38,10 +39,11 @@ public sealed class PersonMovementPersistenceSpecification
             }
 
             // Act
-            await using CustomWebApplicationFactory secondFactory = new(sharedDatabasePath);
-            HttpClient freshClient = secondFactory.CreateClient();
+            await using CustomWebApplicationFactory secondFactory = CustomWebApplicationFactory.ForDatabase(sharedDatabasePath);
+            await using var secondHost = secondFactory.CreateHost().Start();
+            var freshClient = secondHost.CreateClient();
 
-            HttpResponseMessage response = await freshClient.GetAsync(
+            var response = await freshClient.GetAsync(
                 new Uri($"/api/v1/person-movements/{registrationId}", UriKind.Relative),
                 TestContext.Current.CancellationToken);
 

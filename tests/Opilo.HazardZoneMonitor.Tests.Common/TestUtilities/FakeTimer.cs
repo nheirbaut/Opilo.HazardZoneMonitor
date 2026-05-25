@@ -1,6 +1,8 @@
-namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
+using DomainTimer = Opilo.HazardZoneMonitor.Domain.Shared.Abstractions.ITimer;
 
-internal sealed class FakeTimer : Shared.Abstractions.ITimer
+namespace Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
+
+internal sealed class FakeTimer : DomainTimer
 {
     private readonly FakeClock _clock;
     private readonly Lock _lock = new();

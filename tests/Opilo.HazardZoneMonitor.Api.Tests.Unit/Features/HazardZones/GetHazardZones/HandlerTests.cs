@@ -1,8 +1,9 @@
 using Ardalis.Result;
-using Microsoft.Extensions.Options;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using NSubstitute;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
+using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones.GetHazardZones;
 
@@ -16,35 +17,32 @@ public sealed class HandlerTests
         Coordinate point2 = new(10.0, 10.0);
         Coordinate point3 = new(10.0, 0.0);
 
-        HazardZoneConfiguration zone1 = new(
+        HazardZoneInfo zone1 = new(
             HazardZoneName.From("Hazard Zone 1"),
             new[] { point1, point2, point3 },
             TimeSpan.FromSeconds(30),
             TimeSpan.FromSeconds(10),
-            ZoneState.Active,
-            AlarmState.Alarm,
-            5);
+            5,
+            ZoneState.Inactive,
+            AlarmState.None);
 
-        HazardZoneConfiguration zone2 = new(
+        HazardZoneInfo zone2 = new(
             HazardZoneName.From("Hazard Zone 2"),
             new[] { point1, point2 },
             TimeSpan.FromSeconds(60),
             TimeSpan.FromSeconds(20),
+            10,
             ZoneState.Inactive,
-            AlarmState.PreAlarm,
-            10);
+            AlarmState.None);
 
-        HazardZoneOptions hazardZoneOptions = new()
-        {
-            HazardZones = new[] { zone1, zone2 },
-        };
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        hazardZoneService.GetHazardZones().Returns([zone1, zone2]);
 
-        IOptions<HazardZoneOptions> options = Options.Create(hazardZoneOptions);
-        Handler handler = new(options);
+        Handler handler = new(hazardZoneService);
         Query query = new();
 
         // Act
-        Result<GetHazardZonesResponse> result = await handler.Handle(query, TestContext.Current.CancellationToken);
+        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);
@@ -55,17 +53,14 @@ public sealed class HandlerTests
     public async Task Handle_ShouldReturnSuccessResultWithEmptyHazardZones_WhenNoHazardZonesAreConfigured()
     {
         // Arrange
-        HazardZoneOptions hazardZoneOptions = new()
-        {
-            HazardZones = Array.Empty<HazardZoneConfiguration>(),
-        };
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        hazardZoneService.GetHazardZones().Returns(Array.Empty<HazardZoneInfo>());
 
-        IOptions<HazardZoneOptions> options = Options.Create(hazardZoneOptions);
-        Handler handler = new(options);
+        Handler handler = new(hazardZoneService);
         Query query = new();
 
         // Act
-        Result<GetHazardZonesResponse> result = await handler.Handle(query, TestContext.Current.CancellationToken);
+        var result = await handler.Handle(query, TestContext.Current.CancellationToken);
 
         // Assert
         result.Status.Should().Be(ResultStatus.Ok);

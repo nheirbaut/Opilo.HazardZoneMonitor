@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Opilo.HazardZoneMonitor.Api.Tests.Unit" />
+    <InternalsVisibleTo Include="Opilo.HazardZoneMonitor.Domain.Tests.Unit" />
     <InternalsVisibleTo Include="Opilo.HazardZoneMonitor.Tests.Integration" />
   </ItemGroup>
 

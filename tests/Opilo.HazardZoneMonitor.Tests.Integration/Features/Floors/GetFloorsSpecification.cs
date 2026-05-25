@@ -1,10 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.Extensions.Configuration;
-using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.Floors;
@@ -16,7 +13,8 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
     public async Task GetFloors_ShouldReturn200Ok_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetAsync(new Uri("/api/v1/floors", UriKind.Relative), TestContext.Current.CancellationToken);
@@ -29,7 +27,8 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
     public async Task GetFloors_ShouldSendResponseWithoutFloors_WhenNoFloorsAreRegistered()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetFloorsResponse>(
@@ -47,36 +46,15 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
     public async Task GetFloors_ShouldSendResponseWithFloors_WhenFloorsAreRegistered()
     {
         // Arrange
-        List<FloorConfiguration> expectedFloors =
-        [
-            new(FloorName.From("First Floor"),
-                new List<Coordinate>
-                {
-                    new(0, 0),
-                    new(10, 0),
-                    new(10, 10),
-                    new(0, 10)
-                }),
-            new(FloorName.From("Second Floor"),
-                new List<Coordinate>
-                {
-                    new(0, 0),
-                    new(15, 0),
-                    new(15, 15),
-                    new(0, 15)
-                })
-        ];
-        var floorOptions = new FloorOptions { Floors = expectedFloors };
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor("First Floor", floor => floor.WithRectangleOutline(0, 0, 10, 10))
+            .WithFloor("Second Floor", floor => floor.WithRectangleOutline(0, 0, 15, 15))
+            .Build();
 
-        await using var customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-            });
-        });
-
-        var client = customFactory.CreateClient();
+        await using var host = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions)
+            .Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetFloorsResponse>(
@@ -87,52 +65,23 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         // Assert
         response.Should().NotBeNull();
         response.Floors.Should().NotBeNullOrEmpty();
-        response.Floors.Should().BeEquivalentTo(expectedFloors);
+        response.Floors.Should().BeEquivalentTo(floorOptions.Floors);
     }
 
     [Fact]
     public async Task GetFloors_ShouldReturnFloorsWithHazardZones_WhenFloorsHaveHazardZonesConfigured()
     {
         // Arrange
-        List<HazardZoneConfiguration> expectedHazardZones =
-        [
-            new(HazardZoneName.From("Reactor Room"),
-            [
-                new(2, 2),
-                new(8, 2),
-                new(8, 8),
-                new(2, 8),
-            ],
-            TimeSpan.Zero,
-            TimeSpan.Zero),
-        ];
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor("Ground Floor", floor => floor
+                .WithRectangleOutline(0, 0, 20, 20)
+                .WithHazardZone("Reactor Room", zone => zone.WithRectangleOutline(2, 2, 8, 8)))
+            .Build();
 
-        List<FloorConfiguration> expectedFloors =
-        [
-            new(FloorName.From("Ground Floor"),
-                new List<Coordinate>
-                {
-                    new(0, 0),
-                    new(20, 0),
-                    new(20, 20),
-                    new(0, 20),
-                })
-            {
-                HazardZones = expectedHazardZones,
-            },
-        ];
-
-        var floorOptions = new FloorOptions { Floors = expectedFloors };
-
-        await using var customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(floorOptions.ToConfigurationDictionary());
-            });
-        });
-
-        var client = customFactory.CreateClient();
+        await using var host = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions)
+            .Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetFloorsResponse>(
@@ -145,6 +94,6 @@ public sealed class GetFloorsSpecification(CustomWebApplicationFactory factory)
         response.Should().NotBeNull();
         response.Floors.Should().ContainSingle();
         response.Floors[0].HazardZones.Should().NotBeNullOrEmpty();
-        response.Floors[0].HazardZones.Should().BeEquivalentTo(expectedHazardZones);
+        response.Floors[0].HazardZones.Should().BeEquivalentTo(floorOptions.Floors[0].HazardZones);
     }
 }

@@ -5,6 +5,7 @@ using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Events;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities;
 using Opilo.HazardZoneMonitor.Domain.Tests.Unit.TestUtilities.Builders;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.Domain.Tests.Unit.Domain;
 

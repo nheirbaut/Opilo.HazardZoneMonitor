@@ -1,9 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.Extensions.Configuration;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
-using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
@@ -15,7 +13,8 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
     public async Task GetHazardZones_ShouldReturn200Ok_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetAsync(new Uri("/api/v1/hazard-zones", UriKind.Relative), TestContext.Current.CancellationToken);
@@ -28,7 +27,8 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
     public async Task GetHazardZones_ShouldSendResponseWithoutHazardZones_WhenNoHazardZonesAreRegistered()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(
@@ -46,38 +46,15 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
     public async Task GetHazardZones_ShouldSendResponseWithHazardZones_WhenHazardZonesAreRegistered()
     {
         // Arrange
-        List<HazardZoneConfiguration> expectedHazardZones =
-        [
-            new(HazardZoneName.From("Reactor Room"),
-                [
-                    new(0, 0),
-                    new(10, 0),
-                    new(10, 10),
-                    new(0, 10)
-                ],
-                TimeSpan.Zero,
-                TimeSpan.Zero),
-            new(HazardZoneName.From("Chemical Storage"),
-                [
-                    new(20, 20),
-                    new(35, 20),
-                    new(35, 35),
-                    new(20, 35)
-                ],
-                TimeSpan.Zero,
-                TimeSpan.Zero)
-        ];
-        var hazardZoneOptions = new HazardZoneOptions { HazardZones = expectedHazardZones };
+        var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
+            .WithHazardZone("Reactor Room", zone => zone.WithRectangleOutline(0, 0, 10, 10))
+            .WithHazardZone("Chemical Storage", zone => zone.WithRectangleOutline(20, 20, 35, 35))
+            .Build();
 
-        await using var customFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureAppConfiguration((_, config) =>
-            {
-                config.AddInMemoryCollection(hazardZoneOptions.ToConfigurationDictionary());
-            });
-        });
-
-        var client = customFactory.CreateClient();
+        await using var host = factory.CreateHost()
+            .WithHazardZoneConfiguration(hazardZoneOptions)
+            .Start();
+        var client = host.CreateClient();
 
         // Act
         var response = await client.GetFromJsonAsync<GetHazardZonesResponse>(
@@ -88,6 +65,6 @@ public sealed class GetHazardZonesSpecification(CustomWebApplicationFactory fact
         // Assert
         response.Should().NotBeNull();
         response.HazardZones.Should().NotBeNullOrEmpty();
-        response.HazardZones.Should().BeEquivalentTo(expectedHazardZones);
+        response.HazardZones.Should().BeEquivalentTo(hazardZoneOptions.HazardZones);
     }
 }

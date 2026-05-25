@@ -9,17 +9,15 @@ internal sealed class HazardZoneConfigurationBuilder
 
     public static readonly IReadOnlyList<Coordinate> DefaultOutline =
     [
-        new Coordinate(1, 1),
-        new Coordinate(2, 1),
-        new Coordinate(1, 2)
+        new(1, 1),
+        new(2, 1),
+        new(1, 2)
     ];
 
     private HazardZoneName _name = DefaultName;
     private IReadOnlyList<Coordinate> _outline = DefaultOutline;
     private TimeSpan _activationDuration = TimeSpan.Zero;
     private TimeSpan _preAlarmDuration = TimeSpan.Zero;
-    private ZoneState _zoneState;
-    private AlarmState _alarmState;
     private int _allowedNumberOfPersons;
 
     public static HazardZoneConfigurationBuilder Create() => new();
@@ -39,6 +37,24 @@ internal sealed class HazardZoneConfigurationBuilder
         return this;
     }
 
+    public HazardZoneConfigurationBuilder WithRectangleOutline(double minX, double minY, double maxX, double maxY)
+    {
+        _outline = OutlineBuilder.Rectangle(minX, minY, maxX, maxY);
+        return this;
+    }
+
+    public HazardZoneConfigurationBuilder WithTriangleOutline(
+        double firstX,
+        double firstY,
+        double secondX,
+        double secondY,
+        double thirdX,
+        double thirdY)
+    {
+        _outline = OutlineBuilder.Triangle(firstX, firstY, secondX, secondY, thirdX, thirdY);
+        return this;
+    }
+
     public HazardZoneConfigurationBuilder WithActivationDuration(TimeSpan duration)
     {
         _activationDuration = duration;
@@ -51,18 +67,6 @@ internal sealed class HazardZoneConfigurationBuilder
         return this;
     }
 
-    public HazardZoneConfigurationBuilder WithZoneState(ZoneState zoneState)
-    {
-        _zoneState = zoneState;
-        return this;
-    }
-
-    public HazardZoneConfigurationBuilder WithAlarmState(AlarmState alarmState)
-    {
-        _alarmState = alarmState;
-        return this;
-    }
-
     public HazardZoneConfigurationBuilder WithAllowedNumberOfPersons(int allowedNumberOfPersons)
     {
         _allowedNumberOfPersons = allowedNumberOfPersons;
@@ -70,5 +74,5 @@ internal sealed class HazardZoneConfigurationBuilder
     }
 
     public HazardZoneConfiguration Build() =>
-        new(_name, _outline, _activationDuration, _preAlarmDuration, _zoneState, _alarmState, _allowedNumberOfPersons);
+        new(_name, _outline, _activationDuration, _preAlarmDuration, _allowedNumberOfPersons);
 }

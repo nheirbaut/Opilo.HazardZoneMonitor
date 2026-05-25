@@ -54,6 +54,7 @@ An overview of tasks and features to be implemented.
 - [ ] Add API versioning infrastructure (endpoints use `/api/v1/` prefix but no actual versioning strategy exists).
 - [ ] Add structured error responses (RFC 9457 Problem Details) via global error handling middleware.
 - [ ] Add request validation at the API boundary (commands accept arbitrary values with no validation before hitting the handler).
+- [ ] Decide project-wide value-object validation convention so invalid `HazardZoneName` route values map consistently to 400 without duplicating endpoint guards.
 - [ ] Add correlation/request ID tracking for traceability across logs.
 
 ### Endpoints

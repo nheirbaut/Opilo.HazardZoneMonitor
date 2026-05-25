@@ -7,14 +7,15 @@ using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.PersonTracking;
 
-public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory factory)
+public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFactory factory)
     : IClassFixture<CustomWebApplicationFactory>
 {
     [Fact]
     public async Task RegisterPersonMovement_ShouldReturn201Created_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, new Coordinate(1, 1));
 
@@ -29,7 +30,8 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
     public async Task RegisterPersonMovement_ShouldIncludeRegisteredAtTimestamp_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, new Coordinate(1, 1));
 
@@ -46,7 +48,8 @@ public class RegisterPersonMovementsSpecification(CustomWebApplicationFactory fa
     public async Task RegisterPersonMovement_ShouldReturnLocationHeader_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var request = new Command(personId, new Coordinate(1, 1));
 

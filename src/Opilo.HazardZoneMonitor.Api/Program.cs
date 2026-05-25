@@ -33,6 +33,7 @@ try
     });
 
     builder.Services.AddSingleton<IClock, SystemClock>();
+    builder.Services.AddSingleton<ITimerFactory, SystemTimerFactory>();
     builder.Services.AddOpenApi(options =>
     {
         options.AddSchemaTransformer((schema, context, _) =>
@@ -53,12 +54,7 @@ try
 
     var app = builder.Build();
 
-    var initializers = app.Services.GetServices<ISchemaInitializer>();
-    foreach (var initializer in initializers)
-    {
-        await initializer.InitializeAsync();
-    }
-
+    await app.InitializeDatabaseSchemasAsync();
     app.UseSerilogRequestLogging();
     app.MapOpenApi();
     app.MapScalarApiReference();

@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration;
 
@@ -13,10 +12,11 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldReturnOkStatusCode_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -28,10 +28,11 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldReturnJsonContentType_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -43,10 +44,11 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeApiName_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -60,10 +62,11 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeApiVersion_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -77,10 +80,11 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeLinksCollection_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -95,10 +99,11 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeFloorsLink_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -113,10 +118,11 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludePersonMovementsLink_WhenCalled()
     {
         // Arrange
-        HttpClient client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -131,8 +137,9 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     public async Task GetRoot_ShouldIncludeLinkForEveryFeatureEndpoint_WhenFeaturesAreRegistered()
     {
         // Arrange
-        var client = factory.CreateClient();
-        EndpointDataSource endpointDataSource = factory.Services.GetRequiredService<EndpointDataSource>();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
+        var endpointDataSource = host.Services.GetRequiredService<EndpointDataSource>();
         var expectedFeatureRoutes = endpointDataSource.Endpoints
             .OfType<RouteEndpoint>()
             .Select(endpoint => endpoint.RoutePattern.RawText)

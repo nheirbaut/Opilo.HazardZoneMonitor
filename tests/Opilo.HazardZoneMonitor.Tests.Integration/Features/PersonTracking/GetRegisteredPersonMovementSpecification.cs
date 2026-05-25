@@ -15,7 +15,8 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
     public async Task GetPersonMovement_ShouldReturn200Ok_WhenCalled()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var command = new Command(personId, new Coordinate(1, 1));
         var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, SerializationOptions.Default, TestContext.Current.CancellationToken);
@@ -34,7 +35,8 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
     public async Task GetPersonMovement_ShouldReturnMovementWithRegisteredAtTimestamp_WhenMovementIsRegistered()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var personId = PersonId.From(Guid.NewGuid());
         var command = new Command(personId, new Coordinate(5, 10));
         var postResponse = await client.PostAsJsonAsync("/api/v1/person-movements", command, SerializationOptions.Default, TestContext.Current.CancellationToken);
@@ -59,7 +61,8 @@ public sealed class GetRegisteredPersonMovementSpecification(CustomWebApplicatio
     public async Task GetPersonMovement_ShouldReturn404NotFound_WhenMovementDoesNotExist()
     {
         // Arrange
-        var client = factory.CreateClient();
+        await using var host = factory.CreateHost().Start();
+        var client = host.CreateClient();
         var nonExistentId = Guid.NewGuid();
 
         // Act

@@ -36,9 +36,36 @@ internal sealed class FloorConfigurationBuilder
         return this;
     }
 
+    public FloorConfigurationBuilder WithRectangleOutline(double minX, double minY, double maxX, double maxY)
+    {
+        _outline = OutlineBuilder.Rectangle(minX, minY, maxX, maxY);
+        return this;
+    }
+
+    public FloorConfigurationBuilder WithTriangleOutline(
+        double firstX,
+        double firstY,
+        double secondX,
+        double secondY,
+        double thirdX,
+        double thirdY)
+    {
+        _outline = OutlineBuilder.Triangle(firstX, firstY, secondX, secondY, thirdX, thirdY);
+        return this;
+    }
+
     public FloorConfigurationBuilder WithHazardZones(params HazardZoneConfiguration[] hazardZones)
     {
         _hazardZones = hazardZones;
+        return this;
+    }
+
+    public FloorConfigurationBuilder WithHazardZone(string name, Action<HazardZoneConfigurationBuilder>? configure = null)
+    {
+        var builder = HazardZoneConfigurationBuilder.Create().WithName(name);
+        configure?.Invoke(builder);
+
+        _hazardZones = [.. _hazardZones, builder.Build()];
         return this;
     }
 
