@@ -9,6 +9,25 @@ namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones.ActivateHa
 public sealed class HandlerTests
 {
     [Fact]
+    public async Task Handle_ShouldReturnOkResult_WhenHazardZoneServiceSucceeds()
+    {
+        // Arrange
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        hazardZoneService
+            .ActivateHazardZone(Arg.Any<HazardZoneName>())
+            .Returns(Result.Success());
+
+        Handler handler = new(hazardZoneService);
+        Command command = new(HazardZoneName.From("existing-hazardzone"));
+
+        // Act
+        var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Status.Should().Be(ResultStatus.Ok);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnNotFoundResult_WhenNoHazardZonesAreConfigured()
     {
         // Arrange
