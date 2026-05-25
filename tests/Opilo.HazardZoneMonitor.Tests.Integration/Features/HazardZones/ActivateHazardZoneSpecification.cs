@@ -1,13 +1,12 @@
 using System.Net;
-using System.Reflection;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
-using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
+using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
@@ -108,9 +107,9 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
         });
 
         var client = customFactory.CreateClient();
-        var hazardZone = GetHazardZone(customFactory.Services, hazardZoneName);
         using var emptyContent = new StringContent(string.Empty);
 
+        var hazardZone = await GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.ZoneState.Should().Be(ZoneState.Inactive);
 
         // Act
@@ -121,24 +120,23 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        hazardZone = await GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.ZoneState.Should().Be(ZoneState.Activating);
 
         clock.AdvanceBy(TimeSpan.FromSeconds(1));
+        hazardZone = await GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.ZoneState.Should().Be(ZoneState.Active);
     }
 
-    private static HazardZone GetHazardZone(IServiceProvider services, HazardZoneName hazardZoneName)
+    private static async Task<HazardZoneInfo> GetCurrentHazardZone(HttpClient client, HazardZoneName hazardZoneName)
     {
-        var hazardZoneService = services.GetRequiredService<IHazardZoneService>();
-        if (hazardZoneService is not HazardZoneService hazardZoneServiceImplementation)
-        {
-            throw new InvalidOperationException($"Expected {nameof(HazardZoneService)} to be registered.");
-        }
+        var currentHazardZones = await client.GetFromJsonAsync<GetHazardZonesResponse>(
+            new Uri("/api/v1/hazard-zones", UriKind.Relative),
+            SerializationOptions.Default,
+            TestContext.Current.CancellationToken);
 
-        var hazardZonesField = typeof(HazardZoneService).GetField("_hazardZones", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException("Could not find configured hazard zones.");
+        currentHazardZones.Should().NotBeNull();
 
-        var hazardZones = (IReadOnlyDictionary<HazardZoneName, HazardZone>)hazardZonesField.GetValue(hazardZoneServiceImplementation)!;
-        return hazardZones[hazardZoneName];
+        return currentHazardZones.HazardZones.Single(hazardZone => hazardZone.Name == hazardZoneName);
     }
 }
