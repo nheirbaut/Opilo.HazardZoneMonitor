@@ -10,10 +10,8 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMark
     private readonly string _databasePath;
     private readonly bool _ownsDatabase;
 
-    internal CustomWebApplicationFactory(string databasePath)
-        : this(databasePath, ownsDatabase: false)
-    {
-    }
+    internal static CustomWebApplicationFactory ForDatabase(string databasePath) =>
+        new(databasePath, ownsDatabase: false);
 
     private CustomWebApplicationFactory(string databasePath, bool ownsDatabase)
     {

@@ -9,9 +9,9 @@ internal sealed class HazardZoneConfigurationBuilder
 
     public static readonly IReadOnlyList<Coordinate> DefaultOutline =
     [
-        new Coordinate(1, 1),
-        new Coordinate(2, 1),
-        new Coordinate(1, 2)
+        new(1, 1),
+        new(2, 1),
+        new(1, 2)
     ];
 
     private HazardZoneName _name = DefaultName;
@@ -34,6 +34,24 @@ internal sealed class HazardZoneConfigurationBuilder
     public HazardZoneConfigurationBuilder WithOutline(params Coordinate[] outline)
     {
         _outline = outline;
+        return this;
+    }
+
+    public HazardZoneConfigurationBuilder WithRectangleOutline(double minX, double minY, double maxX, double maxY)
+    {
+        _outline = OutlineBuilder.Rectangle(minX, minY, maxX, maxY);
+        return this;
+    }
+
+    public HazardZoneConfigurationBuilder WithTriangleOutline(
+        double firstX,
+        double firstY,
+        double secondX,
+        double secondY,
+        double thirdX,
+        double thirdY)
+    {
+        _outline = OutlineBuilder.Triangle(firstX, firstY, secondX, secondY, thirdX, thirdY);
         return this;
     }
 

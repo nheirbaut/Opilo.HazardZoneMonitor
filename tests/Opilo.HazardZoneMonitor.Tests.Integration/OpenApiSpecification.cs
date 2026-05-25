@@ -9,10 +9,10 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/openapi/v1.json", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -25,10 +25,10 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/openapi/v1.json", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -42,10 +42,10 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        string content = await client.GetStringAsync(
+        var content = await client.GetStringAsync(
             new Uri("/openapi/v1.json", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -59,10 +59,10 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        string content = await client.GetStringAsync(
+        var content = await client.GetStringAsync(
             new Uri("/openapi/v1.json", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -75,10 +75,10 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/scalar/v1", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -91,10 +91,10 @@ public sealed class OpenApiSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/scalar/v1", UriKind.Relative),
             TestContext.Current.CancellationToken);
 

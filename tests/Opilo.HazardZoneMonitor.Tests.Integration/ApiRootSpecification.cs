@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration;
 
@@ -14,10 +13,10 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -30,10 +29,10 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
 
@@ -46,10 +45,10 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -64,10 +63,10 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -82,10 +81,10 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -101,10 +100,10 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -120,10 +119,10 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
     {
         // Arrange
         await using var host = factory.CreateHost().Start();
-        HttpClient client = host.CreateClient();
+        var client = host.CreateClient();
 
         // Act
-        HttpResponseMessage response = await client.GetAsync(
+        var response = await client.GetAsync(
             new Uri("/", UriKind.Relative),
             TestContext.Current.CancellationToken);
         ApiRootResponse? apiRoot = await response.Content.ReadFromJsonAsync<ApiRootResponse>(
@@ -140,7 +139,7 @@ public sealed class ApiRootSpecification(CustomWebApplicationFactory factory)
         // Arrange
         await using var host = factory.CreateHost().Start();
         var client = host.CreateClient();
-        EndpointDataSource endpointDataSource = host.Services.GetRequiredService<EndpointDataSource>();
+        var endpointDataSource = host.Services.GetRequiredService<EndpointDataSource>();
         var expectedFeatureRoutes = endpointDataSource.Endpoints
             .OfType<RouteEndpoint>()
             .Select(endpoint => endpoint.RoutePattern.RawText)

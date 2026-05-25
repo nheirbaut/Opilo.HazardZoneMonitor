@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.GetHazardZones;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
@@ -34,17 +34,12 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
     public async Task ActivateHazardZone_ShouldReturn204NoContent_WhenHazardZoneExists()
     {
         // Arrange
-        var hazardZoneOptions = new HazardZoneOptions
-        {
-            HazardZones =
-            [
-                new HazardZoneConfiguration(
-                    HazardZoneName.From("existing-hazardzone"),
-                    [new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)],
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(1))
-            ]
-        };
+        var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
+            .WithHazardZone("existing-hazardzone", zone => zone
+                .WithRectangleOutline(0, 0, 10, 10)
+                .WithActivationDuration(TimeSpan.FromSeconds(1))
+                .WithPreAlarmDuration(TimeSpan.FromSeconds(1)))
+            .Build();
 
         await using var host = factory.CreateHost()
             .WithHazardZoneConfiguration(hazardZoneOptions)
@@ -68,17 +63,12 @@ public sealed class ActivateHazardZoneSpecification(CustomWebApplicationFactory 
         // Arrange
         var hazardZoneName = HazardZoneName.From("existing-inactive-hazardzone");
         var clock = new FakeClock(DateTime.UnixEpoch);
-        var hazardZoneOptions = new HazardZoneOptions
-        {
-            HazardZones =
-            [
-                new HazardZoneConfiguration(
-                    hazardZoneName,
-                    [new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)],
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(1))
-            ]
-        };
+        var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
+            .WithHazardZone(hazardZoneName.Value, zone => zone
+                .WithRectangleOutline(0, 0, 10, 10)
+                .WithActivationDuration(TimeSpan.FromSeconds(1))
+                .WithPreAlarmDuration(TimeSpan.FromSeconds(1)))
+            .Build();
 
         await using var host = factory.CreateHost()
             .WithHazardZoneConfiguration(hazardZoneOptions)

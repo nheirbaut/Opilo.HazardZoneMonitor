@@ -1,7 +1,5 @@
 using System.Net;
 using Microsoft.Extensions.Options;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
@@ -29,14 +27,10 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
     public void Api_ShouldThrowOptionsValidationException_WhenHazardZoneNamesAreDuplicate()
     {
         // Arrange
-        var hazardZoneOptions = new HazardZoneOptions
-        {
-            HazardZones =
-            [
-                HazardZoneConfigurationBuilder.BuildSimple(),
-                HazardZoneConfigurationBuilder.Create().WithOutline(new Coordinate(2, 2), new Coordinate(3, 2), new Coordinate(2, 3)).Build()
-            ]
-        };
+        var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
+            .WithHazardZone(HazardZoneConfigurationBuilder.BuildSimple())
+            .WithHazardZone(HazardZoneConfigurationBuilder.Create().WithTriangleOutline(2, 2, 3, 2, 2, 3).Build())
+            .Build();
 
         var hostBuilder = factory.CreateHost()
             .WithHazardZoneConfiguration(hazardZoneOptions);
@@ -47,5 +41,4 @@ public sealed class HazardZoneConfigurationStartupSpecification(CustomWebApplica
         // Assert
         act.Should().Throw<OptionsValidationException>();
     }
-
 }

@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.Extensions.Options;
-using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
@@ -49,14 +48,10 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
     public void Api_ShouldThrowOptionsValidationException_WhenFloorNamesAreDuplicate()
     {
         // Arrange
-        var floorOptions = new FloorOptions
-        {
-            Floors =
-            [
-                FloorConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 0), new Coordinate(0, 1)).Build(),
-                FloorConfigurationBuilder.Create().WithOutline(new Coordinate(2, 2), new Coordinate(3, 2), new Coordinate(2, 3)).Build()
-            ]
-        };
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor(FloorConfigurationBuilder.Create().WithTriangleOutline(0, 0, 1, 0, 0, 1).Build())
+            .WithFloor(FloorConfigurationBuilder.Create().WithTriangleOutline(2, 2, 3, 2, 2, 3).Build())
+            .Build();
 
         var hostBuilder = factory.CreateHost()
             .WithFloorConfiguration(floorOptions);
@@ -72,10 +67,9 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
     public void Api_ShouldThrowOptionsValidationException_WhenFloorOutlineHasFewerThanThreePoints()
     {
         // Arrange
-        var floorOptions = new FloorOptions
-        {
-            Floors = [FloorConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 1)).Build()]
-        };
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor(FloorConfigurationBuilder.Create().WithOutline(new Coordinate(0, 0), new Coordinate(1, 1)).Build())
+            .Build();
 
         var hostBuilder = factory.CreateHost()
             .WithFloorConfiguration(floorOptions);
@@ -86,5 +80,4 @@ public sealed class FloorConfigurationStartupSpecification(CustomWebApplicationF
         // Assert
         act.Should().Throw<OptionsValidationException>();
     }
-
 }
