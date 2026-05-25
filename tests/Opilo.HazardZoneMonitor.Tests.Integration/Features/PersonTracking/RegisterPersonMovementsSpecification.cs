@@ -4,6 +4,7 @@ using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMov
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
 using Opilo.HazardZoneMonitor.Tests.Integration.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Tests.Integration.Shared;
 
@@ -94,5 +95,47 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
 
         var hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
+    }
+
+    [Fact]
+    public async Task RegisterPersonMovement_ShouldClearHazardZoneAlarm_WhenPersonExpires()
+    {
+        // Arrange
+        var hazardZoneName = HazardZoneName.From("Reactor Room");
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor("Main Floor", f => f
+                .WithRectangleOutline(0, 0, 10, 10)
+                .WithHazardZone(hazardZoneName.Value, z => z
+                    .WithRectangleOutline(2, 2, 8, 8)
+                    .WithAllowedNumberOfPersons(0)
+                    .WithPreAlarmDuration(TimeSpan.Zero)))
+            .Build();
+
+        var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
+            .WithHazardZone(hazardZoneName.Value, z => z
+                .WithRectangleOutline(2, 2, 8, 8)
+                .WithAllowedNumberOfPersons(0)
+                .WithPreAlarmDuration(TimeSpan.Zero))
+            .Build();
+
+        var clock = new FakeClock();
+        await using var host = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions)
+            .WithHazardZoneConfiguration(hazardZoneOptions)
+            .WithFakeTime(clock)
+            .Start();
+        var client = host.CreateClient();
+
+        await HazardZoneApi.ActivateHazardZone(client, hazardZoneName);
+
+        var request = new Command(PersonId.From(Guid.NewGuid()), new Coordinate(4, 4));
+        await client.PostAsJsonAsync("/api/v1/person-movements", request, SerializationOptions.Default, TestContext.Current.CancellationToken);
+
+        // Act
+        clock.AdvanceBy(TimeSpan.FromMilliseconds(500));
+
+        // Assert
+        var hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
 }
