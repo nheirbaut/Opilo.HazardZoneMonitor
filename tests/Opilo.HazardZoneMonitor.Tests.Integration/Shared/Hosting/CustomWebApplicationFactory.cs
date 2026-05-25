@@ -10,6 +10,11 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<IApiMark
     private readonly string _databasePath;
     private readonly bool _ownsDatabase;
 
+    public CustomWebApplicationFactory()
+        : this(Path.Combine(Path.GetTempPath(), $"hazardzone_test_{Guid.NewGuid():N}.db"), true)
+    {
+    }
+
     internal static CustomWebApplicationFactory ForDatabase(string databasePath) =>
         new(databasePath, ownsDatabase: false);
 

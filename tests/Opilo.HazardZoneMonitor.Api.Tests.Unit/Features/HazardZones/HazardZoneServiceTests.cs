@@ -47,6 +47,6 @@ public sealed class HazardZoneServiceTests
         var result = hazardZoneService.ActivateHazardZone(hazardZoneName);
 
         // Assert
-        result.Status.Should().Be(ResultStatus.NoContent);
+        result.IsSuccess.Should().BeTrue();
     }
 }

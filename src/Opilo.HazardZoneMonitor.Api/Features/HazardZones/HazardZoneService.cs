@@ -46,7 +46,18 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
         }
 
         zone.ManuallyActivate();
-        return Result.NoContent();
+        return Result.Success();
+    }
+
+    public Result DeactivateHazardZone(HazardZoneName hazardZoneName)
+    {
+        if (!_hazardZones.TryGetValue(hazardZoneName, out var zone))
+        {
+            return Result.NotFound();
+        }
+
+        zone.ManuallyDeactivate();
+        return Result.Success();
     }
 
     public void Dispose()

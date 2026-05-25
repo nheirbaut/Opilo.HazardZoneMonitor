@@ -5,10 +5,11 @@ using Opilo.HazardZoneMonitor.Api.Shared.Features;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using IResult = Microsoft.AspNetCore.Http.IResult;
 
-namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones.ActivateHazardZone;
+namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones.DeactivateHazardZone;
 
-public sealed class Feature : IFeature
+public class Feature : IFeature
 {
+
     public void AddServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ICommandHandler<Command>, Handler>();
@@ -16,7 +17,7 @@ public sealed class Feature : IFeature
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/v1/hazard-zones/{hazardZoneName}/activate", async Task<IResult> (
+        app.MapPost("/api/v1/hazard-zones/{hazardZoneName}/deactivate", async Task<IResult> (
             [FromRoute] string hazardZoneName,
             ICommandHandler<Command> handler,
             CancellationToken cancellationToken) =>
@@ -27,6 +28,7 @@ public sealed class Feature : IFeature
             {
                 ResultStatus.NotFound => TypedResults.NotFound(),
                 ResultStatus.Ok => TypedResults.NoContent(),
+                ResultStatus.NoContent => TypedResults.NoContent(),
                 _ => TypedResults.InternalServerError()
             };
         });

@@ -8,4 +8,5 @@ public interface IHazardZoneService
     IReadOnlyList<HazardZoneInfo> GetHazardZones();
 
     Result ActivateHazardZone(HazardZoneName hazardZoneName);
+    Result DeactivateHazardZone(HazardZoneName hazardZoneName);
 }
