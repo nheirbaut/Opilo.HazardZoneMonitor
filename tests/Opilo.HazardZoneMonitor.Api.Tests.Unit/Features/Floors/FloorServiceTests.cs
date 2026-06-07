@@ -20,9 +20,10 @@ public sealed class FloorServiceTests
                 .Build());
 
         var hazardZoneService = Substitute.For<IHazardZoneService>();
-        var timerFactory = new FakeTimerFactory(new FakeClock());
+        var clock = new FakeClock();
+        var timerFactory = new FakeTimerFactory(clock);
 
-        using var floorService = new FloorService(floorOptions, hazardZoneService, timerFactory);
+        using var floorService = new FloorService(floorOptions, hazardZoneService, clock, timerFactory);
 
         var personId = PersonId.From(Guid.NewGuid());
         var coordinate = new Coordinate(5, 5);
@@ -45,9 +46,10 @@ public sealed class FloorServiceTests
                 .Build());
 
         var hazardZoneService = Substitute.For<IHazardZoneService>();
-        var timerFactory = new FakeTimerFactory(new FakeClock());
+        var clock = new FakeClock();
+        var timerFactory = new FakeTimerFactory(clock);
 
-        using var floorService = new FloorService(floorOptions, hazardZoneService, timerFactory);
+        using var floorService = new FloorService(floorOptions, hazardZoneService, clock, timerFactory);
 
         var personId = PersonId.From(Guid.NewGuid());
         var inside = new Coordinate(5, 5);
