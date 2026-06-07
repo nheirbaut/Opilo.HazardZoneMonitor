@@ -15,6 +15,7 @@ public sealed class FloorService : IFloorService, IDisposable
 {
     private readonly Dictionary<FloorName, Floor> _floors = new();
     private readonly IHazardZoneService _hazardZoneService;
+    private volatile bool _disposed;
 
     public FloorService(IOptions<FloorOptions> options, IHazardZoneService hazardZoneService, IClock clock, ITimerFactory timerFactory)
     {
@@ -66,6 +67,13 @@ public sealed class FloorService : IFloorService, IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
         foreach (var floor in _floors.Values)
         {
             floor.PersonAddedToFloor -= OnPersonAddedToFloor;
