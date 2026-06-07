@@ -46,6 +46,14 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
         }
     }
 
+    public void RemovePerson(PersonId personId)
+    {
+        foreach (var hazardZone in _hazardZones.Values)
+        {
+            hazardZone.HandlePersonExpired(personId);
+        }
+    }
+
     public Result ActivateHazardZone(HazardZoneName hazardZoneName)
     {
         if (!_hazardZones.TryGetValue(hazardZoneName, out var zone))

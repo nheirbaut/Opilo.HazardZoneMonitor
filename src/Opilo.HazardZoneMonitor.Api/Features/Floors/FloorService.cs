@@ -45,8 +45,7 @@ public sealed class FloorService : IFloorService, IDisposable
 
     private void OnPersonRemovedFromFloor(object? sender, PersonRemovedFromFloorEventArgs e)
     {
-        _hazardZoneService.ApplyPersonLocationUpdate(
-            new PersonLocationUpdate(e.PersonId, new Coordinate(double.MinValue, double.MinValue)));
+        _hazardZoneService.RemovePerson(e.PersonId);
     }
 
     public void Dispose()

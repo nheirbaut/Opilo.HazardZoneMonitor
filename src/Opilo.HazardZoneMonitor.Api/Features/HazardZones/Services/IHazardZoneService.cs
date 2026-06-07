@@ -9,6 +9,8 @@ public interface IHazardZoneService
 
     void ApplyPersonLocationUpdate(PersonLocationUpdate personLocationUpdate);
 
+    void RemovePerson(PersonId personId);
+
     Result ActivateHazardZone(HazardZoneName hazardZoneName);
     Result DeactivateHazardZone(HazardZoneName hazardZoneName);
 }

@@ -34,4 +34,31 @@ public sealed class FloorServiceTests
         hazardZoneService.Received(1).ApplyPersonLocationUpdate(Arg.Is<PersonLocationUpdate>(
             update => update.PersonId == personId && update.Coordinate == coordinate));
     }
+
+    [Fact]
+    public void ApplyPersonLocationUpdate_ShouldCallRemovePersonOnHazardZoneService_WhenPersonLeavesFloor()
+    {
+        // Arrange
+        var floorOptions = Options.Create(
+            FloorOptionsBuilder.Create()
+                .WithFloor("Main Floor", f => f.WithRectangleOutline(0, 0, 10, 10))
+                .Build());
+
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        var timerFactory = new FakeTimerFactory(new FakeClock());
+
+        using var floorService = new FloorService(floorOptions, hazardZoneService, timerFactory);
+
+        var personId = PersonId.From(Guid.NewGuid());
+        var inside = new Coordinate(5, 5);
+        var outside = new Coordinate(15, 15);
+
+        floorService.ApplyPersonLocationUpdate(new PersonLocationUpdate(personId, inside));
+
+        // Act
+        floorService.ApplyPersonLocationUpdate(new PersonLocationUpdate(personId, outside));
+
+        // Assert
+        hazardZoneService.Received(1).RemovePerson(personId);
+    }
 }

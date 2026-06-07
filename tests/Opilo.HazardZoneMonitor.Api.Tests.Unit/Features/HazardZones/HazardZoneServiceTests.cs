@@ -102,4 +102,35 @@ public sealed class HazardZoneServiceTests
         hazardZone = hazardZoneService.GetHazardZones().Single();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
+
+    [Fact]
+    public void RemovePerson_ShouldTransitionAlarmStateToNone_WhenPersonIsInsideActiveZone()
+    {
+        // Arrange
+        var hazardZoneName = HazardZoneName.From("TestZone");
+        var clock = new FakeClock();
+        var options = Options.Create(
+            HazardZoneOptionsBuilder.Create()
+                .WithHazardZone("TestZone", z => z
+                    .WithRectangleOutline(0, 0, 10, 10)
+                    .WithAllowedNumberOfPersons(0))
+                .Build());
+
+        using var hazardZoneService = new HazardZoneService(options, clock, new FakeTimerFactory(clock));
+        hazardZoneService.ActivateHazardZone(hazardZoneName);
+
+        var personId = PersonId.From(Guid.NewGuid());
+        var location = new Coordinate(5, 5);
+
+        hazardZoneService.ApplyPersonLocationUpdate(new PersonLocationUpdate(personId, location));
+        var hazardZone = hazardZoneService.GetHazardZones().Single();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
+
+        // Act
+        hazardZoneService.RemovePerson(personId);
+
+        // Assert
+        hazardZone = hazardZoneService.GetHazardZones().Single();
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
 }
