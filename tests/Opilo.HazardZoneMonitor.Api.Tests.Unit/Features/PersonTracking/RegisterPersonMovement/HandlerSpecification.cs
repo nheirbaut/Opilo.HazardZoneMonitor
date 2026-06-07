@@ -103,4 +103,24 @@ public sealed class HandlerSpecification
         _floorService.Received(1).ApplyPersonLocationUpdate(Arg.Is<PersonLocationUpdate>(
             update => update.PersonId == personId && update.Coordinate == coordinate));
     }
+
+    [Fact]
+    public async Task Handle_ShouldNotCallApplyPersonLocationUpdateOnFloorService_WhenRepositoryReturnsError()
+    {
+        // Arrange
+        var personId = PersonId.From(Guid.NewGuid());
+        var coordinate = new Coordinate(1.0, 2.0);
+        Command command = new(personId, coordinate);
+
+        _movementsRepository
+            .RegisterMovementAsync(personId, coordinate, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Error("Database unavailable"));
+
+        // Act
+        var result = await _sut.Handle(command, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Status.Should().Be(ResultStatus.Error);
+        _floorService.DidNotReceive().ApplyPersonLocationUpdate(Arg.Any<PersonLocationUpdate>());
+    }
 }
