@@ -4,6 +4,7 @@ using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones;
 
@@ -48,5 +49,38 @@ public sealed class HazardZoneServiceTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ApplyPersonLocationUpdate_ShouldUpdateHazardZoneAlarmState_WhenPersonIsInsideActiveZoneAndOverThreshold()
+    {
+        // Arrange
+        var hazardZoneName = HazardZoneName.From("TestZone");
+        var clock = new FakeClock();
+        var options = Options.Create(new HazardZoneOptions
+        {
+            HazardZones =
+            [
+                new HazardZoneConfiguration(
+                    hazardZoneName,
+                    [new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)],
+                    TimeSpan.Zero,
+                    TimeSpan.Zero,
+                    AllowedNumberOfPersons: 0)
+            ]
+        });
+
+        using var hazardZoneService = new HazardZoneService(options, clock, new FakeTimerFactory(clock));
+        hazardZoneService.ActivateHazardZone(hazardZoneName);
+
+        var personId = PersonId.From(Guid.NewGuid());
+        var location = new Coordinate(5, 5);
+
+        // Act
+        hazardZoneService.ApplyPersonLocationUpdate(new PersonLocationUpdate(personId, location));
+
+        // Assert
+        var hazardZone = hazardZoneService.GetHazardZones().Single();
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
     }
 }
