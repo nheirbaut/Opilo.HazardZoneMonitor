@@ -144,4 +144,53 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
         var hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
         hazardZone.AlarmState.Should().Be(AlarmState.None);
     }
+
+    [Fact]
+    public async Task RegisterPersonMovement_ShouldClearHazardZoneAlarm_WhenPersonMovesOutsideFloor()
+    {
+        // Arrange
+        var hazardZoneName = HazardZoneName.From("Reactor Room");
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor("Main Floor", f => f
+                .WithRectangleOutline(0, 0, 10, 10)
+                .WithHazardZone(hazardZoneName.Value, z => z
+                    .WithRectangleOutline(2, 2, 8, 8)
+                    .WithAllowedNumberOfPersons(0)
+                    .WithPreAlarmDuration(TimeSpan.Zero)))
+            .Build();
+
+        var hazardZoneOptions = HazardZoneOptionsBuilder.Create()
+            .WithHazardZone(hazardZoneName.Value, z => z
+                .WithRectangleOutline(2, 2, 8, 8)
+                .WithAllowedNumberOfPersons(0)
+                .WithPreAlarmDuration(TimeSpan.Zero))
+            .Build();
+
+        var clock = new FakeClock();
+        await using var host = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions)
+            .WithHazardZoneConfiguration(hazardZoneOptions)
+            .WithFakeTime(clock)
+            .Start();
+        var client = host.CreateClient();
+
+        await HazardZoneApi.ActivateHazardZone(client, hazardZoneName);
+
+        var personId = PersonId.From(Guid.NewGuid());
+        var insideRequest = new Command(personId, new Coordinate(4, 4));
+        await client.PostAsJsonAsync("/api/v1/person-movements", insideRequest, SerializationOptions.Default, TestContext.Current.CancellationToken);
+
+        var hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
+        hazardZone.AlarmState.Should().Be(AlarmState.Alarm);
+
+        var outsideRequest = new Command(personId, new Coordinate(15, 15));
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/v1/person-movements", outsideRequest, SerializationOptions.Default, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        hazardZone = await HazardZoneApi.GetCurrentHazardZone(client, hazardZoneName);
+        hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
 }
