@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones;
-using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Domain.Shared.Time;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones;
 
@@ -14,7 +14,7 @@ public sealed class HazardZoneServiceTests
     public void ActivateHazardZone_ShouldReturnNotFoundResult_WhenNoHazardZonesAreConfigured()
     {
         // Arrange
-        var options = Options.Create(new HazardZoneOptions { HazardZones = [] });
+        var options = Options.Create(HazardZoneOptionsBuilder.Create().Build());
         using var hazardZoneService = new HazardZoneService(options, new SystemClock(), new SystemTimerFactory());
         var hazardZoneName = HazardZoneName.From("non-existing-hazardzone");
 
@@ -30,17 +30,10 @@ public sealed class HazardZoneServiceTests
     {
         // Arrange
         var hazardZoneName = HazardZoneName.From("existing-hazardzone");
-        var options = Options.Create(new HazardZoneOptions
-        {
-            HazardZones =
-            [
-                new HazardZoneConfiguration(
-                    hazardZoneName,
-                    [new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)],
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(1))
-            ]
-        });
+        var options = Options.Create(
+            HazardZoneOptionsBuilder.Create()
+                .WithHazardZone("existing-hazardzone", z => z.WithRectangleOutline(0, 0, 10, 10))
+                .Build());
 
         using var hazardZoneService = new HazardZoneService(options, new SystemClock(), new SystemTimerFactory());
 
@@ -57,18 +50,12 @@ public sealed class HazardZoneServiceTests
         // Arrange
         var hazardZoneName = HazardZoneName.From("TestZone");
         var clock = new FakeClock();
-        var options = Options.Create(new HazardZoneOptions
-        {
-            HazardZones =
-            [
-                new HazardZoneConfiguration(
-                    hazardZoneName,
-                    [new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)],
-                    TimeSpan.Zero,
-                    TimeSpan.Zero,
-                    AllowedNumberOfPersons: 0)
-            ]
-        });
+        var options = Options.Create(
+            HazardZoneOptionsBuilder.Create()
+                .WithHazardZone("TestZone", z => z
+                    .WithRectangleOutline(0, 0, 10, 10)
+                    .WithAllowedNumberOfPersons(0))
+                .Build());
 
         using var hazardZoneService = new HazardZoneService(options, clock, new FakeTimerFactory(clock));
         hazardZoneService.ActivateHazardZone(hazardZoneName);
@@ -90,18 +77,12 @@ public sealed class HazardZoneServiceTests
         // Arrange
         var hazardZoneName = HazardZoneName.From("TestZone");
         var clock = new FakeClock();
-        var options = Options.Create(new HazardZoneOptions
-        {
-            HazardZones =
-            [
-                new HazardZoneConfiguration(
-                    hazardZoneName,
-                    [new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)],
-                    TimeSpan.Zero,
-                    TimeSpan.Zero,
-                    AllowedNumberOfPersons: 0)
-            ]
-        });
+        var options = Options.Create(
+            HazardZoneOptionsBuilder.Create()
+                .WithHazardZone("TestZone", z => z
+                    .WithRectangleOutline(0, 0, 10, 10)
+                    .WithAllowedNumberOfPersons(0))
+                .Build());
 
         using var hazardZoneService = new HazardZoneService(options, clock, new FakeTimerFactory(clock));
         hazardZoneService.ActivateHazardZone(hazardZoneName);

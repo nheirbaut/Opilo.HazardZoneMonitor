@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Opilo.HazardZoneMonitor.Api.Features.Floors;
-using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Floors;
 
@@ -14,16 +14,10 @@ public sealed class FloorServiceTests
     public void ApplyPersonLocationUpdate_ShouldCallApplyPersonLocationUpdateOnHazardZoneService_WhenPersonIsAddedToFloor()
     {
         // Arrange
-        var floorName = FloorName.From("Main Floor");
-        var floorOptions = Options.Create(new FloorOptions
-        {
-            Floors =
-            [
-                new FloorConfiguration(
-                    floorName,
-                    [new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)])
-            ]
-        });
+        var floorOptions = Options.Create(
+            FloorOptionsBuilder.Create()
+                .WithFloor("Main Floor", f => f.WithRectangleOutline(0, 0, 10, 10))
+                .Build());
 
         var hazardZoneService = Substitute.For<IHazardZoneService>();
         var timerFactory = new FakeTimerFactory(new FakeClock());

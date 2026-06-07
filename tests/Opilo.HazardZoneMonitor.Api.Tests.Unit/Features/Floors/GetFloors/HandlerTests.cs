@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Api.Features.Floors.GetFloors;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Floors.GetFloors;
 
@@ -12,17 +13,13 @@ public sealed class HandlerTests
     public async Task Handle_ShouldReturnSuccessResult_WhenFloorsAreConfigured()
     {
         // Arrange
-        Coordinate point1 = new(0.0, 0.0);
-        Coordinate point2 = new(10.0, 10.0);
-        Coordinate point3 = new(10.0, 0.0);
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor("Floor 1", f => f.WithOutline(new Coordinate(0, 0), new Coordinate(10, 10), new Coordinate(10, 0)))
+            .WithFloor("Floor 2", f => f.WithOutline(new Coordinate(0, 0), new Coordinate(10, 10)))
+            .Build();
 
-        FloorConfiguration floor1 = new(FloorName.From("Floor 1"), new[] { point1, point2, point3 });
-        FloorConfiguration floor2 = new(FloorName.From("Floor 2"), new[] { point1, point2 });
-
-        FloorOptions floorOptions = new()
-        {
-            Floors = new[] { floor1, floor2 },
-        };
+        var floor1 = floorOptions.Floors[0];
+        var floor2 = floorOptions.Floors[1];
 
         IOptions<FloorOptions> options = Options.Create(floorOptions);
         Handler handler = new(options);
@@ -40,10 +37,7 @@ public sealed class HandlerTests
     public async Task Handle_ShouldReturnSuccessResultWithEmptyFloors_WhenNoFloorsAreConfigured()
     {
         // Arrange
-        FloorOptions floorOptions = new()
-        {
-            Floors = Array.Empty<FloorConfiguration>(),
-        };
+        FloorOptions floorOptions = FloorOptionsBuilder.Create().Build();
 
         IOptions<FloorOptions> options = Options.Create(floorOptions);
         Handler handler = new(options);
