@@ -78,7 +78,13 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
                 .WithPreAlarmDuration(TimeSpan.Zero))
             .Build();
 
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor("Main Floor", f => f
+                .WithRectangleOutline(0, 0, 10, 10))
+            .Build();
+
         await using var host = factory.CreateHost()
+            .WithFloorConfiguration(floorOptions)
             .WithHazardZoneConfiguration(hazardZoneOptions)
             .Start();
         var client = host.CreateClient();
