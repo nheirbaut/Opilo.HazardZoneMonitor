@@ -74,7 +74,7 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
 
     private static ValidateOptionsResult ValidateHazardZones(IReadOnlyList<FloorConfiguration> floors)
     {
-        var hazardZoneValidator = new HazardZoneOptionsValidator();
+        var hazardZoneValidator = new HazardZoneOptionsValidator(Options.Create(new FloorOptions()));
 
         foreach (var floor in floors)
         {

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
@@ -6,7 +7,7 @@ namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.HazardZones;
 
 public sealed class HazardZoneOptionsValidatorTests
 {
-    private readonly HazardZoneOptionsValidator _validator = new();
+    private readonly HazardZoneOptionsValidator _validator = new(Options.Create(FloorOptionsBuilder.Create().Build()));
 
     [Fact]
     public void Validate_ShouldReturnFailure_WhenHazardZonesIsNull()
@@ -152,6 +153,27 @@ public sealed class HazardZoneOptionsValidatorTests
 
         // Act
         var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZoneNameIsDuplicatedAcrossConfigurationSources()
+    {
+        // Arrange
+        var hazardZone = HazardZoneConfigurationBuilder.Create().WithName("DuplicateZone").Build();
+        var floorOptions = FloorOptionsBuilder.Create()
+            .WithFloor("Main Floor", f => f
+                .WithRectangleOutline(0, 0, 100, 100)
+                .WithHazardZone("DuplicateZone", z => z.WithRectangleOutline(10, 10, 20, 20)))
+            .Build();
+        var validator = new HazardZoneOptionsValidator(Options.Create(floorOptions));
+        var options = new HazardZoneOptions { HazardZones = [hazardZone] };
+
+        // Act
+        var result = validator.Validate(string.Empty, options);
 
         // Assert
         result.Succeeded.Should().BeFalse();

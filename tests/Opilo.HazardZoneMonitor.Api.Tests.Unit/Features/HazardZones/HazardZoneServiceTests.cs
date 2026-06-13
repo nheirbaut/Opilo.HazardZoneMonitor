@@ -163,26 +163,4 @@ public sealed class HazardZoneServiceTests
         hazardZones[0].Name.Should().Be(HazardZoneName.From("FloorZone"));
     }
 
-    [Fact]
-    public void Constructor_ShouldThrowInvalidOperationException_WhenDuplicateHazardZoneNamesAcrossSources()
-    {
-        // Arrange
-        var clock = new FakeClock();
-        var hazardZoneOptions = Options.Create(
-            HazardZoneOptionsBuilder.Create()
-                .WithHazardZone("DuplicateZone", z => z.WithRectangleOutline(0, 0, 10, 10))
-                .Build());
-        var floorOptions = Options.Create(
-            FloorOptionsBuilder.Create()
-                .WithFloor("Main Floor", f => f
-                    .WithRectangleOutline(0, 0, 100, 100)
-                    .WithHazardZone("DuplicateZone", z => z.WithRectangleOutline(20, 20, 30, 30)))
-                .Build());
-
-        // Act
-        var act = () => new HazardZoneService(hazardZoneOptions, floorOptions, clock, new FakeTimerFactory(clock));
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>();
-    }
 }

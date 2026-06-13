@@ -25,14 +25,8 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
             .Concat(floorOptions.Value.Floors.SelectMany(f => f.HazardZones))
             .ToList();
 
-        var seenNames = new HashSet<HazardZoneName>();
         foreach (var config in allConfigurations)
         {
-            if (!seenNames.Add(config.Name))
-            {
-                throw new InvalidOperationException($"Duplicate HazardZone name '{config.Name}' detected across configuration. HazardZone names must be unique.");
-            }
-
             var outline = new Outline(new ReadOnlyCollection<Coordinate>(config.Outline.ToList()));
             var zone = new HazardZone(
                 config.Name,
