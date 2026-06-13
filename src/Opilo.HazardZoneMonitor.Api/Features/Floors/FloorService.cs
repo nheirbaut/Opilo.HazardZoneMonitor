@@ -5,7 +5,6 @@ using Opilo.HazardZoneMonitor.Api.Features.Floors.Services;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
 using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Events;
-using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
@@ -17,7 +16,7 @@ public sealed class FloorService : IFloorService, IDisposable
     private readonly IHazardZoneService _hazardZoneService;
     private volatile bool _disposed;
 
-    public FloorService(IOptions<FloorOptions> options, IHazardZoneService hazardZoneService, IClock clock, ITimerFactory timerFactory)
+    public FloorService(IOptions<FloorOptions> options, IHazardZoneService hazardZoneService, ITimerFactory timerFactory)
     {
         _hazardZoneService = hazardZoneService;
 
@@ -25,23 +24,10 @@ public sealed class FloorService : IFloorService, IDisposable
         {
             var outline = new Outline(new ReadOnlyCollection<Coordinate>(config.Outline.ToList()));
 
-            var hazardZones = config.HazardZones.Select(hz =>
-            {
-                var hzOutline = new Outline(new ReadOnlyCollection<Coordinate>(hz.Outline.ToList()));
-                var zone = new HazardZone(
-                    hz.Name,
-                    hzOutline,
-                    Duration.From(hz.ActivationDuration),
-                    Duration.From(hz.PreAlarmDuration),
-                    clock,
-                    timerFactory);
-                zone.SetAllowedNumberOfPersons(Capacity.From(hz.AllowedNumberOfPersons));
-                return zone;
-            }).ToList();
-
-            var floor = new Floor(config.Name, outline, hazardZones, timerFactory: timerFactory);
+            var floor = new Floor(config.Name, outline, timerFactory: timerFactory);
             floor.PersonAddedToFloor += OnPersonAddedToFloor;
             floor.PersonRemovedFromFloor += OnPersonRemovedFromFloor;
+            floor.PersonLocationChanged += OnPersonLocationChanged;
             _floors[config.Name] = floor;
         }
     }
@@ -65,6 +51,12 @@ public sealed class FloorService : IFloorService, IDisposable
         _hazardZoneService.RemovePerson(e.PersonId);
     }
 
+    private void OnPersonLocationChanged(object? sender, PersonLocationChangedOnFloorEventArgs e)
+    {
+        _hazardZoneService.ApplyPersonLocationUpdate(
+            new PersonLocationUpdate(e.PersonId, e.Location));
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -78,6 +70,7 @@ public sealed class FloorService : IFloorService, IDisposable
         {
             floor.PersonAddedToFloor -= OnPersonAddedToFloor;
             floor.PersonRemovedFromFloor -= OnPersonRemovedFromFloor;
+            floor.PersonLocationChanged -= OnPersonLocationChanged;
             floor.Dispose();
         }
 

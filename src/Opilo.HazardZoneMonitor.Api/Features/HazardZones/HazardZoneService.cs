@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
@@ -14,12 +15,24 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
     private readonly Dictionary<HazardZoneName, HazardZone> _hazardZones = new();
     private bool _disposed;
 
-    public HazardZoneService(IOptions<HazardZoneOptions> options, IClock clock, ITimerFactory timerFactory)
+    public HazardZoneService(
+        IOptions<HazardZoneOptions> hazardZoneOptions,
+        IOptions<FloorOptions> floorOptions,
+        IClock clock,
+        ITimerFactory timerFactory)
     {
-        var configurations = options.Value.HazardZones;
+        var allConfigurations = hazardZoneOptions.Value.HazardZones
+            .Concat(floorOptions.Value.Floors.SelectMany(f => f.HazardZones))
+            .ToList();
 
-        foreach (var config in configurations)
+        var seenNames = new HashSet<HazardZoneName>();
+        foreach (var config in allConfigurations)
         {
+            if (!seenNames.Add(config.Name))
+            {
+                throw new InvalidOperationException($"Duplicate HazardZone name '{config.Name}' detected across configuration. HazardZone names must be unique.");
+            }
+
             var outline = new Outline(new ReadOnlyCollection<Coordinate>(config.Outline.ToList()));
             var zone = new HazardZone(
                 config.Name,

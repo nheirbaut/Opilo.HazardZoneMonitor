@@ -43,17 +43,6 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
     private static async Task<HttpResponseMessage> RegisterPersonMovement(HttpClient client, Command request) =>
         await client.PostAsJsonAsync("/api/v1/person-movements", request, SerializationOptions.Default, TestContext.Current.CancellationToken);
 
-    private IntegrationTestHostBuilder CreateHazardZoneHostBuilder(FakeClock? clock = null)
-    {
-        var builder = factory.CreateHost()
-            .WithHazardZoneConfiguration(s_hazardZoneOptions);
-
-        if (clock is not null)
-            builder.WithFakeTime(clock);
-
-        return builder;
-    }
-
     [Fact]
     public async Task RegisterPersonMovement_ShouldReturn201Created_WhenCalled()
     {
@@ -133,8 +122,9 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
     {
         // Arrange
         var clock = new FakeClock();
-        await using var host = CreateHazardZoneHostBuilder(clock)
+        await using var host = factory.CreateHost()
             .WithFloorConfiguration(s_floorOptionsWithHazardZone)
+            .WithFakeTime(clock)
             .Start();
         var client = host.CreateClient();
 
@@ -156,8 +146,9 @@ public sealed class RegisterPersonMovementsSpecification(CustomWebApplicationFac
     {
         // Arrange
         var clock = new FakeClock();
-        await using var host = CreateHazardZoneHostBuilder(clock)
+        await using var host = factory.CreateHost()
             .WithFloorConfiguration(s_floorOptionsWithHazardZone)
+            .WithFakeTime(clock)
             .Start();
         var client = host.CreateClient();
 

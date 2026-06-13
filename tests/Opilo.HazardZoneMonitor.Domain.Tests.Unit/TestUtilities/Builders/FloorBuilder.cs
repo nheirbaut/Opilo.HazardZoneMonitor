@@ -1,5 +1,4 @@
 using Opilo.HazardZoneMonitor.Domain.Features.FloorManagement.Domain;
-using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
 using Opilo.HazardZoneMonitor.Domain.Shared.Abstractions;
 using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
 
@@ -9,7 +8,6 @@ internal sealed class FloorBuilder
 {
     private FloorName _name = DefaultName;
     private Outline _outline = DefaultOutline;
-    private readonly List<HazardZone> _hazardZones = [];
     private TimeSpan? _personLifespan;
     private ITimerFactory? _timerFactory;
 
@@ -22,7 +20,7 @@ internal sealed class FloorBuilder
         new Coordinate(0, 4)
     ]));
 
-    public static Floor BuildSimple() => new(DefaultName, DefaultOutline, []);
+    public static Floor BuildSimple() => new(DefaultName, DefaultOutline);
 
     public static FloorBuilder Create() => new();
 
@@ -35,18 +33,6 @@ internal sealed class FloorBuilder
     public FloorBuilder WithOutline(Outline outline)
     {
         _outline = outline;
-        return this;
-    }
-
-    public FloorBuilder WithHazardZone(HazardZone hazardZone)
-    {
-        _hazardZones.Add(hazardZone);
-        return this;
-    }
-
-    public FloorBuilder WithHazardZones(IEnumerable<HazardZone> hazardZones)
-    {
-        _hazardZones.AddRange(hazardZones);
         return this;
     }
 
@@ -64,7 +50,7 @@ internal sealed class FloorBuilder
 
     public Floor Build()
     {
-        return new Floor(_name, _outline, _hazardZones, _personLifespan, _timerFactory);
+        return new Floor(_name, _outline, _personLifespan, _timerFactory);
     }
 
     private FloorBuilder()

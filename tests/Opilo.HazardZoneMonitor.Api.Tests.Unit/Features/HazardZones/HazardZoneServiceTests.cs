@@ -14,8 +14,9 @@ public sealed class HazardZoneServiceTests
     public void ActivateHazardZone_ShouldReturnNotFoundResult_WhenNoHazardZonesAreConfigured()
     {
         // Arrange
-        var options = Options.Create(HazardZoneOptionsBuilder.Create().Build());
-        using var hazardZoneService = new HazardZoneService(options, new SystemClock(), new SystemTimerFactory());
+        var hazardZoneOptions = Options.Create(HazardZoneOptionsBuilder.Create().Build());
+        var floorOptions = Options.Create(FloorOptionsBuilder.Create().Build());
+        using var hazardZoneService = new HazardZoneService(hazardZoneOptions, floorOptions, new SystemClock(), new SystemTimerFactory());
         var hazardZoneName = HazardZoneName.From("non-existing-hazardzone");
 
         // Act
@@ -30,12 +31,13 @@ public sealed class HazardZoneServiceTests
     {
         // Arrange
         var hazardZoneName = HazardZoneName.From("existing-hazardzone");
-        var options = Options.Create(
+        var hazardZoneOptions = Options.Create(
             HazardZoneOptionsBuilder.Create()
                 .WithHazardZone("existing-hazardzone", z => z.WithRectangleOutline(0, 0, 10, 10))
                 .Build());
+        var floorOptions = Options.Create(FloorOptionsBuilder.Create().Build());
 
-        using var hazardZoneService = new HazardZoneService(options, new SystemClock(), new SystemTimerFactory());
+        using var hazardZoneService = new HazardZoneService(hazardZoneOptions, floorOptions, new SystemClock(), new SystemTimerFactory());
 
         // Act
         var result = hazardZoneService.ActivateHazardZone(hazardZoneName);
@@ -50,14 +52,15 @@ public sealed class HazardZoneServiceTests
         // Arrange
         var hazardZoneName = HazardZoneName.From("TestZone");
         var clock = new FakeClock();
-        var options = Options.Create(
+        var hazardZoneOptions = Options.Create(
             HazardZoneOptionsBuilder.Create()
                 .WithHazardZone("TestZone", z => z
                     .WithRectangleOutline(0, 0, 10, 10)
                     .WithAllowedNumberOfPersons(0))
                 .Build());
+        var floorOptions = Options.Create(FloorOptionsBuilder.Create().Build());
 
-        using var hazardZoneService = new HazardZoneService(options, clock, new FakeTimerFactory(clock));
+        using var hazardZoneService = new HazardZoneService(hazardZoneOptions, floorOptions, clock, new FakeTimerFactory(clock));
         hazardZoneService.ActivateHazardZone(hazardZoneName);
 
         var personId = PersonId.From(Guid.NewGuid());
@@ -77,14 +80,15 @@ public sealed class HazardZoneServiceTests
         // Arrange
         var hazardZoneName = HazardZoneName.From("TestZone");
         var clock = new FakeClock();
-        var options = Options.Create(
+        var hazardZoneOptions = Options.Create(
             HazardZoneOptionsBuilder.Create()
                 .WithHazardZone("TestZone", z => z
                     .WithRectangleOutline(0, 0, 10, 10)
                     .WithAllowedNumberOfPersons(0))
                 .Build());
+        var floorOptions = Options.Create(FloorOptionsBuilder.Create().Build());
 
-        using var hazardZoneService = new HazardZoneService(options, clock, new FakeTimerFactory(clock));
+        using var hazardZoneService = new HazardZoneService(hazardZoneOptions, floorOptions, clock, new FakeTimerFactory(clock));
         hazardZoneService.ActivateHazardZone(hazardZoneName);
 
         var personId = PersonId.From(Guid.NewGuid());
@@ -109,14 +113,15 @@ public sealed class HazardZoneServiceTests
         // Arrange
         var hazardZoneName = HazardZoneName.From("TestZone");
         var clock = new FakeClock();
-        var options = Options.Create(
+        var hazardZoneOptions = Options.Create(
             HazardZoneOptionsBuilder.Create()
                 .WithHazardZone("TestZone", z => z
                     .WithRectangleOutline(0, 0, 10, 10)
                     .WithAllowedNumberOfPersons(0))
                 .Build());
+        var floorOptions = Options.Create(FloorOptionsBuilder.Create().Build());
 
-        using var hazardZoneService = new HazardZoneService(options, clock, new FakeTimerFactory(clock));
+        using var hazardZoneService = new HazardZoneService(hazardZoneOptions, floorOptions, clock, new FakeTimerFactory(clock));
         hazardZoneService.ActivateHazardZone(hazardZoneName);
 
         var personId = PersonId.From(Guid.NewGuid());
@@ -132,5 +137,52 @@ public sealed class HazardZoneServiceTests
         // Assert
         hazardZone = hazardZoneService.GetHazardZones().Single();
         hazardZone.AlarmState.Should().Be(AlarmState.None);
+    }
+
+    [Fact]
+    public void Constructor_ShouldCreateHazardZonesFromFloorOptions_WhenFloorHasHazardZones()
+    {
+        // Arrange
+        var clock = new FakeClock();
+        var hazardZoneOptions = Options.Create(HazardZoneOptionsBuilder.Create().Build());
+        var floorOptions = Options.Create(
+            FloorOptionsBuilder.Create()
+                .WithFloor("Main Floor", f => f
+                    .WithRectangleOutline(0, 0, 100, 100)
+                    .WithHazardZone("FloorZone", z => z
+                        .WithRectangleOutline(10, 10, 20, 20)
+                        .WithAllowedNumberOfPersons(0)))
+                .Build());
+
+        // Act
+        using var hazardZoneService = new HazardZoneService(hazardZoneOptions, floorOptions, clock, new FakeTimerFactory(clock));
+
+        // Assert
+        var hazardZones = hazardZoneService.GetHazardZones();
+        hazardZones.Should().ContainSingle();
+        hazardZones[0].Name.Should().Be(HazardZoneName.From("FloorZone"));
+    }
+
+    [Fact]
+    public void Constructor_ShouldThrowInvalidOperationException_WhenDuplicateHazardZoneNamesAcrossSources()
+    {
+        // Arrange
+        var clock = new FakeClock();
+        var hazardZoneOptions = Options.Create(
+            HazardZoneOptionsBuilder.Create()
+                .WithHazardZone("DuplicateZone", z => z.WithRectangleOutline(0, 0, 10, 10))
+                .Build());
+        var floorOptions = Options.Create(
+            FloorOptionsBuilder.Create()
+                .WithFloor("Main Floor", f => f
+                    .WithRectangleOutline(0, 0, 100, 100)
+                    .WithHazardZone("DuplicateZone", z => z.WithRectangleOutline(20, 20, 30, 30)))
+                .Build());
+
+        // Act
+        var act = () => new HazardZoneService(hazardZoneOptions, floorOptions, clock, new FakeTimerFactory(clock));
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
     }
 }

@@ -23,7 +23,7 @@ public sealed class FloorServiceTests
         var clock = new FakeClock();
         var timerFactory = new FakeTimerFactory(clock);
 
-        using var floorService = new FloorService(floorOptions, hazardZoneService, clock, timerFactory);
+        using var floorService = new FloorService(floorOptions, hazardZoneService, timerFactory);
 
         var personId = PersonId.From(Guid.NewGuid());
         var coordinate = new Coordinate(5, 5);
@@ -49,7 +49,7 @@ public sealed class FloorServiceTests
         var clock = new FakeClock();
         var timerFactory = new FakeTimerFactory(clock);
 
-        using var floorService = new FloorService(floorOptions, hazardZoneService, clock, timerFactory);
+        using var floorService = new FloorService(floorOptions, hazardZoneService, timerFactory);
 
         var personId = PersonId.From(Guid.NewGuid());
         var inside = new Coordinate(5, 5);
@@ -62,5 +62,34 @@ public sealed class FloorServiceTests
 
         // Assert
         hazardZoneService.Received(1).RemovePerson(personId);
+    }
+
+    [Fact]
+    public void ApplyPersonLocationUpdate_ShouldCallApplyPersonLocationUpdateOnHazardZoneService_WhenPersonMovesOnFloor()
+    {
+        // Arrange
+        var floorOptions = Options.Create(
+            FloorOptionsBuilder.Create()
+                .WithFloor("Main Floor", f => f.WithRectangleOutline(0, 0, 10, 10))
+                .Build());
+
+        var hazardZoneService = Substitute.For<IHazardZoneService>();
+        var clock = new FakeClock();
+        var timerFactory = new FakeTimerFactory(clock);
+
+        using var floorService = new FloorService(floorOptions, hazardZoneService, timerFactory);
+
+        var personId = PersonId.From(Guid.NewGuid());
+        var initialLocation = new Coordinate(2, 2);
+        var newLocation = new Coordinate(5, 5);
+
+        floorService.ApplyPersonLocationUpdate(new PersonLocationUpdate(personId, initialLocation));
+
+        // Act
+        floorService.ApplyPersonLocationUpdate(new PersonLocationUpdate(personId, newLocation));
+
+        // Assert
+        hazardZoneService.Received(2).ApplyPersonLocationUpdate(Arg.Is<PersonLocationUpdate>(
+            update => update.PersonId == personId));
     }
 }

@@ -29,6 +29,9 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         result = ValidateHazardZonesAreWithinFloorOutline(options.Floors);
         if (!result.Succeeded) return result;
 
+        result = ValidateHazardZoneNamesAreUniqueAcrossFloors(options.Floors);
+        if (!result.Succeeded) return result;
+
         return ValidateOptionsResult.Success;
     }
 
@@ -150,6 +153,20 @@ public sealed class FloorOptionsValidator : IValidateOptions<FloorOptions>
         }
 
         return ValidateOptionsResult.Success;
+    }
+
+    private static ValidateOptionsResult ValidateHazardZoneNamesAreUniqueAcrossFloors(IReadOnlyList<FloorConfiguration> floors)
+    {
+        var allHazardZoneNames = floors
+            .Where(f => !ReferenceEquals(f.HazardZones, null))
+            .SelectMany(f => f.HazardZones)
+            .Select(hz => hz.Name)
+            .ToList();
+
+        var distinctCount = allHazardZoneNames.Distinct().Count();
+        return distinctCount != allHazardZoneNames.Count
+            ? ValidateOptionsResult.Fail("HazardZone names must be unique across all floors.")
+            : ValidateOptionsResult.Success;
     }
 
     private static Outline ToOutline(IReadOnlyList<Coordinate> points)
