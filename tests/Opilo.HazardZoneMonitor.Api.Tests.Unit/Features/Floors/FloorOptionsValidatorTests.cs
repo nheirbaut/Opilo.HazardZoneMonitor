@@ -184,4 +184,21 @@ public sealed class FloorOptionsValidatorTests
         result.Succeeded.Should().BeFalse();
         result.Failures.Should().ContainSingle();
     }
+
+    [Fact]
+    public void Validate_ShouldReturnFailure_WhenHazardZoneNamesAreDuplicateAcrossFloors()
+    {
+        // Arrange
+        var hazardZone = HazardZoneConfigurationBuilder.Create().WithName("SharedZone").WithOutline(new Coordinate(0, 0), new Coordinate(4, 0), new Coordinate(4, 4), new Coordinate(0, 4)).Build();
+        var floor1 = FloorConfigurationBuilder.Create().WithName("Floor1").WithOutline(new Coordinate(0, 0), new Coordinate(10, 0), new Coordinate(10, 10), new Coordinate(0, 10)).WithHazardZones(hazardZone).Build();
+        var floor2 = FloorConfigurationBuilder.Create().WithName("Floor2").WithOutline(new Coordinate(20, 20), new Coordinate(30, 20), new Coordinate(30, 30), new Coordinate(20, 30)).WithHazardZones(hazardZone).Build();
+        var options = new FloorOptions { Floors = [floor1, floor2] };
+
+        // Act
+        var result = _validator.Validate(string.Empty, options);
+
+        // Assert
+        result.Succeeded.Should().BeFalse();
+        result.Failures.Should().ContainSingle();
+    }
 }

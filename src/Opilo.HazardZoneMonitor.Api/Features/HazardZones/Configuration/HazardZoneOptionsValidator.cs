@@ -1,9 +1,17 @@
 using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 
 namespace Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 
 public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOptions>
 {
+    private readonly IOptions<FloorOptions> _floorOptions;
+
+    public HazardZoneOptionsValidator(IOptions<FloorOptions> floorOptions)
+    {
+        _floorOptions = floorOptions;
+    }
+
     public ValidateOptionsResult Validate(string? name, HazardZoneOptions options)
     {
         if (ReferenceEquals(options.HazardZones, null))
@@ -12,6 +20,9 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         }
 
         var result = ValidateHazardZoneNamesAreUnique(options.HazardZones);
+        if (!result.Succeeded) return result;
+
+        result = ValidateHazardZoneNamesAreUniqueAcrossAllSources(options.HazardZones, _floorOptions.Value.Floors);
         if (!result.Succeeded) return result;
 
         result = ValidateHazardZoneOutlinesHaveMinimumPoints(options.HazardZones);
@@ -94,5 +105,25 @@ public sealed class HazardZoneOptionsValidator : IValidateOptions<HazardZoneOpti
         }
 
         return ValidateOptionsResult.Success;
+    }
+
+    private static ValidateOptionsResult ValidateHazardZoneNamesAreUniqueAcrossAllSources(
+        IReadOnlyList<HazardZoneConfiguration> hazardZones,
+        IReadOnlyList<FloorConfiguration> floors)
+    {
+        var floorHazardZoneNames = floors
+            .Where(floor => !ReferenceEquals(floor.HazardZones, null))
+            .SelectMany(floor => floor.HazardZones)
+            .Select(hazardZone => hazardZone.Name);
+
+        var allNames = hazardZones
+            .Select(hazardZone => hazardZone.Name)
+            .Concat(floorHazardZoneNames)
+            .ToList();
+
+        var distinctCount = allNames.Distinct().Count();
+        return distinctCount != allNames.Count
+            ? ValidateOptionsResult.Fail("HazardZone names must be unique across all configuration sources.")
+            : ValidateOptionsResult.Success;
     }
 }

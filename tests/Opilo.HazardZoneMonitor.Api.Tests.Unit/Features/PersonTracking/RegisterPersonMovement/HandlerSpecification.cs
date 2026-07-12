@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using NSubstitute;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Services;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.Data;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.GetRegisteredPersonMovement;
 using Opilo.HazardZoneMonitor.Api.Features.PersonTracking.RegisterPersonMovement;
@@ -13,13 +14,15 @@ public sealed class HandlerSpecification
 {
     private readonly IMovementsRepository _movementsRepository;
     private readonly IClock _clock;
+    private readonly IFloorService _floorService;
     private readonly Handler _sut;
 
     public HandlerSpecification()
     {
         _movementsRepository = Substitute.For<IMovementsRepository>();
         _clock = Substitute.For<IClock>();
-        _sut = new Handler(_movementsRepository, _clock);
+        _floorService = Substitute.For<IFloorService>();
+        _sut = new Handler(_movementsRepository, _clock, _floorService);
     }
 
     [Fact]
@@ -74,5 +77,50 @@ public sealed class HandlerSpecification
         // Assert
         await _movementsRepository.Received(1)
             .RegisterMovementAsync(personId, coordinate, fixedTime, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ShouldCallApplyPersonLocationUpdate_OnFloorService_WhenMovementIsRegisteredSuccessfully()
+    {
+        // Arrange
+        var personId = PersonId.From(Guid.NewGuid());
+        var coordinate = new Coordinate(1.0, 2.0);
+        Command command = new(personId, coordinate);
+
+        _movementsRepository
+            .RegisterMovementAsync(personId, coordinate, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Created(new RegisteredPersonMovement
+            {
+                PersonId = personId,
+                Coordinate = coordinate,
+                RegisteredAt = DateTime.UtcNow,
+            }));
+
+        // Act
+        await _sut.Handle(command, TestContext.Current.CancellationToken);
+
+        // Assert
+        _floorService.Received(1).ApplyPersonLocationUpdate(Arg.Is<PersonLocationUpdate>(
+            update => update.PersonId == personId && update.Coordinate == coordinate));
+    }
+
+    [Fact]
+    public async Task Handle_ShouldNotCallApplyPersonLocationUpdateOnFloorService_WhenRepositoryReturnsError()
+    {
+        // Arrange
+        var personId = PersonId.From(Guid.NewGuid());
+        var coordinate = new Coordinate(1.0, 2.0);
+        Command command = new(personId, coordinate);
+
+        _movementsRepository
+            .RegisterMovementAsync(personId, coordinate, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Error("Database unavailable"));
+
+        // Act
+        var result = await _sut.Handle(command, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Status.Should().Be(ResultStatus.Error);
+        _floorService.DidNotReceive().ApplyPersonLocationUpdate(Arg.Any<PersonLocationUpdate>());
     }
 }

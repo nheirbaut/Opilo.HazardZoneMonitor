@@ -1,5 +1,5 @@
 using Opilo.HazardZoneMonitor.Api.Features.Site.Configuration;
-using Opilo.HazardZoneMonitor.Domain.Shared.Primitives;
+using Opilo.HazardZoneMonitor.Tests.Common.TestUtilities.Builders;
 
 namespace Opilo.HazardZoneMonitor.Api.Tests.Unit.Features.Site;
 
@@ -11,7 +11,7 @@ public sealed class SiteOptionsValidatorTests
     public void Validate_ShouldReturnSuccess_WhenNameIsProvided()
     {
         // Arrange
-        var options = new SiteOptions { Name = SiteName.From("Reactor Facility Alpha") };
+        var options = SiteOptionsBuilder.Create().WithName("Reactor Facility Alpha").Build();
 
         // Act
         var result = _validator.Validate(string.Empty, options);

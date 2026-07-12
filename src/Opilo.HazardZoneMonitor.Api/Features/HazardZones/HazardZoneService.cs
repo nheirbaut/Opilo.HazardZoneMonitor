@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
+using Opilo.HazardZoneMonitor.Api.Features.Floors.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Configuration;
 using Opilo.HazardZoneMonitor.Api.Features.HazardZones.Services;
 using Opilo.HazardZoneMonitor.Domain.Features.HazardZoneManagement.Domain;
@@ -14,11 +15,17 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
     private readonly Dictionary<HazardZoneName, HazardZone> _hazardZones = new();
     private bool _disposed;
 
-    public HazardZoneService(IOptions<HazardZoneOptions> options, IClock clock, ITimerFactory timerFactory)
+    public HazardZoneService(
+        IOptions<HazardZoneOptions> hazardZoneOptions,
+        IOptions<FloorOptions> floorOptions,
+        IClock clock,
+        ITimerFactory timerFactory)
     {
-        var configurations = options.Value.HazardZones;
+        var allConfigurations = hazardZoneOptions.Value.HazardZones
+            .Concat(floorOptions.Value.Floors.SelectMany(f => f.HazardZones))
+            .ToList();
 
-        foreach (var config in configurations)
+        foreach (var config in allConfigurations)
         {
             var outline = new Outline(new ReadOnlyCollection<Coordinate>(config.Outline.ToList()));
             var zone = new HazardZone(
@@ -37,6 +44,22 @@ public sealed class HazardZoneService : IHazardZoneService, IDisposable
 
     public IReadOnlyList<HazardZoneInfo> GetHazardZones()
         => _hazardZones.Select(z => z.Value.ToHazardZoneInfo()).ToList();
+
+    public void ApplyPersonLocationUpdate(PersonLocationUpdate personLocationUpdate)
+    {
+        foreach (var hazardZone in _hazardZones.Values)
+        {
+            hazardZone.HandlePersonLocationChanged(personLocationUpdate.PersonId, personLocationUpdate.Coordinate);
+        }
+    }
+
+    public void RemovePerson(PersonId personId)
+    {
+        foreach (var hazardZone in _hazardZones.Values)
+        {
+            hazardZone.HandlePersonExpired(personId);
+        }
+    }
 
     public Result ActivateHazardZone(HazardZoneName hazardZoneName)
     {
